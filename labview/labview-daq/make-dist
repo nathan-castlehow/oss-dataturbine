@@ -1,0 +1,101 @@
+#!/usr/bin/env perl
+#
+
+$srcdirname = "neesgrid-3.0-daq";
+$srcpkgname = $srcdirname;
+
+#
+# uncomment when we've got a better place to get the current version from
+#
+# determine gpt version number
+#
+#open (CFG, 'packaging_tools/configure.in');
+#
+#my $version;
+#for (<CFG>) {
+#  if (m!AM_INIT_AUTOMAKE\(\w+,([^,\)]+)!) {
+#    $version = $1;
+#    $version =~ s!\s+!!g;
+#  }
+#}
+
+#
+# test to make sure we're okay to
+#   o create/use the $srcdirname directories
+#   o create the source package
+#
+
+if ( (!defined($srcdirname)) || length($srcdirname) le 0 )
+{
+    printf("\$srcdirname must be defined to a usable value!\n");
+    die;
+}
+
+if ( (!defined($srcpkgname)) || length($srcpkgname) le 0 )
+{
+    printf("\$srcpkgname must be defined to a usable value!\n");
+    die;
+}
+
+if ( -e "../$srcdirname-self" )
+{
+    printf("found existing '../$srcdirname'... please remove before continuing\n");
+    die;
+}
+
+if ( -e "./$srcdirname" )
+{
+    printf("found existing './$srcdirname'... please remove before continuing\n");
+    die;
+}
+
+if ( -e "./$srcpkgname.tar" )
+{
+    printf("found existing './$srcpkgname.tar'... please remove before continuing\n");
+    die;
+}
+
+if ( -e "./$srcpkgname.tar.gz" )
+{
+    printf("found existing './$srcpkgname.tar.gz'... please remove before continuing\n");
+    die;
+}
+
+#
+# prep the source directory by creating a temp directory containing all of the
+# required files.
+#
+
+printf("copying files into source directory...\n");
+system("mkdir ../$srcdirname-self")==0 or die "Unable to create ../$srcdirname-self: $?";
+system("cp -rf * ../$srcdirname-self")==0 or die "Unable to copy . into ../$srcdirname-self: $?";
+system("mv ../$srcdirname-self ./$srcdirname")==0 or die "Unable to move $srcdirname from ../ to ./: $?";
+
+chdir("./$srcdirname");
+
+#
+# remove any 'unnecessary' files from the source directory.
+#
+
+printf("pruning source directory of extraneous files...\n");
+
+system("rm -rf `find . -name CVS -print`")==0 or die "Unable to remove cvs directories: $?";
+system("rm -f make-dist mdist.conf mdist.log.0")==0 or die "Unable to remove mdist.conf: $?";
+
+chdir("../");
+
+#
+# create the source package from the source directory.
+#
+
+printf("creating zip file '$srcpkgname.zip'...\n");
+system("zip -r $srcpkgname.zip $srcdirname/")==0 or die "Unable to create $srcpkgname.zip: $?";
+
+printf("cleaning up after myself...\n");
+system("rm -rf ./$srcdirname")==0 or die "Unable to remove ./$srcdirname: $?";
+
+#
+# done.
+#
+
+printf("done.\n");

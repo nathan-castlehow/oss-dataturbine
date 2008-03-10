@@ -1,0 +1,2 @@
+#!/bin/sh
+java edu.sdsc.rtdsm.dig.sites.SiteSourceListener $1

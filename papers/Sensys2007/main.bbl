@@ -1,0 +1,252 @@
+\begin{thebibliography}{10}
+\providecommand{\url}[1]{#1}
+\csname url@rmstyle\endcsname
+\providecommand{\newblock}{\relax}
+\providecommand{\bibinfo}[2]{#2}
+\providecommand\BIBentrySTDinterwordspacing{\spaceskip=0pt\relax}
+\providecommand\BIBentryALTinterwordstretchfactor{4}
+\providecommand\BIBentryALTinterwordspacing{\spaceskip=\fontdimen2\font plus
+\BIBentryALTinterwordstretchfactor\fontdimen3\font minus
+  \fontdimen4\font\relax}
+\providecommand\BIBforeignlanguage[2]{{%
+\expandafter\ifx\csname l@#1\endcsname\relax
+\typeout{** WARNING: IEEEtran.bst: No hyphenation pattern has been}%
+\typeout{** loaded for the language `#1'. Using the pattern for}%
+\typeout{** the default language instead.}%
+\else
+\language=\csname l@#1\endcsname
+\fi
+#2}}
+
+\bibitem{NRC01}
+``National research council (nrc) “grand challenges in the environmental
+  sciences,'' 2001.
+
+\bibitem{Arzberger04}
+P.~Arzberger, ``Sensors for environmental observatories: Report of the nsf
+  sponsored workshop,'' 2004.
+
+\bibitem{NRC06}
+``Committee on the collaborative large-scale engineering analysis network for
+  environmental research (cleaner), cleaner and nsf’s environmental
+  observatories,'' 2006.
+
+\bibitem{NEON03}
+``Committee on the national ecological observatory network, “neon: Addressing
+  the nation's environmental challenges,'' 2003.
+
+\bibitem{GLEON}
+``The global lake ecological observatory network (gleon),'' www.gleon.org.
+
+\bibitem{USArray}
+``Usarray project,'' http://earthscope.org/usarray/.
+
+\bibitem{NEES}
+``Nees: The network for earthquake engineering and simulation,''
+  http://www.nees.org.
+
+\bibitem{LEAD}
+``Lead: The linked environments for atmospheric discovery,''
+  https://portal.leadproject.org/gridsphere/gridsphere.
+
+\bibitem{MESONET}
+``Oklahoma mesonet project,'' http://www.mesonet.ou.edu/.
+
+\bibitem{NEON}
+``The national ecological observatory network,'' http://www.neoninc.org.
+
+\bibitem{ORION}
+``The ocean research interactive observatory network,''
+  http://www.orionprogram.org.
+
+\bibitem{NASA-NAMMA}
+``Namma: The nasa african monsoon multidisciplinary analyses program,''
+  http://namma.msfc.nasa.gov/.
+
+\bibitem{hubbard-05}
+P.~H. et~al., ``Using a network ring buffer for science and outreach,'' 2005,
+  http://www.phfactor.net/sc05/.
+
+\bibitem{APACHE2.0}
+``Apache license version 2.0,'' January 2004,
+  http://www.opensource.org/licenses/apache2.0.php.
+
+\bibitem{CREON}
+``Creon: The coral reef environmental observatory network,''
+  http://www.coralreefeon.org/.
+
+\bibitem{earthscope}
+``The earthscope project,'' http://earthscope.org.
+
+\bibitem{campbell}
+``Campbell scientific inc.'' http://www.campbellsci.com/index.cfm.
+
+\bibitem{ni}
+``National instruments,'' www.ni.com/.
+
+\bibitem{MSMQ}
+``Microsoft message queuing (msmq) technology,''
+  http://msdn2.microsoft.com/en-us/library/ms701784.aspx.
+
+\bibitem{MQ}
+``Ibm websphere mq,'' http://www.devx.com/ibm/Article/31997.
+
+\bibitem{Pallickara03}
+S.~Pallickara and G.~Fox, ``Naradabrokering: A middleware framework and
+  architecture for enabling durable peer-to-peer grids,'' in \emph{Proceedings
+  of ACM/IFIP/USENIX International Middleware Conference on Middleware}, 2003.
+
+\bibitem{EMS}
+``Enterprise messaging systems,''
+  http://en.wikipedia.org/wiki/Enterprise\_Messaging\_System.
+
+\bibitem{Chappell04}
+D.~A. Chappell, \emph{Enterprise Service Bus}, 2004.
+
+\bibitem{JMS}
+``Jsr 914: Java message service (jms) api,''
+  http://jcp.org/en/jsr/details?id\=914.
+
+\bibitem{CORBA}
+``Corba,'' http://www.corba.org/.
+
+\bibitem{liu-03}
+Y.~Liu and B.~Plale, ``Survey of publish-subscribe event systems,'' May 2003.
+
+\bibitem{BRTT}
+``Brtt antelope real-time system,'' http://www.brtt.com/.
+
+\bibitem{sun-T2000}
+``Sun fire t2000 server,'' http://www.sun.com/servers/coolthreads/t2000/.
+
+\bibitem{gumstix}
+``Gumstix,'' http://gumstix.com/.
+
+\bibitem{nokia-n80}
+``Nokia n80 cell phone,'' http://www.nokiausa.com/phones/N80.
+
+\bibitem{tomcat-project}
+``Apache tomcat,'' http://tomcat.apache.org/.
+
+\bibitem{french-02}
+``A system for multi-axial subassemblage testing (mast): Design concepts and
+  capabilities,'' 2002.
+
+\bibitem{elnashai-04}
+E.~A.S., B.~Spencer, D.~Kuchma, J.~Ghaboussi, Y.~Hashash, and G.~Quan,
+  ``Multi-axial full-scale sub-structured testing and simulation (must-sim)
+  facility at the university of illinois at urbana-champaign,'' in
+  \emph{Proceedings of the 13th World Conference on Earthquake Engineering},
+  2004.
+
+\bibitem{madden02tag}
+\BIBentryALTinterwordspacing
+S.~Madden, M.~Franklin, J.~Hellerstein, and W.~Hong, ``Tag: a tiny aggregation
+  service for ad-hoc sensor networks,'' 2002. [Online]. Available:
+  \url{citeseer.ist.psu.edu/madden02tag.html}
+\BIBentrySTDinterwordspacing
+
+\bibitem{elson-02}
+J.~Elson, L.~Girod, and D.~Estrin, ``Fine-grained network time synchronization
+  using reference broadcasts,'' \emph{SIGOPS Oper. Syst. Rev.}, vol.~36,
+  no.~SI, pp. 147--163, 2002.
+
+\bibitem{elson-report-02}
+\BIBentryALTinterwordspacing
+J.~E. el~al., ``Wireless sensor networks: A new regime for time
+  synchronization,'' UCLA, Tech. Rep., July 2002. [Online]. Available:
+  \url{citeseer.ist.psu.edu/elson02wireless.html}
+\BIBentrySTDinterwordspacing
+
+\bibitem{karp-03}
+\BIBentryALTinterwordspacing
+R.~K. Jeremy, ``Global synchronization in sensornets.'' [Online]. Available:
+  \url{citeseer.ist.psu.edu/764199.html}
+\BIBentrySTDinterwordspacing
+
+\bibitem{sichitiu03}
+\BIBentryALTinterwordspacing
+M.~Sichitiu and C.~Veerarittiphan, ``Simple, accurate time synchronization for
+  wireless sensor networks,'' 2003. [Online]. Available:
+  \url{citeseer.ist.psu.edu/sichitiu03simple.html}
+\BIBentrySTDinterwordspacing
+
+\bibitem{hamilton-97}
+D.~P. Hamilton and S.~G. Schladow, 1997.
+
+\bibitem{kratz-03}
+T.~Kratz, L.~A. Deegan, M.~E. Harmon, and W.~K. Lauenroth, ``Ecological
+  variability in space and time: insights gained from the us lter program,''
+  2003.
+
+\bibitem{scheffer-01}
+M.~S. Scheffer, S.~R. Carpenter, J.~A. Foley, C.~Folke, and B.~Walker,
+  ``Catastrophic shifts in ecosystems,'' 2001.
+
+\bibitem{kepler}
+``Kepler project,'' http://kepler-project.org/.
+
+\bibitem{tcpwrappers}
+\BIBentryALTinterwordspacing
+W.~Venema, ``Tcp wrapper: Network monitoring, access control, and booby
+  traps.'' [Online]. Available:
+  \url{www.vtcif.telstra.com.au/pub/docs/security/tcp_wrapper.txt}
+\BIBentrySTDinterwordspacing
+
+\bibitem{CAMERA}
+``Camera: The community cyberinfrastructure for advanced marine microbial
+  ecology research and analysis,'' http://camera.calit2.net/.
+
+\bibitem{GEON}
+``Geon: The geosciences network,'' http://www.geongrid.org/.
+
+\bibitem{bhatia-05}
+K.~Bhatia, K.~Mueller, and S.~Chandra, ``Gama: Grid account management
+  architecture,'' in \emph{IEEE International Conference on EScience and Grid
+  Computing}, 2005.
+
+\bibitem{Shibboleth}
+``Shibboleth open source middleware,'' http://shibboleth.internet2.edu/.
+
+\bibitem{GridAuth}
+``Gridauth session management system,'' http://www.gridauth.com/.
+
+\bibitem{OGC}
+``Open geospatial consortium,'' http://www.opengeospatial.org/.
+
+\bibitem{TML}
+``Transducer markup language,'' http://www.ogcnetwork.net/?q=node/105.
+
+\bibitem{SML}
+``Sensorml,'' http://vast.nsstc.uah.edu/SensorML/.
+
+\bibitem{chandrasekaran02streaming}
+\BIBentryALTinterwordspacing
+S.~Chandrasekaran and M.~Franklin, ``Streaming queries over streaming data,''
+  2002. [Online]. Available:
+  \url{citeseer.ist.psu.edu/chandrasekaran02streaming.html}
+\BIBentrySTDinterwordspacing
+
+\bibitem{chen00niagaracq}
+\BIBentryALTinterwordspacing
+J.~Chen, D.~J. DeWitt, F.~Tian, and Y.~Wang, ``{NiagaraCQ}: a scalable
+  continuous query system for {Internet} databases,'' 2000, pp. 379--390.
+  [Online]. Available: \url{citeseer.ist.psu.edu/chen00niagaracq.html}
+\BIBentrySTDinterwordspacing
+
+\bibitem{abadi03aurora}
+\BIBentryALTinterwordspacing
+D.~Abadi, D.~Camey, U.~Cetintemel, M.~Chemiack, C.~Convey, S.~Lee,
+  M.~Stonebraker, N.~Tatbul, and S.~Zdonik, ``Aurora: A new model and
+  architecture for data stream management,'' 2003. [Online]. Available:
+  \url{citeseer.ist.psu.edu/abadi03aurora.html}
+\BIBentrySTDinterwordspacing
+
+\bibitem{chandrasekaran03telegraphcq}
+\BIBentryALTinterwordspacing
+S.~Chandrasekaran, ``Telegraphcq: Continuous dataflow processing for an
+  uncertain world,'' 2003. [Online]. Available:
+  \url{citeseer.ist.psu.edu/chandrasekaran03telegraphcq.html}
+\BIBentrySTDinterwordspacing
+
+\end{thebibliography}

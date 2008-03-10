@@ -1,0 +1,38 @@
+% \documentclass[10pt,times,twoside,twocolumn]{IEEEtran}
+% \documentclass[10pt]{sigplan-proc-varsize}
+\documentclass[12pt,times,twoside,twocolumn]{IEEEtran}
+\usepackage{times,fullpage}
+\usepackage{color,graphicx,url}
+\usepackage {cite,setspace}
+\usepackage[bf]{subfigure}
+
+\begin{document}
+	
+\newcommand{\rednote}[1]{\textcolor{red}{ \em #1 }}
+%\setstretch{0.9}
+
+%To hide notes: uncomment the following line
+% \renewcommand{\rednote}[1]{}
+
+\input{header}
+\input{abstract}
+\input{introduction}
+\input{background}
+\input{rbnb-internals}
+\input{use-case-scenarios}
+% \input{fieldedsystem}
+\input{rbnb-features}
+% \input{rbnb-tools}
+\input{rbnb-apps-experiences}
+\input{futurework}
+\input{conclusion}
+% Uncomment if accepted
+%\input{acknowledgments}
+
+% \input{abstract}
+
+\bibliography{sensys}
+
+\bibliographystyle{IEEEtran}
+\end{document}
+

@@ -1,0 +1,21 @@
+<!ELEMENT SourceConfig (source*) >
+
+<!ELEMENT source (orbParams)>
+<!ATTLIST source name CDATA #REQUIRED>
+
+<!ELEMENT orbParams (storage, server)>
+<!ATTLIST orbParams orbType CDATA #REQUIRED>
+
+<!ELEMENT storage EMPTY>
+<!ATTLIST storage cacheSize CDATA #REQUIRED
+                    archiveMode CDATA #REQUIRED
+                    archiveSize CDATA #REQUIRED>
+
+<!ELEMENT server (channel*)>
+<!ATTLIST server uri CDATA #REQUIRED
+                 username CDATA #REQUIRED
+                 passowrd CDATA #REQUIRED>
+
+<!ELEMENT channel EMPTY>
+<!ATTLIST channel name CDATA #REQUIRED
+                  dataType CDATA #REQUIRED>

@@ -1,0 +1,440 @@
+.TH "fake_daq.c" 3 "24 Feb 2005" "Version 1.4" "Fake DAQ for NEESgrid" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+fake_daq.c \- A fake DAQ program for testing NSDS et al.  
+
+.SH SYNOPSIS
+.br
+.PP
+\fC#include <sys/types.h>\fP
+.br
+\fC#include <sys/socket.h>\fP
+.br
+\fC#include <netinet/in.h>\fP
+.br
+\fC#include <arpa/inet.h>\fP
+.br
+\fC#include <netdb.h>\fP
+.br
+\fC#include <assert.h>\fP
+.br
+\fC#include <stdlib.h>\fP
+.br
+\fC#include <stdio.h>\fP
+.br
+\fC#include <math.h>\fP
+.br
+\fC#include <unistd.h>\fP
+.br
+\fC#include <stdint.h>\fP
+.br
+\fC#include <string.h>\fP
+.br
+\fC#include <signal.h>\fP
+.br
+\fC#include <time.h>\fP
+.br
+\fC#include <pthread.h>\fP
+.br
+\fC#include <getopt.h>\fP
+.br
+\fC#include 'nsds_util.h'\fP
+.br
+\fC#include 'flog.h'\fP
+.br
+
+.SS "Data Structures"
+
+.in +1c
+.ti -1c
+.RI "struct \fBconnection_fds\fP"
+.br
+.RI "\fIhold a copy of the network file descriptors so that the signal handler can stop the program \fP"
+.in -1c
+.SS "Functions"
+
+.in +1c
+.ti -1c
+.RI "int \fBdata_active_count\fP (void)"
+.br
+.RI "\fIReturn number of active channels. \fP"
+.ti -1c
+.RI "bool \fBdata_channel_enabled\fP (const int channel_id)"
+.br
+.RI "\fIIs a channel subscribed? \fP"
+.ti -1c
+.RI "int \fBdata_channel_flag\fP (const int channel_id, const bool subscribe)"
+.br
+.RI "\fIMark a channel as subscribed or unsubscribed. \fP"
+.ti -1c
+.RI "double \fBdata_generate\fP (const int index, const double sin_period)"
+.br
+.RI "\fIData generator. Sine wave of sorts. \fP"
+.ti -1c
+.RI "void \fBsighandler\fP (int signal)"
+.br
+.RI "\fIControl-break handler. Sets global flag to indicate exit request. \fP"
+.ti -1c
+.RI "void * \fBdata_thread_main\fP (void *arg)"
+.br
+.RI "\fIData handling thread. \fP"
+.ti -1c
+.RI "int \fBdaq_do_work\fP (const int control_socket, const int data_socket)"
+.br
+.RI "\fIMain worker routine: read / parse / respond. \fP"
+.ti -1c
+.RI "void \fBdaq_main_loop\fP (const int daq_port)"
+.br
+.RI "\fIOpen network socket, loop doing work until control-c. \fP"
+.ti -1c
+.RI "int \fBmain\fP (int argc, char *argv[])"
+.br
+.RI "\fIInit the network, talk to all. \fP"
+.in -1c
+.SS "Variables"
+
+.in +1c
+.ti -1c
+.RI "const int \fBDAQ_PORT\fP = 55055"
+.br
+.RI "\fIDefault TCP port to listen on. \fP"
+.ti -1c
+.RI "const int \fBTCP_Q_LEN\fP = 1"
+.br
+.RI "\fITCP queue length, number of queued connections allowed. \fP"
+.ti -1c
+.RI "bool \fBcontrol_break\fP"
+.br
+.RI "\fIGlobal boolean set by signal handler to force exit. \fP"
+.ti -1c
+.RI "float \fBsample_rate\fP"
+.br
+.RI "\fIFake data sample rate. \fP"
+.ti -1c
+.RI "bool \fBstreaming_active\fP"
+.br
+.RI "\fIGlobal boolean for IPC between threads. \fP"
+.ti -1c
+.RI "const int \fBSINE_PERIOD\fP = 80*NUM_CHANNELS"
+.br
+.RI "\fILength (period) of the sine wave we generate. \fP"
+.ti -1c
+.RI "struct {"
+.br
+.ti -1c
+.RI "   pthread_mutex_t \fBmutex\fP"
+.br
+.ti -1c
+.RI "   bool \fBactive\fP [NUM_CHANNELS]"
+.br
+.RI "\fIR/W mutex for struct. \fP"
+.ti -1c
+.RI "   int \fBnum_active\fP"
+.br
+.ti -1c
+.RI "} \fBchan_struct\fP"
+.br
+.RI "\fIShared structure for subscribed data channels. \fP"
+.ti -1c
+.RI "\fBconnection_fds\fP \fBcurr_connection\fP"
+.br
+.RI "\fIGlobal, hold file descriptors for signal handler to close. \fP"
+.in -1c
+.SH "Detailed Description"
+.PP 
+A fake DAQ program for testing NSDS et al. 
+
+\fBNote:\fP
+.RS 4
+Requires the flog messaging library.
+.RE
+.PP
+This has gotten a bit more useful. Currently streams NUM_CHANNELS fake data channels of sinusoidal data at 20Hz with a period of 100 samples. Threaded, with data on the second thread. If you replace the data_generate routine, this would make a decent skeleton DAQ program. Data rate is selectable on the command line.
+.PP
+Robust against most network failures - knows to restart, etc. Simple signal handler a la the driver as well.
+.PP
+Note that this uses integer channel IDs, where LabVIEW often has multicharacter descriptive strings like 'RoomTempCelsius'. That makes this code much much simpler, and for this application simplicity wins. For more useful testing, you should get labview and its fake DAQ (or real!) code working anyway.
+.PP
+If you're using this as skeleton code for another DAQ system, be aware than you can name a DAQ channel as any printable ASCII string. It does complicate the parsing of open-port and close-port requests, though.
+.PP
+\fBDate:\fP
+.RS 4
+9/5/02 
+.RE
+.PP
+\fBAuthor:\fP
+.RS 4
+Paul Hubbard
+.RE
+.PP
+
+.PP
+Definition in file \fBfake_daq.c\fP.
+.SH "Function Documentation"
+.PP 
+.SS "int daq_do_work (const int control_socket, const int data_socket)"
+.PP
+Main worker routine: read / parse / respond. \fBDate:\fP
+.RS 4
+9/5/02
+.RE
+.PP
+\fBReturn values:\fP
+.RS 4
+\fI0\fP OK, != 0 means error 
+.RE
+.PP
+\fBParameters:\fP
+.RS 4
+\fIcontrol_socket\fP FD of control connection 
+.br
+\fIdata_socket\fP FD of data connection Read commands, respond as required. Starts data thread if necessary. 
+.RE
+.PP
+Definition at line 464 of file fake_daq.c.
+.PP
+References data_active_count(), data_channel_flag(), data_thread_main(), and streaming_active.
+.PP
+Referenced by daq_main_loop().
+.SS "void daq_main_loop (const int daq_port)"
+.PP
+Open network socket, loop doing work until control-c. \fBDate:\fP
+.RS 4
+9/5/02 
+.RE
+.PP
+\fBNote:\fP
+.RS 4
+Opens server socket
+.RE
+.PP
+This handles the dropped connections and other TCP errors, mostly by restarting the connects. Also kills data thread if connections die. Definition at line 757 of file fake_daq.c.
+.PP
+References control_break, connection_fds::control_socket, curr_connection, daq_do_work(), connection_fds::data_socket, streaming_active, and TCP_Q_LEN.
+.PP
+Referenced by main().
+.SS "int data_active_count (void)"
+.PP
+Return number of active channels. \fBReturn values:\fP
+.RS 4
+\fINumber\fP active, <0 if error 
+.RE
+.PP
+\fBDate:\fP
+.RS 4
+9/27/02 
+.RE
+.PP
+Definition at line 97 of file fake_daq.c.
+.PP
+References chan_struct.
+.PP
+Referenced by daq_do_work(), and data_thread_main().
+.SS "bool data_channel_enabled (const int channel_id)"
+.PP
+Is a channel subscribed? Locks mutex and checks array to see if a channel is subscribed.
+.PP
+\fBParameters:\fP
+.RS 4
+\fIchannel_id\fP Channel ID to check 
+.RE
+.PP
+\fBReturn values:\fP
+.RS 4
+\fITrue\fP or false, false if error 
+.RE
+.PP
+\fBNote:\fP
+.RS 4
+uses mutex lock on chan_struct 
+.RE
+.PP
+\fBDate:\fP
+.RS 4
+9/24/02 
+.RE
+.PP
+Definition at line 134 of file fake_daq.c.
+.PP
+References chan_struct.
+.PP
+Referenced by data_thread_main().
+.SS "int data_channel_flag (const int channel_id, const bool subscribe)"
+.PP
+Mark a channel as subscribed or unsubscribed. Lock the mutex, set the bit, report if it changed.
+.PP
+\fBNote:\fP
+.RS 4
+Idempotent - call multiple times w/no harm done. 
+.RE
+.PP
+\fBParameters:\fP
+.RS 4
+\fIchannel_id\fP Channel ID in question 
+.br
+\fIsubscribe\fP if true, subscribe, if false un-sub 
+.RE
+.PP
+\fBReturn values:\fP
+.RS 4
+\fI0\fP if OK, non-zero if error 
+.RE
+.PP
+\fBNote:\fP
+.RS 4
+Uses chan_struct and mutex therein 
+.RE
+.PP
+\fBDate:\fP
+.RS 4
+9/24/02 
+.RE
+.PP
+Definition at line 180 of file fake_daq.c.
+.PP
+References chan_struct.
+.PP
+Referenced by daq_do_work().
+.SS "double data_generate (const int index, const double sin_period)"
+.PP
+Data generator. Sine wave of sorts. \fBDate:\fP
+.RS 4
+9/16/02 
+.RE
+.PP
+\fBReturn values:\fP
+.RS 4
+\fIsin(x),scaled\fP to period 
+.RE
+.PP
+\fBParameters:\fP
+.RS 4
+\fIindex\fP 0 to N-1 
+.br
+\fIsin_period\fP Period of function, cannot be zero! 
+.RE
+.PP
+Definition at line 263 of file fake_daq.c.
+.PP
+Referenced by data_thread_main().
+.SS "void* data_thread_main (void * arg)"
+.PP
+Data handling thread. Transient thread to send data out the data channel. Dead simple. Generates data and sends it out the data socket.
+.PP
+\fBNote:\fP
+.RS 4
+Assumes NSDS will read at least as fast as the DAQ sends!
+.RE
+.PP
+\fBParameters:\fP
+.RS 4
+\fIarg\fP Ptr to file descriptor to use for socket 
+.RE
+.PP
+\fBReturn values:\fP
+.RS 4
+\fINull\fP always 
+.RE
+.PP
+Definition at line 317 of file fake_daq.c.
+.PP
+References control_break, data_active_count(), data_channel_enabled(), data_generate(), sample_rate, SINE_PERIOD, and streaming_active.
+.PP
+Referenced by daq_do_work().
+.SS "int main (int argc, char * argv[])"
+.PP
+Init the network, talk to all. Sets up messaging, installs signal handler, calls worker routine.
+.PP
+\fBNote:\fP
+.RS 4
+Driver port passed on command line 
+.PP
+Ditto w/sample rate 
+.RE
+.PP
+\fBParameters:\fP
+.RS 4
+\fIargc\fP Argc as passed by shell 
+.br
+\fIargv\fP Argv as passed by shell 
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+0 All is good 
+.PP
+Non-zero All is not good 
+.RE
+.PP
+Definition at line 848 of file fake_daq.c.
+.PP
+References chan_struct, control_break, daq_main_loop(), DAQ_PORT, sample_rate, and sighandler().
+.SS "void sighandler (int signal)"
+.PP
+Control-break handler. Sets global flag to indicate exit request. \fBNote:\fP
+.RS 4
+Assumes installed in interrupt chain by someone else 
+.RE
+.PP
+\fBParameters:\fP
+.RS 4
+\fIsignal\fP Signal number 
+.RE
+.PP
+\fBDate:\fP
+.RS 4
+3/25/02 
+.RE
+.PP
+Definition at line 288 of file fake_daq.c.
+.PP
+References control_break, connection_fds::control_socket, curr_connection, and connection_fds::data_socket.
+.PP
+Referenced by main().
+.SH "Variable Documentation"
+.PP 
+.SS "bool \fBactive\fP[NUM_CHANNELS]"
+.PP
+R/W mutex for struct. Definition at line 75 of file fake_daq.c.
+.SS "struct { ... }   \fBchan_struct\fP"
+.PP
+Shared structure for subscribed data channels. Referenced by data_active_count(), data_channel_enabled(), data_channel_flag(), and main().
+.SS "bool \fBcontrol_break\fP"
+.PP
+Global boolean set by signal handler to force exit. Definition at line 60 of file fake_daq.c.
+.PP
+Referenced by daq_main_loop(), data_thread_main(), main(), and sighandler().
+.SS "\fBconnection_fds\fP \fBcurr_connection\fP"
+.PP
+Global, hold file descriptors for signal handler to close. Definition at line 89 of file fake_daq.c.
+.PP
+Referenced by daq_main_loop(), and sighandler().
+.SS "const int \fBDAQ_PORT\fP = 55055"
+.PP
+Default TCP port to listen on. Definition at line 54 of file fake_daq.c.
+.PP
+Referenced by main().
+.SS "float \fBsample_rate\fP"
+.PP
+Fake data sample rate. Definition at line 63 of file fake_daq.c.
+.PP
+Referenced by data_thread_main(), and main().
+.SS "const int \fBSINE_PERIOD\fP = 80*NUM_CHANNELS"
+.PP
+Length (period) of the sine wave we generate. Definition at line 69 of file fake_daq.c.
+.PP
+Referenced by data_thread_main().
+.SS "bool \fBstreaming_active\fP"
+.PP
+Global boolean for IPC between threads. Definition at line 66 of file fake_daq.c.
+.PP
+Referenced by daq_do_work(), daq_main_loop(), and data_thread_main().
+.SS "const int \fBTCP_Q_LEN\fP = 1"
+.PP
+TCP queue length, number of queued connections allowed. Definition at line 57 of file fake_daq.c.
+.PP
+Referenced by daq_main_loop().
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for Fake DAQ for NEESgrid from the source code.

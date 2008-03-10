@@ -1,0 +1,25 @@
+# $LastChangedDate: 2007-11-09 15:21:54 -0800 (Fri, 09 Nov 2007) $
+# $LastChangedRevision: 200 $
+# $LastChangedBy: ljmiller $
+# $HeadURL: file:///Users/hubbard/code/cleos-svn/nmi_rbnb/cleosRbnb.submit $
+
+project = RBNB SDCI
+component = rbnb
+component_version = 3.1 trunk
+description = v3.1 trunk
+
+run_type = build
+fetch_retry_count = 0
+inputs = cleosRbnb.cvs, cleosRbnb.scp
+
+pre_all = nmi_rbnb_fix.sh
+prereqs_x86_rhas_3 = java-1.5.0_08, apache-ant-1.6.5
+prereqs_x86_rhas_4 = jdk1.5.0_08, apache-ant-1.6.5
+remote_task = nmi_rbnb.sh
+
+remote_post_args = -taskhook=remote_post -genresult
+
+notify = ljmiller@sdsc.edu
+#platforms = x86_rh_8.0, x86_rh_9, x86_fc_4, x86_winnt_5.1, sun4u_sol_5.10
+platforms = x86_rhas_3, x86_rhas_4, x86_macos_10.4
+

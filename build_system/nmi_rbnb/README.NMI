@@ -1,0 +1,24 @@
+NMI BUILD AND TEST FOR TURBINE and RDV
+# $LastChangedDate: 2007-10-02 16:13:29 -0700 (Tue, 02 Oct 2007) $
+# $LastChangedRevision: 163 $
+# $LastChangedBy: ljmiller $
+# $HeadURL: file:///Users/hubbard/code/cleos-svn/nmi_rbnb/README.NMI $
+
+- on the host 'grandcentral.cs.wisc.edu', which is the NMI
+build and test submission host, do:
+- mkdir ${HOME}/bnt
+- put the following files into bnt:
+  - NEESitTurbine.submit - the main script to pull all of the pieces of the
+  build process together
+  - NEESitTurbine.cvs - called by NEESitTurbine.submit to pull source from
+  svn.nees.org
+  - NEESitTurbine.scp - stages nmi_turbine_fix.sh
+  - NEESitRBNB.scp - stages RBNB from $HOME
+  - nmi_turbine_fix.sh - ensures that
+  https://svn.nees.org/svn/telepresence/dataturbine/trunk/nmi_turbine.sh,
+  a build wrapper script that sets RBNB_HOME and makes ant calls, is executable - cd ${HOME}/bnt && nmi_submit ./NEESitTurbine.submit
+- one can check the status of builds here:
+http://grandcentral.cs.wisc.edu/pavlo/index.php?page=results%2Foverview
+- for rdv, s/turbine/rdv/g
+- the only way to automate currently is using cron;
+nmiBntCrontab is a sample crontab

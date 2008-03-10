@@ -1,0 +1,61 @@
+#!/bin/sh
+#
+# Init file for NEES fake_daq
+#
+# chkconfig: 345 98 98
+# description: Start the fake_daq daemon
+#
+
+NEES="/usr/local/nees"
+LOGDIR="/var/log"
+
+source /etc/rc.d/init.d/functions
+
+(
+
+do_start()
+{
+    echo -n $"Starting fake-daq: "
+
+    pushd $NEES/bin >/dev/null 2>&1
+    ( $NEES/bin/fake_daq --rate 1 >$LOGDIR/fake_daq.log 2>&1 & ) \
+        && success $"fake-daq startup" \
+        || failure $"fake-daq startup"
+    popd >/dev/null 2>&1
+    echo
+}
+
+do_stop()
+{
+    echo -n $"Stopping fake-daq: "
+
+    ps -elf 2>&1 | grep "fake_daq" 2>&1 | grep "   1  " 2>&1 | awk '{print "kill " $4}' 2>&1 | sh
+    sleep 3
+    ps -elf 2>&1 | grep "fake_daq" 2>&1 | grep "   1  " 2>&1 | awk '{print "kill -9 " $4}' 2>&1 | sh
+
+    success $"fake-daq shutdown" true
+    echo
+}
+
+case "$1" in
+    start)
+        do_start
+        ;;
+
+    stop)
+        do_stop
+        ;;
+
+    restart)
+        $0 stop
+        $0 start
+        ;;
+
+    *)
+        echo "Usage: $0 (start|stop|restart)"
+        exit 1
+esac
+
+exit 0
+
+) 2>&1 | tee $LOGDIR/fake_daq.log

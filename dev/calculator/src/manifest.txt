@@ -1,0 +1,3 @@
+Manifest-Version: 1.0
+Created-By: Terry E. Weymouth for NEES-IT
+Main-Class: org.nees.calculate.Test

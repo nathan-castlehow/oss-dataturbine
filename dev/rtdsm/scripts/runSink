@@ -1,0 +1,2 @@
+#!/bin/sh
+java edu.sdsc.rtdsm.stubs.DswSinkStub $1 $2

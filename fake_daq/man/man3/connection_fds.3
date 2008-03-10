@@ -1,0 +1,41 @@
+.TH "connection_fds" 3 "24 Feb 2005" "Version 1.4" "Fake DAQ for NEESgrid" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+connection_fds \- hold a copy of the network file descriptors so that the signal handler can stop the program  
+
+.PP
+.SH SYNOPSIS
+.br
+.PP
+.SS "Data Fields"
+
+.in +1c
+.ti -1c
+.RI "int \fBcontrol_socket\fP"
+.br
+.RI "\fIFD of control socket. \fP"
+.ti -1c
+.RI "int \fBdata_socket\fP"
+.br
+.RI "\fICurrent data TCP socket fd. \fP"
+.in -1c
+.SH "Detailed Description"
+.PP 
+hold a copy of the network file descriptors so that the signal handler can stop the program Definition at line 80 of file fake_daq.c.
+.SH "Field Documentation"
+.PP 
+.SS "int \fBconnection_fds::control_socket\fP"
+.PP
+FD of control socket. Definition at line 83 of file fake_daq.c.
+.PP
+Referenced by daq_main_loop(), and sighandler().
+.SS "int \fBconnection_fds::data_socket\fP"
+.PP
+Current data TCP socket fd. Definition at line 85 of file fake_daq.c.
+.PP
+Referenced by daq_main_loop(), and sighandler().
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for Fake DAQ for NEESgrid from the source code.

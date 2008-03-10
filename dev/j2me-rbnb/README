@@ -1,0 +1,20 @@
+What this is
+============
+
+This is the port of RBNB DataTurbine to Java 2 Mobile Edition. Work was done by
+Brian Ryujin for Sameer Tilak of the CLEOS center at UCSD/SDSC.
+
+More information on DataTurbine can be found at http://dataturbine.org/
+
+Notes
+=====
+
+At present there is no documentation for this project. The idea was to produce native
+Java code for DataTurbine that'd run on Nokia cell phones, to serve as an always-
+connected inexpensive datalogger and display device.
+
+Chronology
+==========
+
+Put into Subversion Jan 22 2008 by Paul Hubbard, hubbard@sdsc.edu, who also wrote
+this README.

@@ -1,0 +1,71 @@
+<?xml version="1.0"?>
+
+<project default="run" basedir=".">
+
+<!-- environment access via env.* -->
+<property environment="env"/>
+
+<!-- Get Turbine, JMF and NEES from environment -->
+<property name="rbnb.home" value="${env.RBNB_HOME}"/>
+<property name="turbine.home" value="${env.TURBINE_HOME}"/>
+
+<!-- working dirs -->
+<property name="src.dir" value="src"/>
+<property name="build.dir" value="build"/>
+<property name="build.classes" value="${build.dir}/classes"/>
+
+	
+<!-- classpath -->
+<path id="classpath">
+	 <pathelement path="${java.class.path}"/>
+	 <pathelement location="${build.classes}"/>
+	 <fileset dir="${rbnb.home}/bin">
+	  <include name="rbnb.jar"/>
+	 </fileset>
+	 <fileset dir="${turbine.home}/lib">
+	  <include name="commons-cli-1.0.jar" />
+	 </fileset>
+	 <fileset dir="${turbine.home}/build/lib">
+	  <include name="turbine.jar" />
+	 </fileset>
+</path>
+
+<!-- targets to check environment variables -->
+<target name="checkRBNB" unless="env.RBNB_HOME">
+  <fail message="RBNB_HOME must be defined in your environment."/>
+</target>
+<target name="checkTURBINE" unless="env.TURBINE_HOME">
+ <fail message="TURBINE_HOME"/>
+</target>
+
+<!-- Meta-target that depends on all environment variables -->
+<target name="checkEnvVars" depends="checkRBNB,checkTURBINE" 
+description="Check necessary environment variables"/>
+
+<!-- target to make temp dirs -->
+<target name="prepare" depends="checkEnvVars" description="Make directories">
+  <mkdir dir="${build.dir}"/>
+  <mkdir dir="${build.classes}"/>
+</target>
+
+<!-- target to clean build dir and doc dir -->
+<target name="clean" description="Remove all generated files">
+  <delete dir="${build.dir}"/>
+</target>
+
+<!-- Build target -->
+<target name="compile" depends="prepare" description="Build from source">
+ <javac srcdir="${src.dir}" 
+        destdir="${build.classes}"
+        classpathref="classpath" debug="on">
+ </javac>
+</target>
+
+<!--- run the new admin tool -->
+<target name="run" depends="compile">
+ <java classpathref="classpath" 
+ 	classname="org.nees.archive.gui.MinimalArchiveViewer"
+ 	fork="true" />
+</target>
+ 
+</project>

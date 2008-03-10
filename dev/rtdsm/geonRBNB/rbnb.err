@@ -1,0 +1,18 @@
+<23-Nov-2006 PST 11:41:26.696> <geon05.sdsc.edu:3333>
+   RBNB (Ring Buffered Network Bus) V2.6B3 build 1704 (built Mon Apr 17 07:17:10 PDT 2006)
+   Copyright 2005 Creare Inc.
+   Started at address tcp://geon05.sdsc.edu:3333.
+<23-Nov-2006 PST 11:42:20.618> <dummySinkControlSink>
+   Started for sink running V2.6B3 build 1704 from Mon Apr 17 07:17:10 PDT 2006.
+<23-Nov-2006 PST 11:42:20.619> <dummySinkControlSink>
+   Set up cache with 1 frameset of 1 frame/set (total frames = 1).
+<23-Nov-2006 PST 13:53:36.904> <dummySinkControlSink>
+   Is shutting down.
+<23-Nov-2006 PST 13:53:36.905> <dummySinkControlSink>
+   Stopped.
+<11-Dec-2006 PST 13:47:22.293> <geon05.sdsc.edu:3333>
+   Terminating.
+<11-Dec-2006 PST 13:47:22.857> <geon05.sdsc.edu:3333>
+   Cleaning up (terminating connections and log).
+<11-Dec-2006 PST 13:47:24.859> <geon05.sdsc.edu:3333>
+   Terminated.

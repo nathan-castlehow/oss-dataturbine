@@ -1,0 +1,60 @@
+Lawrence J. Miller, NEESit@SDSC <ljmiller@sdsc.edu>
+060814
+
+ABOUT
+
+About: this a program to talk to an Antelope ORB, get its waveform data,
+translate this data into a form that RDV likes, and then transmit this data to
+ rbnb.
+
+BUILDING
+The source code tree for this program can be obtained using SubVersion:
+svn co https://svn.nees.org/svn/telepresence/dataturbine-dev/orb2rbnb/
+The build model is Apache ant. Do 'ant -p' to see all ant targets.
+Do 'ant jar' to build the executable jar "orb2rbnb.jar".
+
+RUNNING
+
+Do 'java -jar orb2rbnb.jar -h' to see all command-line options. Explainations below.
+
+ -D    dump data to stdout; extremely VERBOSE; only valid with -d
+ -S    scale factor
+ -Z    RBNB archive size (frames) - this value is best determined empirically based
+ on the length of time for which data is to be collected
+ -a    about - description of program
+ -d    enable debug output - displays information about the state of the Antelope
+orb and DataTurbine connections
+ -f    filter - Antelope orb filter for selecting orb data channels as a regular expression
+ -o    orbname - fqdn:port of the Antelope orb
+ -r    RBNB source - fqdn of the DataTurbine server. Used as an argument to Source.
+This currently hits the default port of 3333, but leave the port out of the argument
+to this option.
+ -s    sampling rate period (ms) - the rate at which a background thread should
+grab data from the orb and forward it to DataTurbine. If ommitted, the program will
+enter a mode in which this data grabbing, translation, and forwarding will be 
+interactively based on hitting <enter>. Note that this sampling rate need not
+necessarily match that advertisd by the Antelope orb since orb packets contain many
+data points. An appropriate sampling rate for this program is best determined
+empirically.
+ -v    print version info
+ -z    RBNB cache size (frames) - this value is best determined empirically based
+ on the length of time for which data is to be collected
+
+PROGRAMMING
+If orb reaps consistently fail, (i.e. return null), look at line 340 of
+AntelopeJava/com/brtt/antelope/Orb.java. The first parameter of the startReap
+call specifies the timeout.
+
+EXAMPLES
+nohup java -jar orb2rbnb.jar -o tremor.nees.ucsb.edu:6610 -f ".*" -r aesys.sdsc.edu -d -S 1E-9 -s 10 -z 5120 -Z 51200 > Orb2rbnb.log 2>&1 &
+nohup java -jar orb2rbnb.jar -o stirred.nees.ucsb.edu:6610 -f ".*" -r aesys.sdsc.edu -S 1E-9 -s 10 -z 5120 -Z 51200 > Orb2rbnb.log 2>&1 &
+
+SEE ALSO
+- shows the types of orb packets that are available:
+orbstat -d types tremor.nees.ucsb.edu:6610
+- shows all of the sources that are available on the orbserver
+orbstat -d all tremor.nees.ucsb.edu:6610
+- enters interactive mode for all orb sources that are of type GENC* do the command 'reap' to get and examine data
+orbstat -i -m .*[^M]GENC.* tremor.nees.ucsb.edu:6610
+- gets all sources of type 'GENC', which seem to be the only ones that the BRTT Java code gets for unknown reasons
+orbstat -s -m .*[^M]GENC.* tremor.nees.ucsb.edu:6610 | grep -v /S200

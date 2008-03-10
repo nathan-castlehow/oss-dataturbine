@@ -1,0 +1,244 @@
+com.mysql.jdbc.CommunicationsException: Communications link failure due to underlying exception: 
+
+** BEGIN NESTED EXCEPTION ** 
+
+java.io.EOFException
+
+STACKTRACE:
+
+java.io.EOFException
+	at com.mysql.jdbc.MysqlIO.readFully(MysqlIO.java:1934)
+	at com.mysql.jdbc.MysqlIO.reuseAndReadPacket(MysqlIO.java:2380)
+	at com.mysql.jdbc.MysqlIO.checkErrorPacket(MysqlIO.java:2909)
+	at com.mysql.jdbc.MysqlIO.sendCommand(MysqlIO.java:1600)
+	at com.mysql.jdbc.MysqlIO.sqlQueryDirect(MysqlIO.java:1695)
+	at com.mysql.jdbc.Connection.execSQL(Connection.java:2998)
+	at com.mysql.jdbc.Statement.executeUpdate(Statement.java:1071)
+	at com.mysql.jdbc.Statement.executeUpdate(Statement.java:1005)
+	at edu.sdsc.rtdsm.dataint.LakeSink.insertIntoDb(Unknown Source)
+	at edu.sdsc.rtdsm.dataint.LakeSink.updateIntoDb(Unknown Source)
+	at edu.sdsc.rtdsm.dataint.LakeSink.callBack(Unknown Source)
+	at edu.sdsc.rtdsm.drivers.turbine.TurbineSinkMonitorHandler.dataCollect(Unknown Source)
+	at edu.sdsc.rtdsm.drivers.turbine.TurbineSinkMonitorHandler.initFetch(Unknown Source)
+	at edu.sdsc.rtdsm.drivers.turbine.TurbineRawSink.waitForData(Unknown Source)
+	at edu.sdsc.rtdsm.drivers.turbine.TurbineSinkThread.run(Unknown Source)
+	at java.lang.Thread.run(Thread.java:595)
+
+
+** END NESTED EXCEPTION **
+
+
+
+Last packet sent to the server was 23 ms ago.
+	at com.mysql.jdbc.MysqlIO.reuseAndReadPacket(MysqlIO.java:2592)
+	at com.mysql.jdbc.MysqlIO.checkErrorPacket(MysqlIO.java:2909)
+	at com.mysql.jdbc.MysqlIO.sendCommand(MysqlIO.java:1600)
+	at com.mysql.jdbc.MysqlIO.sqlQueryDirect(MysqlIO.java:1695)
+	at com.mysql.jdbc.Connection.execSQL(Connection.java:2998)
+	at com.mysql.jdbc.Statement.executeUpdate(Statement.java:1071)
+	at com.mysql.jdbc.Statement.executeUpdate(Statement.java:1005)
+	at edu.sdsc.rtdsm.dataint.LakeSink.insertIntoDb(Unknown Source)
+	at edu.sdsc.rtdsm.dataint.LakeSink.updateIntoDb(Unknown Source)
+	at edu.sdsc.rtdsm.dataint.LakeSink.callBack(Unknown Source)
+	at edu.sdsc.rtdsm.drivers.turbine.TurbineSinkMonitorHandler.dataCollect(Unknown Source)
+	at edu.sdsc.rtdsm.drivers.turbine.TurbineSinkMonitorHandler.initFetch(Unknown Source)
+	at edu.sdsc.rtdsm.drivers.turbine.TurbineRawSink.waitForData(Unknown Source)
+	at edu.sdsc.rtdsm.drivers.turbine.TurbineSinkThread.run(Unknown Source)
+	at java.lang.Thread.run(Thread.java:595)
+Possible Source abnormal termination during query: Proceeding further without sink termination.
+Exception in thread "RST:dummySink:0" java.lang.IllegalStateException: SQL Error: SQL=INSERT INTO NTL_LB1_CDL_12GREENSPN00000701400000B9F366A_L12 (BV,DO_sat,T,DO_ppm,sample_datetime) VALUES (12.86,98.8,22.39,8.59,'2006-9-19 8:55:26')
+	at edu.sdsc.rtdsm.dataint.LakeSink.insertIntoDb(Unknown Source)
+	at edu.sdsc.rtdsm.dataint.LakeSink.updateIntoDb(Unknown Source)
+	at edu.sdsc.rtdsm.dataint.LakeSink.callBack(Unknown Source)
+	at edu.sdsc.rtdsm.drivers.turbine.TurbineSinkMonitorHandler.dataCollect(Unknown Source)
+	at edu.sdsc.rtdsm.drivers.turbine.TurbineSinkMonitorHandler.initFetch(Unknown Source)
+	at edu.sdsc.rtdsm.drivers.turbine.TurbineRawSink.waitForData(Unknown Source)
+	at edu.sdsc.rtdsm.drivers.turbine.TurbineSinkThread.run(Unknown Source)
+	at java.lang.Thread.run(Thread.java:595)
+java.sql.SQLException: No operations allowed after connection closed.Connection was implicitly closed due to underlying exception/error:
+
+
+** BEGIN NESTED EXCEPTION ** 
+
+com.mysql.jdbc.CommunicationsException
+MESSAGE: Communications link failure due to underlying exception: 
+
+** BEGIN NESTED EXCEPTION ** 
+
+java.io.EOFException
+
+STACKTRACE:
+
+java.io.EOFException
+	at com.mysql.jdbc.MysqlIO.readFully(MysqlIO.java:1934)
+	at com.mysql.jdbc.MysqlIO.reuseAndReadPacket(MysqlIO.java:2380)
+	at com.mysql.jdbc.MysqlIO.checkErrorPacket(MysqlIO.java:2909)
+	at com.mysql.jdbc.MysqlIO.sendCommand(MysqlIO.java:1600)
+	at com.mysql.jdbc.MysqlIO.sqlQueryDirect(MysqlIO.java:1695)
+	at com.mysql.jdbc.Connection.execSQL(Connection.java:2998)
+	at com.mysql.jdbc.Statement.executeUpdate(Statement.java:1071)
+	at com.mysql.jdbc.Statement.executeUpdate(Statement.java:1005)
+	at edu.sdsc.rtdsm.dataint.LakeSink.insertIntoDb(Unknown Source)
+	at edu.sdsc.rtdsm.dataint.LakeSink.updateIntoDb(Unknown Source)
+	at edu.sdsc.rtdsm.dataint.LakeSink.callBack(Unknown Source)
+	at edu.sdsc.rtdsm.drivers.turbine.TurbineSinkMonitorHandler.dataCollect(Unknown Source)
+	at edu.sdsc.rtdsm.drivers.turbine.TurbineSinkMonitorHandler.initFetch(Unknown Source)
+	at edu.sdsc.rtdsm.drivers.turbine.TurbineRawSink.waitForData(Unknown Source)
+	at edu.sdsc.rtdsm.drivers.turbine.TurbineSinkThread.run(Unknown Source)
+	at java.lang.Thread.run(Thread.java:595)
+
+
+** END NESTED EXCEPTION **
+
+
+
+Last packet sent to the server was 23 ms ago.
+
+STACKTRACE:
+
+com.mysql.jdbc.CommunicationsException: Communications link failure due to underlying exception: 
+
+** BEGIN NESTED EXCEPTION ** 
+
+java.io.EOFException
+
+STACKTRACE:
+
+java.io.EOFException
+	at com.mysql.jdbc.MysqlIO.readFully(MysqlIO.java:1934)
+	at com.mysql.jdbc.MysqlIO.reuseAndReadPacket(MysqlIO.java:2380)
+	at com.mysql.jdbc.MysqlIO.checkErrorPacket(MysqlIO.java:2909)
+	at com.mysql.jdbc.MysqlIO.sendCommand(MysqlIO.java:1600)
+	at com.mysql.jdbc.MysqlIO.sqlQueryDirect(MysqlIO.java:1695)
+	at com.mysql.jdbc.Connection.execSQL(Connection.java:2998)
+	at com.mysql.jdbc.Statement.executeUpdate(Statement.java:1071)
+	at com.mysql.jdbc.Statement.executeUpdate(Statement.java:1005)
+	at edu.sdsc.rtdsm.dataint.LakeSink.insertIntoDb(Unknown Source)
+	at edu.sdsc.rtdsm.dataint.LakeSink.updateIntoDb(Unknown Source)
+	at edu.sdsc.rtdsm.dataint.LakeSink.callBack(Unknown Source)
+	at edu.sdsc.rtdsm.drivers.turbine.TurbineSinkMonitorHandler.dataCollect(Unknown Source)
+	at edu.sdsc.rtdsm.drivers.turbine.TurbineSinkMonitorHandler.initFetch(Unknown Source)
+	at edu.sdsc.rtdsm.drivers.turbine.TurbineRawSink.waitForData(Unknown Source)
+	at edu.sdsc.rtdsm.drivers.turbine.TurbineSinkThread.run(Unknown Source)
+	at java.lang.Thread.run(Thread.java:595)
+
+
+** END NESTED EXCEPTION **
+
+
+
+Last packet sent to the server was 23 ms ago.
+	at com.mysql.jdbc.MysqlIO.reuseAndReadPacket(MysqlIO.java:2592)
+	at com.mysql.jdbc.MysqlIO.checkErrorPacket(MysqlIO.java:2909)
+	at com.mysql.jdbc.MysqlIO.sendCommand(MysqlIO.java:1600)
+	at com.mysql.jdbc.MysqlIO.sqlQueryDirect(MysqlIO.java:1695)
+	at com.mysql.jdbc.Connection.execSQL(Connection.java:2998)
+	at com.mysql.jdbc.Statement.executeUpdate(Statement.java:1071)
+	at com.mysql.jdbc.Statement.executeUpdate(Statement.java:1005)
+	at edu.sdsc.rtdsm.dataint.LakeSink.insertIntoDb(Unknown Source)
+	at edu.sdsc.rtdsm.dataint.LakeSink.updateIntoDb(Unknown Source)
+	at edu.sdsc.rtdsm.dataint.LakeSink.callBack(Unknown Source)
+	at edu.sdsc.rtdsm.drivers.turbine.TurbineSinkMonitorHandler.dataCollect(Unknown Source)
+	at edu.sdsc.rtdsm.drivers.turbine.TurbineSinkMonitorHandler.initFetch(Unknown Source)
+	at edu.sdsc.rtdsm.drivers.turbine.TurbineRawSink.waitForData(Unknown Source)
+	at edu.sdsc.rtdsm.drivers.turbine.TurbineSinkThread.run(Unknown Source)
+	at java.lang.Thread.run(Thread.java:595)
+
+
+** END NESTED EXCEPTION **
+
+
+	at com.mysql.jdbc.Connection.checkClosed(Connection.java:1844)
+	at com.mysql.jdbc.Connection.createStatement(Connection.java:2850)
+	at com.mysql.jdbc.Connection.createStatement(Connection.java:2832)
+	at edu.sdsc.rtdsm.dataint.LakeSink.insertIntoDb(Unknown Source)
+	at edu.sdsc.rtdsm.dataint.LakeSink.updateIntoDb(Unknown Source)
+	at edu.sdsc.rtdsm.dataint.LakeSink.callBack(Unknown Source)
+	at edu.sdsc.rtdsm.drivers.turbine.TurbineSinkMonitorHandler.dataCollect(Unknown Source)
+	at edu.sdsc.rtdsm.drivers.turbine.TurbineSinkMonitorHandler.initFetch(Unknown Source)
+	at edu.sdsc.rtdsm.drivers.turbine.TurbineRawSink.waitForData(Unknown Source)
+	at edu.sdsc.rtdsm.drivers.turbine.TurbineSinkThread.run(Unknown Source)
+	at java.lang.Thread.run(Thread.java:595)
+Possible Source abnormal termination during query: Proceeding further without sink termination.
+Exception in thread "RST:dummySink:0" java.lang.IllegalStateException: SQL Error: SQL=INSERT INTO NTL_LB1_CDL_12GREENSPN00000701400000B9F366A_L12 (BV,DO_sat,T,DO_ppm,sample_datetime) VALUES (12.86,98.8,22.400000000000002,8.59,'2006-9-19 8:55:37')
+	at edu.sdsc.rtdsm.dataint.LakeSink.insertIntoDb(Unknown Source)
+	at edu.sdsc.rtdsm.dataint.LakeSink.updateIntoDb(Unknown Source)
+	at edu.sdsc.rtdsm.dataint.LakeSink.callBack(Unknown Source)
+	at edu.sdsc.rtdsm.drivers.turbine.TurbineSinkMonitorHandler.dataCollect(Unknown Source)
+	at edu.sdsc.rtdsm.drivers.turbine.TurbineSinkMonitorHandler.initFetch(Unknown Source)
+	at edu.sdsc.rtdsm.drivers.turbine.TurbineRawSink.waitForData(Unknown Source)
+	at edu.sdsc.rtdsm.drivers.turbine.TurbineSinkThread.run(Unknown Source)
+	at java.lang.Thread.run(Thread.java:595)
+com.rbnb.sapi.SAPIException: Nesting java.io.EOFException
+	at com.rbnb.sapi.Sink.Fetch(SourceFile:1089)
+	at com.rbnb.sapi.Sink.Fetch(SourceFile:1103)
+	at edu.sdsc.rtdsm.drivers.turbine.TurbineSinkMonitorHandler.dataCollect(Unknown Source)
+	at edu.sdsc.rtdsm.drivers.turbine.TurbineSinkMonitorHandler.initFetch(Unknown Source)
+	at edu.sdsc.rtdsm.drivers.turbine.TurbineRawSink.waitForData(Unknown Source)
+	at edu.sdsc.rtdsm.drivers.turbine.TurbineSinkThread.run(Unknown Source)
+	at java.lang.Thread.run(Thread.java:595)
+
+Nested exception:
+java.io.EOFException
+	at com.rbnb.api.bU.readChar(SourceFile:784)
+	at com.rbnb.api.cy.readParameter(SourceFile:133)
+	at com.rbnb.api.ah.readObject(SourceFile:1085)
+	at com.rbnb.api.ah.read(SourceFile:980)
+	at com.rbnb.api.ah.read(SourceFile:922)
+	at com.rbnb.api.bb.receive(SourceFile:386)
+	at com.rbnb.api.aA.receive(SourceFile:1462)
+	at com.rbnb.api.aA.receive(SourceFile:1397)
+	at com.rbnb.api.aA.fetch(SourceFile:664)
+	at com.rbnb.api.bS.fetch(SourceFile:308)
+	at com.rbnb.sapi.Sink.Fetch(SourceFile:1075)
+	at com.rbnb.sapi.Sink.Fetch(SourceFile:1103)
+	at edu.sdsc.rtdsm.drivers.turbine.TurbineSinkMonitorHandler.dataCollect(Unknown Source)
+	at edu.sdsc.rtdsm.drivers.turbine.TurbineSinkMonitorHandler.initFetch(Unknown Source)
+	at edu.sdsc.rtdsm.drivers.turbine.TurbineRawSink.waitForData(Unknown Source)
+	at edu.sdsc.rtdsm.drivers.turbine.TurbineSinkThread.run(Unknown Source)
+	at java.lang.Thread.run(Thread.java:595)
+Possible Source abnormal termination during query: Proceeding further without sink termination.
+Exception in thread "RST:dummySinkControlSink:0" java.lang.IllegalStateException: Need an active request to be able to fetch data.
+	at com.rbnb.api.bS.fetch(SourceFile:301)
+	at com.rbnb.sapi.Sink.Fetch(SourceFile:1075)
+	at com.rbnb.sapi.Sink.Fetch(SourceFile:1103)
+	at edu.sdsc.rtdsm.drivers.turbine.TurbineSinkMonitorHandler.dataCollect(Unknown Source)
+	at edu.sdsc.rtdsm.drivers.turbine.TurbineSinkMonitorHandler.initFetch(Unknown Source)
+	at edu.sdsc.rtdsm.drivers.turbine.TurbineRawSink.waitForData(Unknown Source)
+	at edu.sdsc.rtdsm.drivers.turbine.TurbineSinkThread.run(Unknown Source)
+	at java.lang.Thread.run(Thread.java:595)
+com.rbnb.sapi.SAPIException: Nesting java.net.ConnectException
+	at com.rbnb.sapi.Client.OpenRBNBConnection(SourceFile:293)
+	at edu.sdsc.rtdsm.drivers.turbine.TurbineClient.connect(Unknown Source)
+	at edu.sdsc.rtdsm.drivers.turbine.TurbineRawSink.connectNoHangup(Unknown Source)
+	at edu.sdsc.rtdsm.drivers.turbine.TurbineSink.connectAndWait(Unknown Source)
+	at edu.sdsc.rtdsm.dig.dsw.DswSink.connectAndWait(Unknown Source)
+	at edu.sdsc.rtdsm.dataint.LakeSinkControlChannelListener.listenToControlChannels(Unknown Source)
+	at edu.sdsc.rtdsm.dataint.LakeSink.connect(Unknown Source)
+	at edu.sdsc.rtdsm.dataint.LakeSink.main(Unknown Source)
+
+Nested exception:
+java.net.ConnectException: Connection refused
+	at com.rbnb.api.P.waitForSocket(SourceFile:1384)
+	at com.rbnb.api.C.newClientSide(SourceFile:821)
+	at com.rbnb.api.aA.createRCO(SourceFile:521)
+	at com.rbnb.api.bI.createRCO(SourceFile:277)
+	at com.rbnb.api.aA.start(SourceFile:1940)
+	at com.rbnb.api.aJ.start(SourceFile:443)
+	at com.rbnb.sapi.Sink.doOpen(SourceFile:202)
+	at com.rbnb.sapi.Client.OpenRBNBConnection(SourceFile:288)
+	at edu.sdsc.rtdsm.drivers.turbine.TurbineClient.connect(Unknown Source)
+	at edu.sdsc.rtdsm.drivers.turbine.TurbineRawSink.connectNoHangup(Unknown Source)
+	at edu.sdsc.rtdsm.drivers.turbine.TurbineSink.connectAndWait(Unknown Source)
+	at edu.sdsc.rtdsm.dig.dsw.DswSink.connectAndWait(Unknown Source)
+	at edu.sdsc.rtdsm.dataint.LakeSinkControlChannelListener.listenToControlChannels(Unknown Source)
+	at edu.sdsc.rtdsm.dataint.LakeSink.connect(Unknown Source)
+	at edu.sdsc.rtdsm.dataint.LakeSink.main(Unknown Source)
+com.rbnb.sapi.SAPIException: This operation requires a connection.
+	at com.rbnb.sapi.Client.assertConnection(SourceFile:590)
+	at com.rbnb.sapi.Sink.a(SourceFile:1120)
+	at com.rbnb.sapi.Sink.Monitor(SourceFile:805)
+	at edu.sdsc.rtdsm.drivers.turbine.TurbineSinkMonitorHandler.initFetch(Unknown Source)
+	at edu.sdsc.rtdsm.drivers.turbine.TurbineRawSink.waitForData(Unknown Source)
+	at edu.sdsc.rtdsm.drivers.turbine.TurbineSinkThread.run(Unknown Source)
+	at java.lang.Thread.run(Thread.java:595)

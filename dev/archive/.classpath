@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="var" path="RBNB_HOME/bin/rbnb.jar"/>
+	<classpathentry kind="var" path="TURBINE_HOME/build/lib/turbine.jar"/>
+	<classpathentry kind="var" path="TURBINE_HOME/lib/commons-cli-1.0.jar"/>
+	<classpathentry kind="output" path="build/classes"/>
+</classpath>

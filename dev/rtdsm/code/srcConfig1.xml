@@ -1,0 +1,19 @@
+<?xml version='1.0'?>
+<!DOCTYPE source SYSTEM "srcConfig.dtd">
+
+<SourceConfig>
+<source name="ThinkSource1">
+  <mainChannels>
+    <orbParams orbType="DataTurbine">
+      <storage cacheSize="1000" archiveMode="create" archiveSize="10"/>
+        <!-- TODO: Support multiple Server mirroring options 
+              Multiple uris-->
+      <server uri="localhost:3333" username="me" password="mine">
+        <channel name="Temperature" dataType="double"/>
+        <channel name="Light" dataType="double"/>
+        <channel name="Humidity" dataType="double"/>
+      </server>
+    </orbParams>
+  </mainChannels>
+</source>
+</SourceConfig>

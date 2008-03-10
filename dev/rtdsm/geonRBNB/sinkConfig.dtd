@@ -1,0 +1,23 @@
+<!ELEMENT SinkConfig (sink*) >
+
+<!ELEMENT sink (mainChannel, feedback*)>
+<!ATTLIST sink name CDATA #REQUIRED>
+
+<!ELEMENT mainChannel (orbParams)>
+
+<!ELEMENT orbParams (server*)>
+<!ATTLIST orbParams orbType CDATA #REQUIRED>
+
+<!ELEMENT server (channel*)>
+<!ATTLIST server uri CDATA #REQUIRED
+                 username CDATA #REQUIRED
+                 password CDATA #REQUIRED
+                 feedbackServer CDATA #IMPLIED
+                 feedbackPort CDATA #IMPLIED>
+
+<!ELEMENT channel EMPTY>
+<!ATTLIST channel source CDATA #REQUIRED
+                  name CDATA #REQUIRED
+                  dataType CDATA #REQUIRED
+                  reqMode CDATA #REQUIRED
+                  timeout CDATA #REQUIRED>

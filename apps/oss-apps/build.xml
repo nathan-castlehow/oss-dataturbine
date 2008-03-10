@@ -1,0 +1,167 @@
+<?xml version="1.0"?>
+
+<project default="jar" basedir=".">
+
+<property file="build.properties"/>
+
+<!-- environment access via env.* -->
+<property environment="env"/>
+
+<!-- Get Turbine and NEES from environment -->
+<property name="rbnb.home" value="${env.RBNB_HOME}"/>
+
+<!-- classpath -->
+<path id="classpath">
+ <pathelement location="${java.home}/../lib/tools.jar"/>
+ <pathelement location="."/>
+ <pathelement location="${build.dir}"/>
+ <pathelement path="${java.class.path}"/>
+ <pathelement path="${lib.dir}/QTJava.zip"/>
+ <fileset dir="${build.lib}">
+   <include name="*.jar"/>
+ </fileset>
+ <fileset dir="${rbnb.home}">
+  <include name="*/*.jar"/>
+ </fileset>
+ <fileset dir="${lib.dir}">
+  <include name="*.jar" />
+ </fileset>
+ <pathelement location="${build.classes}"/> 
+</path>
+
+<!-- targets to check environment variables -->
+<target name="checkRBNB" unless="env.RBNB_HOME">
+  <fail message="RBNB_HOME must be defined in your environment."/>
+</target>
+
+<!-- Meta-target that depends on all environment variables -->
+<target name="checkEnvVars" depends="checkRBNB" 
+description="Check necessary environment variables"/>
+
+<!-- target to make temp dirs -->
+<target name="prepare" depends="checkEnvVars" description="Make directories">
+  <mkdir dir="${build.dir}"/>
+  <mkdir dir="${build.classes}"/>
+  <mkdir dir="${build.lib}"/>
+  <mkdir dir="${doc.dir}"/>
+</target>
+
+<!-- target to clean build dir and doc dir -->
+<target name="clean" description="Remove all generated files">
+  <delete dir="${build.dir}"/>
+  <delete file="./${jar.name}.zip"/>
+  <delete>
+    <fileset dir="." includes="turbine-*.noarch.rpm"/>
+  </delete>
+  <delete>
+    <fileset dir="." includes="turbine-*.src.rpm"/>
+  </delete>
+</target>
+
+<!-- Build target -->
+<target name="compile" depends="clean,prepare" description="Build from source">
+ <javac srcdir="${daq.src.dir}" 
+        destdir="${build.classes}"
+        classpathref="classpath" debug="on">
+ </javac>
+ <javac srcdir="${rbnb.src.dir}" 
+        destdir="${build.classes}"
+        classpathref="classpath" debug="on">
+ </javac>
+<javac srcdir="${cleos.src.dir}" 
+	  	destdir="${build.classes}"
+	    classpathref="classpath" debug="on">
+</javac>
+</target>
+
+<!-- Package (jar) target -->
+<target name="jar" depends="compile" description="Build turbine.jar, including its deps">
+  <jar destfile="${build.lib}/${jar.name}.jar" duplicate="preserve">
+  	<fileset dir="${build.classes}"/>
+  	<fileset file="log4j.properties"/>
+  	<!-- include deps to make jar standalone -->
+  	<zipgroupfileset dir="${lib.dir}" excludes="jmf.properties, log4j.properties, turbine-env.sh"/>
+  	<manifest>
+  	    <attribute name="Built-By" value="${user.name}"/>
+  	    <section name="common">
+  	      <attribute name="Implementation-Title" value="${jar.name}"/>
+  	      <attribute name="Implementation-Version" value="${version}"/> 
+  	      <attribute name="Implementation-Vendor" value="NEESit@SDSC"/>
+  	    </section>
+  	  </manifest>
+  </jar>
+</target>
+
+<!-- Doxygen target -->
+<target name="doxygen" depends="compile" description="Source code docs">
+ <exec executable="doxygen" failonerror="true"/>
+</target>
+
+<!-- Docs using javadoc -->
+<target name="javadoc" depends="compile" description="Source code docs (javadoc version)">
+	<javadoc destdir="${doc.dir}"
+	    author="true"
+        version="true"
+        windowtitle="OSS RBNB utilities, version ${version}"
+        packagenames="edu.sdsc.cleos.*"
+		sourcepath="${src.dir}" 
+	/>
+</target>
+
+<!-- target to package the jar dependencies of this jar-->
+<target name="deps" description="Package the jar dependencies of this package">
+    <zip destfile="./turbine-deps.zip" basedir="./lib" />
+</target>
+
+<!-- target to generate an RPM distro - only makes sense on RedHat systems -->
+<target name="rpm" depends="clean, jar, dist" description="Create an RPM package on RedHat systems only">
+	<!-- set up rpm's expected build tree in this local build space -->
+    <copy todir="${system.rpm.source.tree}/SPECS" file="./rpm/turbine-3.6.0-1.spec"/>
+	<copy todir="${system.rpm.source.tree}/SOURCES" file="./${jar.name}.zip"/>
+	<!-- this spec makes a noarch rpm -->
+	<exec executable="rpmbuild" os="Linux">
+	  <arg line="-vv -ba ${system.rpm.source.tree}/SPECS/turbine-3.6.0-1.spec"/>
+	</exec>
+	<!-- sign the binary rpm -->
+	<exec executable="rpm" os="Linux">
+	    <arg line="--addsign ${system.rpm.source.tree}/RPMS/noarch/turbine-3.6.0-1.noarch.rpm"/>
+	</exec>
+	<!-- sign the source rpm -->
+	<exec executable="rpm" os="Linux">
+	    <arg line="--addsign ${system.rpm.source.tree}/SRPMS/turbine-3.6.0-1.src.rpm"/>
+	</exec>
+	<copy todir="./" file="${system.rpm.source.tree}/RPMS/noarch/turbine-3.6.0-1.noarch.rpm"/>
+	<copy todir="./" file="${system.rpm.source.tree}/SRPMS/turbine-3.6.0-1.src.rpm"/>
+</target>
+	
+<!-- target to check the generated RPM -->
+<target name="checkrpm" depends="rpm" description="checks generated RPM for potential confilcts">
+  <!-- check the binary rpm -->
+  <exec executable="rpm" os="Linux">
+    <arg line="-i --test turbine-3.6.0-1.noarch.rpm"/>
+  </exec>
+  <exec executable="rpm" os="Linux">
+    <arg line="--checksig turbine-3.6.0-1.noarch.rpm"/>
+  </exec>
+  <!-- check the source rpm -->
+  <exec executable="rpm" os="Linux">
+    <arg line="-i --test turbine-3.6.0-1.src.rpm"/>
+  </exec>
+  <exec executable="rpm" os="Linux">
+    <arg line="--checksig turbine-3.6.0-1.src.rpm"/>
+  </exec>
+</target>
+	
+ <!-- target to generate a source zip -->	
+<target name="dist" depends="clean" description="Creates an archive of this source tree">
+  <mkdir dir="${build.dir}/dist/${jar.name}"/>
+  <copy todir="${build.dir}/dist/${jar.name}">
+    <fileset dir="."/>
+  </copy>
+  <zip destfile="./${jar.name}.zip" basedir="${build.dir}/dist"/>
+</target>
+ 
+<!-- Catch-all target to aggregate everything -->
+<target name="all" depends="clean,jar" description="Clean, compile, jar">
+</target>
+</project>

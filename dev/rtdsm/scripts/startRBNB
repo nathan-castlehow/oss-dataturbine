@@ -1,0 +1,14 @@
+scriptDir=/home/vinkolar/work/rtdsm/scripts
+RBNB_HOME=/home/vinkolar/myopt/RBNB/V2.6B3
+
+nohup ${RBNB_HOME}/bin/Start_Webserver.sh 1> apache.out 2> apache.err &
+nohup java -jar ${RBNB_HOME}/bin/rbnb.jar 1> rbnb.out 2> rbnb.err &
+echo "Sleeping 5 seconds to check if they started up"
+sleep 5
+serverPid=`ps -ef | grep rbnb.jar | grep vinkolar |  grep -v grep | sed "s/[ \t][ \t]*/ /g" | cut -f 2 -d" "`
+apachePid=`ps -ef | grep ClassLoaderLogManager | grep vinkolar |  grep -v grep | sed "s/[ \t][ \t]*/ /g" | cut -f 2 -d" "`
+echo "Apache output can be seen in apache.out / apache.err"
+echo "RBNB Webturbine output can be seen in rbnb.out / rbnb.err"
+echo "Apache Pid= ${apachePid}"
+echo "RBNB Webturbine Pid= ${serverPid}"
+echo "Done."

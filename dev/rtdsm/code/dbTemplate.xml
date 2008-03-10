@@ -1,0 +1,21 @@
+<!DOCTYPE source SYSTEM "dbTemplate.dtd">
+
+<DBTemplate>
+<template name="template1">
+  <reqPath name="dswSource_1/Temperature" dataType="double">
+    <dbTable name="rtdsm.temperature"/>
+    <map key="source" dbCol="Src"/>
+    <map key="channel" dbCol="Chnl"/>
+    <map key="timeGenerated" dbCol="genTime"/>
+    <map key="value" dbCol="temp"/>
+  </reqPath>
+  
+  <reqPath name="dswSource_1/Light" dataType="double">
+    <dbTable name="rtdsm.light"/>
+    <map key="source" dbCol="Src"/>
+    <map key="channel" dbCol="Chnl"/>
+    <map key="timeGenerated" dbCol="genTime"/>
+    <map key="value" dbCol="light"/>
+  </reqPath>
+</template>
+</DBTemplate>

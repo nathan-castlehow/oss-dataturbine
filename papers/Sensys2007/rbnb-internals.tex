@@ -1,0 +1,40 @@
+\section{RBNB Internals}\label{sec:rbnb-internals}
+
+The RBNB server is a standalone Java program in an executable jarfile. By default, it listens to port 3333 and can therefore be run by unpriveleged users. After it parses the command line, all interactions are via TCP connections. It is also bundled with an optional Tomcat ~\cite{tomcat-project} server with an RBNB extension providing HTTP and DAV access to the server. The server code is compatible with Java 1.1 or later, and runs without change on all known J2SE platforms.
+
+RBNB DataTurbine uses a three-fold classification of programs: Sources, Sinks and Plugins. Sources generate data (writers), Sinks are readers, and Plugins are hybrids that act like Unix pipes, transforming data in the process. A Java program can have one or more of each type, generally however a program will have a single type for simplicity and reliability. 
+
+Data Turbine is designed to give writers priority over readers to prevent data loss or congestion. As a consequence, data is stored as written and demultiplexed by the reader thread as required. 
+
+Key to the idea of RBNB is that all data is time-stamped.  Timestamps can be per frame, per channel, and/or per data point.  Timestamps can be explicit (provided by the source), or implicit (automatically provided by the client API or RBNB server). There is one exception provided for metadata, where a source or channel can have non-varying metadata such as units, scaling information and the like. Time-varying metadata is handled as normal channels, for example the GPS location of a mobile system.
+
+RBNB can also utilize disk to extend the span of a ring buffer. Clients specify the duration for which they they wish to retain data, both in disk and memory, and this is translated into a combination of memory and disk buffers. Clients and sources, however, simply use the unified addressing scheme detailed below, and the server manages the specifics.
+
+\emph{Naming and addressing}
+
+Each data source can have multiple "channels" of data, where channel data are referenced by name and time. Thus, the RBNB data structures are inherently a triad of data, name, and time.  
+
+Each RBNB server has one or more data sources. Each data source has one or more frames of data. Data frames have one or more data channels, and each channel contains one or more blocks of data per frame. 
+
+From an external point of view, an RBNB server resembles streams of data that are accessed by timestamp. Data streams are addressed via a three-part naming system of Server / Source / Channel
+e.g. Server name / DAQ NW Floor / Strain gage 16
+
+Data is therefore addressed via a triplet of Name, Timestamp, and Duration. 
+
+\emph{Channel Map}
+All RBNB data is organized in "channel maps".  A channel map consists of a collection of named channels, each with data and timestamp.  RBNB clients manipulate channel maps as a means to make requests (sinks) and submit data (sources).
+A source client builds a channel map consisting of one or more named channels.  For each channel it provides data of a specified type and quantity.  It also specifies a  timestamp for the channel map as a whole, or for the various pieces (channels and data) separately.  After being so built, the channel map is sent from the source client to the RBNB server.  This process can be repeated, adding new channels or new data to existing channels.
+
+A sink client builds a channel map in order to request data.  Here, the channel map consists of named channels and timestamps, which is sent to the RBNB server as a request.  The response to this request is another channel map, this time with the data filled in for the various channels.
+
+\emph{Sources:}
+Source clients are "active", that is they initiate data transmission to the server.  Each time a source sends some data to the server, it is called a "frame".  A source can send a sequence of frames to the server.  Each frame can consist of one or more named "channels".  Each channel can consist of one or more data points per frame. Increasing the number of points per frame increases efficiency by using larger TCP packets, but adds to the total latency. 
+
+\emph{Sinks:}
+Sink clients are "active", that is they initiate data retrieval from the server.  Just as for a source, each time a sink gets frames of data from a server.  Each frame consists of one or more named channels, with each channel consisting of one or more data points. A sink requests data by both channel name(s) and timestamp.  The data returned to a sink can consist of multiple or partial source frames, depending upon the requested time slice.  There are three modes by which a sink can get data from a server: Request, Subscribe, Monitor.
+
+Requests are for a particular time interval, for which there is a single response for each such request.  It is also possible to make a single request that is automatically repeated over a specified number of time intervals. Subscribe and Monitor modes are open-ended in that new data is automatically sent (from the server to the sink client) as it becomes available.  Subscribe mode fetches all data, even if this means falling behind real-time.  Monitor mode skips data in order to stay current.
+
+\emph{Plugins:}
+Plugin clients are "passive", that is they wait for data requests from the server, and send data to the server in response to those requests. PlugIns act like a kind of combined sink/source. The server passes to the Plugin any requests for Plugin channels.  Upon receipt of a request, a Plugin acts as a source and sends its response to the server.
+A Plugin can optionally register the specific channels that it can provide. Registered channels do not have any data in them, they are a means of "advertising" available channels. With registered channels, only requests for those specific channels will be forwarded by the server to that Plugin. Otherwise, any request (e.g. "Plugin/anychan") is forwarded to the Plugin. Thus, a Plugin can provide "services" that can involve fetching and processing other RBNB data on the demand of third party applications.  Plugins can process data from other Plugins, thus cascading sequences of processing steps.

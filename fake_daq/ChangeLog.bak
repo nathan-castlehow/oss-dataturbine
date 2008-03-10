@@ -1,0 +1,44 @@
+2004-09-10 11:39  hubbard
+
+	* fake_daq.c, makefile: Fix code docs so that doxygen is happy; no
+	substantial changes.
+
+2004-07-15 12:34  hubbard
+
+	* fake_daq.c: Changed rate argument to float, so you can have
+	non-integer sample rates.
+
+2003-12-04 13:08  hubbard
+
+	* Doxyfile: Updated doxyfile to get rid of warnings. No code
+	changes.
+
+2003-10-07 02:36  cphillip
+
+	* makefile:   o Fix to also use name of driver module.
+
+2003-10-03 00:26  cphillip
+
+	* makefile, mdist.conf:   o Remove extraneous steps from fake-daq
+	module.
+
+2003-10-02 23:10  cphillip
+
+	* makefile, mdist.conf:   o makefile dist target changes to better
+	suit release.
+	  o add mdist.conf packaging file to fake-daq module.
+
+2003-09-11 13:56  hubbard
+
+	* ChangeLog, Doxyfile, fake_daq.c: Corrected doxygen file, added
+	changelog, looking good.
+
+2003-09-11 13:53  hubbard
+
+	* Doxyfile, fake_daq.c, makefile: Initial revision
+
+2003-09-11 13:53  hubbard
+
+	* Doxyfile, fake_daq.c, makefile: Moved fake_daq to its own
+	project.
+

@@ -1,0 +1,1 @@
+java edu.sdsc.rtdsm.dig.dsw.DswProcess sinkConfig.xml dswSink srcConfig.xml dswSource

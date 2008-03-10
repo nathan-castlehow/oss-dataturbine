@@ -1,0 +1,2 @@
+java edu.sdsc.rtdsm.dataint.DataIntSink sinkConfig.xml dbSink dbTemplate.xml template1
+

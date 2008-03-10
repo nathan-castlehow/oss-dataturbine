@@ -1,0 +1,71 @@
+<?xml version='1.0'?>
+<!DOCTYPE source SYSTEM "sinkConfig.dtd">
+
+<SinkConfig>
+<sink name="dswSink">
+  <mainChannels>
+    <orbParams orbType="DataTurbine">
+      <server uri="localhost:3333" username="me" password="mine" feedbackServer="localhost" feedbackPort="7878">
+        <channel source="ThinkSource1" name="Temperature" dataType="double" reqMode="monitor" timeout="-1"/>
+        <channel source="ThinkSource1" name="Light" dataType="double" reqMode="monitor" timeout="-1"/>
+        <!--channel source="ThinkSource1" name="Light" dataType="double" reqMode="ondemand"/-->
+        <!--channel source="ThinkSource1" name="Humidity" dataType="double" reqMode="adaptive"/-->
+      </server>
+      <!-- <server uri="geon05.sdsc.edu:3333" username="me" password="mine">
+        <channel source="GeonSource1" name="Temperature" dataType="double" reqMode="monitor" timeout="-1"/>
+        <channel source="GeonSource1" name="Light" dataType="double" reqMode="monitor" timeout="-1"/>-->
+        <!--channel source="ThinkSource1" name="Light" dataType="double" reqMode="ondemand"/-->
+        <!--channel source="ThinkSource1" name="Humidity" dataType="double" reqMode="adaptive"/-->
+      <!--</server>-->
+    </orbParams>
+  </mainChannels>
+</sink>
+
+<sink name="Sink2">
+  <mainChannels>
+    <orbParams orbType="DataTurbine">
+      <server uri="localhost:3333" username="me" password="mine" feedbackServer="localhost" feedbackPort="7878">
+        <channel source="Source1" name="Temperature" dataType="double" reqMode="poll" pollInterval="10000"/>
+        <channel source="Source1" name="Light" dataType="double" reqMode="poll" pollInterval="10000"/>
+        <!--channel source="Source1" name="Light" dataType="double" reqMode="ondemand"/-->
+        <!--channel source="Source1" name="Humidity" dataType="double" reqMode="adaptive"/-->
+      </server>
+    </orbParams>
+  </mainChannels>
+</sink>
+
+<sink name="dbSink">
+  <mainChannels>
+    <orbParams orbType="DataTurbine">
+      <server uri="localhost:3333" username="me" password="mine">
+        <channel source="dswSource" name="Temperature" dataType="double" reqMode="monitor" timeout="-1"/>
+        <channel source="dswSource" name="Light" dataType="double" reqMode="monitor" timeout="-1"/>
+      </server>
+    </orbParams>
+  </mainChannels>
+</sink>
+
+<sink name="dummySink">
+  <mainChannels>
+    <orbParams orbType="DataTurbine">
+      <server uri="localhost:3333" username="me" password="mine">
+        <channel source="12GREENSPN000007014000007E1A285" name="DO_ppm" dataType="double" reqMode="monitor" timeout="-1"/>
+        <channel source="12GREENSPN000007014000007E1A285" name="DO_sat" dataType="double" reqMode="monitor" timeout="-1"/>
+        <channel source="12GREENSPN000007014000007E1A285" name="T" dataType="double" reqMode="monitor" timeout="-1"/>
+        <channel source="12GREENSPN000007014000007E1A285" name="BV" dataType="double" reqMode="monitor" timeout="-1"/>
+      </server>
+    </orbParams>
+  </mainChannels>
+  <feedback>
+    <orbParams orbType="DataTurbine">
+      <!-- archive should never be "create". What if the two
+      sinks that have subscribed to the same source ? Each archive
+      will be overwritten-->
+      <storage cacheSize="10" archiveMode="none" archiveSize="0"/>
+      <server uri="localhost:3333" username="me" password="mine">
+        <channel source="Source1Feedback" name="FeedbackCh" dataType="double"/>
+      </server>
+    </orbParams>
+  </feedback>
+</sink>
+</SinkConfig>

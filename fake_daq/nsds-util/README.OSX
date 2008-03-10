@@ -1,0 +1,12 @@
+
+As of 11/02, I have gotten the driver to build and run on Mac OSX, v10.2.2.
+
+Since I used the GNU getopt() function, you have to install it. I used Fink, which
+puts it into an odd location, that's why the makefile is a bit odd for OSX builds.
+
+Also note that I still don't completely grok OSX shared libraries, so I've rebuilt 
+the flog messaging library to make a static library for OSX. Its a hack, but flog
+is pretty small.
+
+Paul Hubbard
+hubbard@mcs.anl.gov 12/1/02

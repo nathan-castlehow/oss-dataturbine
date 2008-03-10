@@ -1,0 +1,2 @@
+#!/bin/sh
+java edu.sdsc.rtdsm.dataint.LakeSink sinkConfigLake.xml dummySink

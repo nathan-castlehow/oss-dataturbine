@@ -1,0 +1,52 @@
+----
+
+The P105 ID command causes the ID string to be sent directly to FSA.
+This string can only be accessed using a binary dump (F telecom comman).
+
+These strings had 7D as the first byte, then a CR-LF combination, then
+the ID string, then a FF sequence.  The ID string is missing the address.
+There are two FF if the length of the string is even.  Just one, if it is
+odd.
+
+These strings do not automatically form part of an output array.  That is, if
+the P105 command is executed before the output flag is set, it will actually
+go before the output array.  However, it seems best to treat them
+as if they are part of the array, as opposed to something that
+belongs outside of arrays.
+
+----
+
+A successful P105 ID command seems to take approximately 0.375 seconds.
+An unsuccessful one takes about .5 seconds.  This is based on timing the
+commands by using the timestamp command to put timestamps in the FSA.
+
+----
+
+The SDI-12 transparent mode only works when there is a P105 command running,
+it seems.
+
+----
+
+Each FSA location takes two bytes, it seems.
+
+----
+
+There seems to be a bug in the *A command with some models.
+Entering 0 for the program doesn't seem to work.
+
+----
+
+For calculating the checksum of a binary dump, the manual says:
+
+    Form a temporary byte by shifting the old low signature byte
+    one bit to the left and adding any carry bit which results
+    from the shift operation.  A "shift left" is identical to a
+    multiply by 2.  Ignore any carry bit resulting from the add.
+
+This is wierd.  First, the above seems like just a really
+convoluted way of saying "rotate 1 bit left".  Second, there is
+no way you could ever get a carry bit from the add, so why
+tell people to ignore something that can never happen.
+Anyway, I put this note here just to explain that I have
+interpreted the convoluted text above to just mean "rotate left 1
+bit".

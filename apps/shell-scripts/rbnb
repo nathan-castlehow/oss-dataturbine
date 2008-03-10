@@ -1,0 +1,51 @@
+#!/bin/bash
+# Init script for the RBNB server
+#
+# LJM 051102
+# The RBNB_HOME location needs to exist and be acceptable to the admin of the
+# RBNB host system.
+#
+# chkconfig: 345 98 98
+# description: Start the RBNB server
+#
+
+if [ ! "${RBNB_HOME}" ]; then RBNB_HOME=/usr/local/rbnb; fi
+RBNB_LOG="${RBNB_HOME}/var/log/rbnb.log"
+RBNB_PIDFILE="${RBNB_HOME}/var/run/rbnb.pid"
+RBNB_ARCHIVE_LOC='/tmp/rbnb_archive'
+# Amount of memory in MegaBytes for the JVM running RBNB to use
+RBNB_MEM='512'
+
+######################################################################################
+start() {
+   mkdir -p ${RBNB_ARCHIVE_LOC}
+   cd $RBNB_ARCHIVE_LOC
+   mkdir -p ${RBNB_HOME}/var/run/ ${RBNB_HOME}/var/log/
+   java -Xmx${RBNB_MEM}M -jar ${RBNB_HOME}/bin/rbnb.jar > ${RBNB_LOG} 2>&1 &
+   echo $! > ${RBNB_PIDFILE}
+}
+
+######################################################################################
+stop() {
+  kill `cat ${RBNB_PIDFILE}`
+  rm -f ${RBNB_PIDFILE}
+}
+     
+case "$1" in
+   'start')
+       echo "Starting the RBNB server"
+       start
+       ;;
+   'stop')
+       echo "Stopping the RBNB server"
+       stop
+       ;;
+   'restart')
+       echo "Restarting the RBNB server"
+       stop
+       start
+       ;;
+   *)
+       echo "Usage: $0 {start|stop|restart} "
+       ;;
+esac

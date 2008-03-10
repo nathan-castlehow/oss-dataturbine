@@ -1,0 +1,28 @@
+<?xml version='1.0'?>
+<!DOCTYPE source SYSTEM "srcConfig.dtd">
+
+<SourceConfig>
+<source name="12GREENSPN000007014000007E1A285">
+  <mainChannels>
+    <orbParams orbType="DataTurbine">
+      <storage cacheSize="1000" archiveMode="create" archiveSize="10"/>
+        <!-- TODO: Support multiple Server mirroring options 
+              Multiple uris-->
+      <server uri="localhost:3333" username="me" password="mine">
+        <channel name="DO_ppm" dataType="double"/>
+        <channel name="DO_sat" dataType="double"/>
+        <channel name="T" dataType="double"/>
+        <channel name="BV" dataType="double"/>
+      </server>
+    </orbParams>
+  </mainChannels>
+
+  <feedback>
+    <feedbackOrbParams orbType="DataTurbine">
+      <server uri="localhost:3333" username="me" password="mine">
+        <channel name="FeedbackCh_1" dataType="double" reqMode="monitor" timeout="-1"/>
+      </server>
+    </feedbackOrbParams>
+  </feedback>
+</source>
+</SourceConfig>

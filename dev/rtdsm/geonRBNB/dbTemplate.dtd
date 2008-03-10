@@ -1,0 +1,15 @@
+<!ELEMENT DBTemplates (template*)>
+
+<!ELEMENT template (reqPath*)>
+<!ATTLIST template name CDATA #REQUIRED>
+
+<!ELEMENT reqPath (dbTable,map*)>
+<!ATTLIST reqPath name CDATA #REQUIRED
+                  dataType CDATA #REQUIRED>
+
+<!ELEMENT dbTable EMPTY>
+<!ATTLIST dbTable name CDATA #REQUIRED>
+
+<!ELEMENT map EMPTY>
+<!ATTLIST map key CDATA #REQUIRED
+              dbCol CDATA #REQUIRED>

@@ -1,0 +1,6 @@
+#Keys and values should not be separated by spaces
+#Comment symbol is '#' and should be in the first column
+#Empty lines are ignored
+hostname=localhost
+
+port=9998

@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wsdl:definitions targetNamespace="http://yunyi.sdsc.edu:8080/lakeservices/services/InstrumentMetadata" xmlns:apachesoap="http://xml.apache.org/xml-soap" xmlns:impl="http://yunyi.sdsc.edu:8080/lakeservices/services/InstrumentMetadata" xmlns:intf="http://yunyi.sdsc.edu:8080/lakeservices/services/InstrumentMetadata" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:wsdlsoap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+<!--WSDL created by Apache Axis version: 1.2beta
+Built on Mar 31, 2004 (12:47:03 EST)-->
+
+   <wsdl:message name="insertSensorResponse">
+
+      <wsdl:part name="insertSensorReturn" type="soapenc:string"/>
+
+   </wsdl:message>
+
+   <wsdl:message name="getSensorResponse">
+
+      <wsdl:part name="getSensorReturn" type="soapenc:string"/>
+
+   </wsdl:message>
+
+   <wsdl:message name="getSensorRequest">
+
+      <wsdl:part name="sensorID" type="soapenc:string"/>
+
+   </wsdl:message>
+
+   <wsdl:message name="insertSensorRequest">
+
+      <wsdl:part name="sensorID" type="soapenc:string"/>
+
+      <wsdl:part name="lakeID" type="soapenc:string"/>
+
+      <wsdl:part name="buoyID" type="soapenc:string"/>
+
+      <wsdl:part name="loggerID" type="soapenc:string"/>
+
+      <wsdl:part name="tablename" type="soapenc:string"/>
+
+      <wsdl:part name="sampleRate" type="soapenc:string"/>
+
+      <wsdl:part name="dataID" type="soapenc:string"/>
+
+   </wsdl:message>
+
+   <wsdl:portType name="InstrumentMetadata">
+
+      <wsdl:operation name="insertSensor" parameterOrder="sensorID lakeID buoyID loggerID tablename sampleRate dataID">
+
+         <wsdl:input message="impl:insertSensorRequest" name="insertSensorRequest"/>
+
+         <wsdl:output message="impl:insertSensorResponse" name="insertSensorResponse"/>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="getSensor" parameterOrder="sensorID">
+
+         <wsdl:input message="impl:getSensorRequest" name="getSensorRequest"/>
+
+         <wsdl:output message="impl:getSensorResponse" name="getSensorResponse"/>
+
+      </wsdl:operation>
+
+   </wsdl:portType>
+
+   <wsdl:binding name="InstrumentMetadataSoapBinding" type="impl:InstrumentMetadata">
+
+      <wsdlsoap:binding style="rpc" transport="http://schemas.xmlsoap.org/soap/http"/>
+
+      <wsdl:operation name="insertSensor">
+
+         <wsdlsoap:operation soapAction=""/>
+
+         <wsdl:input name="insertSensorRequest">
+
+            <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://service.gleon.cleos.sdsc.edu" use="encoded"/>
+
+         </wsdl:input>
+
+         <wsdl:output name="insertSensorResponse">
+
+            <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://yunyi.sdsc.edu:8080/lakeservices/services/InstrumentMetadata" use="encoded"/>
+
+         </wsdl:output>
+
+      </wsdl:operation>
+
+      <wsdl:operation name="getSensor">
+
+         <wsdlsoap:operation soapAction=""/>
+
+         <wsdl:input name="getSensorRequest">
+
+            <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://service.gleon.cleos.sdsc.edu" use="encoded"/>
+
+         </wsdl:input>
+
+         <wsdl:output name="getSensorResponse">
+
+            <wsdlsoap:body encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" namespace="http://yunyi.sdsc.edu:8080/lakeservices/services/InstrumentMetadata" use="encoded"/>
+
+         </wsdl:output>
+
+      </wsdl:operation>
+
+   </wsdl:binding>
+
+   <wsdl:service name="InstrumentMetadataService">
+
+      <wsdl:port binding="impl:InstrumentMetadataSoapBinding" name="InstrumentMetadata">
+
+         <wsdlsoap:address location="http://yunyi.sdsc.edu:8080/lakeservices/services/InstrumentMetadata"/>
+
+      </wsdl:port>
+
+   </wsdl:service>
+
+</wsdl:definitions>

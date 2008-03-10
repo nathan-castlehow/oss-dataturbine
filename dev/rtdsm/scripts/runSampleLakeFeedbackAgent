@@ -1,0 +1,3 @@
+#!/bin/sh
+# This should be run on the dataturbine server
+java edu.sdsc.rtdsm.dig.sites.lake.LakeFeedbackAgent

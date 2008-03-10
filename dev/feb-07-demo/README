@@ -1,0 +1,2 @@
+the .svn directories under JpgStore cause it to fail and must be removed before running JpgLoaderSource.
+

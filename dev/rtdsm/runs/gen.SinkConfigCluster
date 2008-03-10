@@ -1,0 +1,44 @@
+echo "<?xml version='1.0'?>"
+echo "<!DOCTYPE source SYSTEM \"sinkConfig.dtd\">"
+echo "<SinkConfig>"
+
+i=1
+reqMode=monitor
+timeout=-1
+pollingInterval=5
+
+last=${sink}
+(( last = $last + 1))
+while [ $i -ne $last ]
+do
+  echo "<sink name=\"Sink_${i}\">"
+  echo "  <mainChannels>"
+  echo "    <orbParams orbType=\"DataTurbine\">"
+  echo "      <server uri=\"compute-0-0.local:3333\" username=\"\" password=\"\">"
+  for compute in compute-0-1 compute-0-2
+  do
+	  s=1
+	  lastSrc=${src}
+	  (( lastSrc = ${lastSrc} + 1))
+	  while [ $s -ne ${lastSrc} ]
+	  do
+
+	    j=1
+	    lastCh=${ch}
+	    (( lastCh = ${lastCh} + 1))
+
+	    while [ $j -ne ${lastCh} ]
+	    do
+	      echo "          <channel source=\"Source.${compute}_${s}\" name=\"Channel_${j}\" dataType=\"double\" reqMode=\"${reqMode}\" timeout=\"${timeout}\" pollInterval=\"${pollInterval}\"/>"
+	      (( j=$j + 1 ))
+	    done
+	    (( s=$s + 1 ))
+	  done
+  done
+  echo "      </server>"
+  echo "    </orbParams>"
+  echo "  </mainChannels>"
+  echo "</sink>"
+  (( i=$i + 1 ))
+done
+echo "</SinkConfig>"

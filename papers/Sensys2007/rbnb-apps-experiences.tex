@@ -1,0 +1,26 @@
+\section{Applications and Real-world deployment experiences} \label{sec:rbnb-apps-experiences}
+
+In this section, we present some selected experiences in deploying the DataTurbine for observing systems. 
+
+\subsection{Earthquake engineering experiment}
+Variations in the configuration of RBNB servers and RBNB clients are simple to implement. It is just a matter of making the desired connections at the start of the experiment. For example, % in an 
+for an experiment on the stresses caused by earthquakes, collaborating scientists
+%the University of California, Los Angeles (UCLA) 
+instrumented a building  damaged in the Northridge earthquake.  
+
+The experiment consisted of 16 channel DAQ card, being used in differential mode to yield 8 channels. These were 4-way multiplexed to read 32 strain gages using a sample-and-hold buffer in the SCXI chassis. There were three separate such systems, for a total of 96 channels of strain gage data. In addition, there were a number of accelerometers connected to Quanterra Q330 dataloggers via Antelope ~\cite{BRTT}. We wrote an adapter to communicate with the Antelope system and retrieve the data for insertion into DataTurbine.
+
+In this collaborative experiment the field site was equipped with a satellite uplink and the goal was to stream data and video to a large number of clients. The satellite link was 1.5Mbps, therefore we need to send exactly one copy across that link. To solve this, we used the 'parent-child' routing feature of the DataTurbine, where the 'parent' resided on a server on-campus and the child was on a Linux server onsite. Data was streamed to the child machine, went across the satellite link via the routing, and the clients all connected to the parent on campus. This avoided saturating the satellite link, see Figure~\ref{fig:ucla-arch}) for a schematic. Remote users could view data via the turbine on campus without affecting the onsite RBNB server.
+
+\input{Telepresence}
+
+\subsection{NEON Single-String Diagnostic Testbed}
+
+To validate various aspects of the NEON architecture with working prototypes, 
+NEON Single-String Diagnostic Testbed (SSTB) activity was initiated. Please 
+refer to the single-string diagnostic testbed document for further details on
+deployment experience.
+
+% \input{neon-sst}
+
+

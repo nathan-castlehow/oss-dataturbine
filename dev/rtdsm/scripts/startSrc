@@ -1,0 +1,3 @@
+#!/bin/sh
+scriptDir=/home/vinkolar/work/rtdsm/scripts
+nohup $scriptDir/runSampleLakeSrc 2>srcErr 1>srcOut &

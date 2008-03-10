@@ -1,0 +1,6 @@
+This is a stripped down version of the old nsds_driver code, now just
+building a library that is used by fake_daq. For the full version of the 
+code, please see http://neesforge.nees.org/
+
+Paul Hubbard
+March 2006

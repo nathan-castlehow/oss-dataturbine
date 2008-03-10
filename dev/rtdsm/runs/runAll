@@ -1,0 +1,97 @@
+#1-src 1ch 1-sink
+scriptDir=/home/vinkolar/work/rtdsm/scripts
+srcs=`cat srcsfile`
+initChannels=`cat channelfile`
+sinks=`cat sinksfile`
+sleepTimes=`cat srcSleepTimefile`
+takes=`cat takefile`
+runtime=20s
+
+for take in ${takes}
+do
+
+  if [ -f statsfile.${take} ]
+  then
+  	rm statsfile.${take}
+  fi
+
+  for src in ${srcs}
+  do
+
+    if [ -f channelfile.${src} ]
+    then
+      channels=`cat channelfile.${src}`
+    else
+      channels=${initChannels}
+    fi
+
+    for ch in ${channels}
+    do
+      . ./gen.SrcConfig > srcConfig.${src}src.${ch}ch.xml
+      for sink in ${sinks}
+      do
+
+				. ./gen.SinkConfig > sinkConfig.${src}src.${ch}ch.${sink}sink.xml
+				for sleepTime in ${sleepTimes}
+				do
+
+					# REstart server before every run
+					/home/vinkolar/myopt/RBNB/V2.6B3/bin/Start_Webserver.sh 1> apache.out.${src}src.${ch}ch.${sink}sink.out 2> apache.err.${src}src.${ch}ch.${sink}sink.err &
+					sleep 5 
+					java -jar /home/vinkolar/myopt/RBNB/V2.6B3/bin/rbnb.jar 1> server.out.${src}src.${ch}ch.${sink}sink.out 2> server.err.${src}src.${ch}ch.${sink}sink.err &
+					sleep 5 
+					serverPid=`ps -ef | grep rbnb.jar | grep vinkolar |  grep -v grep | sed "s/[ \t][ \t]*/ /g" | cut -f 2 -d" "`
+					apachePid=`ps -ef | grep ClassLoaderLogManager | grep vinkolar |  grep -v grep | sed "s/[ \t][ \t]*/ /g" | cut -f 2 -d" "`
+					i=1
+					last=${sink}
+					(( last = $last + 1))
+					while [ $i -ne $last ]
+					do
+
+						# Start all the sinks
+						${scriptDir}/runSink sinkConfig.${src}src.${ch}ch.${sink}sink.xml Sink_${i} 1> sinkOut.take.${take}.${i}.${src}src.${ch}ch.${sleepTime}.${sink}sink 2>sinkErr.take.${take}.${i}.${src}src.${ch}ch.${sink}sink.${sleepTime} &
+						(( i=$i + 1 ))
+					done # while
+          sleep 5
+
+					sinkPids=`ps -ef | grep DswSinkStub | grep -v grep | sed "s/[ \t][ \t]*/ /g" | cut -f 2 -d" "`
+
+					${scriptDir}/runSource srcConfig.${src}src.${ch}ch.xml ${sleepTime} 1>srcOut.take.${take}.${src}src.${ch}ch.${sleepTime}.${sink}sink 2>srcErr.take.${take}.${src}src.${ch}ch.${sink}sink.${sleepTime} &
+					srcPid=`ps -ef | grep MultipleSources | grep -v grep | sed "s/[ \t][ \t]*/ /g" | cut -f 2 -d" "`
+					## echo "${srcPid}" >> pidfile
+					## echo "${sinkPids}" >>pidfile
+
+					sleep ${runtime}
+
+					kill -9 ${srcPid}
+					sleep 5
+					kill -9 ${sinkPids}
+					sleep 5
+					kill -9 ${serverPid}
+					sleep 5
+					/home/vinkolar/myopt/RBNB/V2.6B3/bin/Stop_Webserver.sh 1> apache.stop.out.${src}src.${ch}ch.${sink}sink.out 2> apache.stop.err.${src}src.${ch}ch.${sink}sink.err &
+					sleep 5
+					kill -9 ${apachePid}
+					rm -rf Source_*_1
+
+					srcSent=`grep Sent srcOut.take.${take}.${src}src.${ch}ch.${sleepTime}.${sink}sink  | wc -l`
+
+					i=1
+					last=${sink}
+					(( last = $last + 1))
+					recvdStr=""
+
+					while [ $i -ne $last ]
+					do
+						rcvd=`grep Received sinkOut.take.${take}.${i}.${src}src.${ch}ch.${sleepTime}.${sink}sink  | wc -l`
+						recvdStr="${recvdStr} ${rcvd}"
+						(( i=$i + 1 ))
+					done # while
+
+					echo "${src} ${ch} ${sleepTime} ${sink} ${srcSent}${recvdStr}" >> statsfile.${take}
+					sleep 10
+				done # sleeptime
+      done # sink
+    done #ch
+  done # src
+done # take

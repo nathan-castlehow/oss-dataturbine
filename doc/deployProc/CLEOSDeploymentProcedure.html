@@ -1,0 +1,615 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <meta content="text/html; charset=ISO-8859-1"
+ http-equiv="content-type">
+  <title>CLEOS Streaming Data Deployment Procedure</title>
+</head>
+<body>
+<span style="font-weight: bold;">Procedure for Deploying a Sensor
+Array, DataLogger, and
+DataTurbine Middleware</span><br>
+Lawrence J. Miller, Senior Developer, UC San Diego<br>
+Paul F. Hubbard, Senior Developer, UC San Diego<br>
+<br>
+<span style="font-weight: bold;">Overview</span><br>
+This document is intended to explain how to deploy a streaming data
+system based on RBNB DataTurbine and software from CLEOS. The focus is
+on the field station end, i.e. sensors, datalogger and local server.<br>
+Upon successful completion, real-time data streams from an array of
+sensors into a DataTurbine ring buffer will be established.<br>
+Examples from a deployment that was completed at the Santa Margarita
+Ecological Reserve by CLEOS are in the examples section at the end of
+this document.<br>
+<br>
+<span style="font-weight: bold;">Site Prerequisites</span><br>
+1. Power - there will have to be an infrastructure to provide power to
+the datalogger and to sensors in the field. Also consider power
+conditioning (transients such as lightning) and possibly battery backup
+power such as UPS, depending on site conditions and reliability
+requirements.<br>
+2. Local communications link - the datalogger must be able to
+communicate with DataTurbine server&nbsp; the via some digital
+communications interface, such as 802 ethernet, 80211 wirekless,&nbsp;
+or RS-232 serial. <br>
+3. Adaptations to physical environment - this aspect is the most
+situation-specific. The only point that can be said to be generally
+true is that sensitive electronics like the PoP computer system and the
+datalogger will need to be protected from environmental exposure.
+Sensors will have requirements on their positioning that may require
+physical adaptation.<br>
+<br>
+<img src="svrRackHPWREN.jpg" alt=""><br>
+&nbsp;
+Figure 2 - Networking Link Infrastructure as exists at Santa Margarita<br>
+<br>
+<span style="font-weight: bold;">Materials</span><br>
+&nbsp;&nbsp; &nbsp;Here are the materials required to reproduce the
+deployment. The following categories will be common to most deployments:<br>
+1. Sensors - ensure that power requirements are feasible and that the
+communications interface is supported by the datalogger. Examples of
+common communications interfaces are TCP/IP, RS-232, and SDI-12.<br>
+2. Datalogger - a device that can acquire data from the chosen sensors
+and then forward this data stream to the PoP server via a digital
+communications interface, such as RS-232 or TCP/IP.<br>
+3. Environmental adaptation - construction required to adequately
+secure deployed equipment from any possible environmental detriment.
+Common examples of environmental adaptations are outdoor enclosures for
+electronic equipment and rugged mounting to poles and masts.<br>
+4. Hardware and wiring - it is important that such materials are
+planned for before going into the field. Furthermore, construct as much
+of the deployment as possible on the bench.<br>
+5. Point of Presence (PoP) computer system - variants of the UNIX
+operating system are recommended. In general, the more memory the
+better and adequate disk to accommodate at least twice the expected
+quantity of data to be stored in the DataTurbine ring buffer. Note that
+it is often better to place the computer physically separate from the
+datalogger, preferably indoors, as few machines are designed for the
+environmental extremes that exist in an enclosure.<br>
+<br>
+&nbsp;<img src="enclosure.jpg" alt=""><br>
+Figure 3 &#8211; Installed and wired enclosure at Santa Margarita<br>
+<br>
+<span style="font-weight: bold;">PoP Software Requirements</span><br>
+DataTurbine and its applications are Java programs and run on any
+operating system with a Java virtual machine (JVM). They&#8217;ve been tested
+on Microsoft Windows, Linux, OSX, and Solaris.<br>
+<br>
+The POP node also should have<br>
+1. Software that enables remote login (SSH, RDC, VNC,&nbsp; Citrix, etc)<br>
+2. Java virtual machine in which to run DataTurbine and applications<br>
+3. Latest DataTurbine. See this link for installation instructions:
+http://dataturbine.org/content/how-deploy-rbnb<br>
+4. DataTurbine source program specific to the communication protocol of
+the datalogger being used.<br>
+5. Environment variables:<br>
+a. Set Java CLASSPATH to include RBNB_HOME/bin/rbnb.jar<br>
+b. Set&nbsp; RBNB_HOME to have the value of the DataTurbine
+installation root. <br>
+c. Add the entry $RBNB_HOME/bin/rbnb.jar to the Java CLASSPATH in any
+environments in which DataTurbine and related DAQ programs are to be
+used.<br>
+6. Configuring the PoP hardware:<br>
+a. Auto-start when powered up, so that if site power is interrupted it
+will boot without human intervention<br>
+7. DataTurbine Source Program(s) for data acquisition (DAQ)<br>
+<br>
+Bench-test operational validation of integrated system<br>
+The motivation for this section is to try the integrated system at the
+bench. &#8220;Test what you fly, and fly what you test,&#8221; as NASA puts it.<br>
+<br>
+1. Assembly - assemble all components as completely and as
+representative of the actual field deployment as possible<br>
+2. Configure a PoP as specified above<br>
+3. Have all networking between the datalogger and the PoP and the PoP
+and clients routed over the Wide-Area Network (WAN) in order to
+represent deployment operation. If that&#8217;s not possible, consider
+simulating WAN conditions with a bench-deployed network simulator such
+as http://linux-net.osdl.org/index.php/Netem<br>
+4. Verify end-to-end data flow over the network and troubleshoot, as
+appropriate, at each step:<br>
+a. Sensors -&gt; cRIO -&gt; DataTurbine -&gt; DataTurbine client
+application program<br>
+<br>
+The system is operationally validated by this end-to-end data flow<br>
+<br>
+<span style="font-weight: bold;">Installation qualification</span><br>
+&nbsp;&nbsp; &nbsp;The purpose of this step is to verify that
+installation results in a system that is functional enough to be
+operated remotely.<br>
+1. Physically mount enclosure - ensure that all fittings are secure and
+that the equipment is solidly attached.<br>
+2. Weatherproof - ensure that there are no external air spaces and that
+all bulkheads (e.g. the screw pressure cable fittings) are tight.<br>
+3. Mount sensors<br>
+4. Plug in to power and network - verify that the datalogger powers up
+and can be reached on the network by using the ping or traceroute
+programs, for example. Also validate that whatever TCP ports you&#8217;re
+using are up and working, e.g. &#8216;telnet datalogger {port}&#8217;<br>
+5. Secure the enclosure with a lock and give a key to the site engineer<br>
+6. Setup PoP in machine room - connect to power and network<br>
+<br>
+&nbsp;<img src="macMiniPoP.jpg" alt=""><br>
+Figure 4 - Point of Presence DataTurbine Server at Santa Margarita<br>
+<br>
+<span style="font-weight: bold;">Operational qualification</span><br>
+The purpose of this step to verify that the integrated and installed
+system functions to stream real-time data from end to end and that the
+system is maintainable.<br>
+1. Verify that all network components can communicate on the local area
+network. <br>
+2. Verify that all network components are reachable from the wide-area
+network.<br>
+3. Verify that remote software interaction with the PoP function
+properly<br>
+<br>
+The deployment is qualified for operation if the real-time data stream
+can be accessed by a DataTurbine client from a host system on the
+wide-area network and its possible to administer the system remotely.<br>
+<br>
+&nbsp;<img src="pBryant.jpg" alt=""><br>
+Figure 5 - On-Site Network Communication Verification<br>
+<br>
+<span style="font-weight: bold;">Performance Qualification</span><br>
+&nbsp;&nbsp; &nbsp;Verify that the system will perform as required for
+the expected operating environment. Some examples of this could be:<br>
+1. "sanity checking" of data streams - verify that the data values make
+sense in order to validate proper functioning of the sensors and
+datalogger<br>
+2. Loss of communications - verify that the system can recover from
+interruptions in its internal communications via remote interaction
+once communications are restored.<br>
+3. Loss of power - verify that the system can recover from
+interruptions in power supply via remote interaction,once power is
+restored.<br>
+<br>
+&nbsp;
+<img src="nStationComputers.jpg" alt=""><br>
+Figure 6 - WAN Communication Verification<br>
+<br>
+Open Issues<br>
+&nbsp;&nbsp; &nbsp;Describe aspects of the currently deployed system
+that could potentially effect system operation or performance. Also
+describe the status of efforts to address these issues.<br>
+<br>
+Additional Notes<br>
+&nbsp;&nbsp; &nbsp;List additional comments that important to this
+record; especially with regard to reproducibility.<br>
+<br>
+<table style="width: 100%; text-align: left;" border="1" cellpadding="2"
+ cellspacing="2">
+  <tbody>
+    <tr style="font-weight: bold;">
+      <td colspan="3" rowspan="1" style="vertical-align: top;">Deployment
+Summary Checklist for
+Site:</td>
+    </tr>
+    <tr>
+      <td colspan="3" rowspan="1" style="vertical-align: top;">Indicate
+the date when each step was checked off and provide detail of
+each item in the space provided</td>
+    </tr>
+    <tr style="font-weight: bold;">
+      <td colspan="3" rowspan="1" style="vertical-align: top;">Site
+Prerequisites</td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top; width: 100px;"><br>
+      </td>
+      <td style="vertical-align: top; width: 300px;">power</td>
+      <td style="vertical-align: top;"><br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top; width: 100px;"><br>
+      </td>
+      <td style="vertical-align: top; width: 300px;">local
+communications link</td>
+      <td style="vertical-align: top;"><br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top; width: 100px;"><br>
+      </td>
+      <td style="vertical-align: top; width: 300px;">adaptations to
+physical environment</td>
+      <td style="vertical-align: top;"><br>
+      </td>
+    </tr>
+    <tr style="font-weight: bold;">
+      <td colspan="3" rowspan="1"
+ style="vertical-align: top; width: 100px;">Materials</td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top; width: 100px;"><br>
+      </td>
+      <td style="vertical-align: top;">sensors</td>
+      <td style="vertical-align: top;"><br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top; width: 100px;"><br>
+      </td>
+      <td style="vertical-align: top;">datalogger</td>
+      <td style="vertical-align: top;"><br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top; width: 100px;"><br>
+      </td>
+      <td style="vertical-align: top;">environmental adaptation</td>
+      <td style="vertical-align: top;"><br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top; width: 100px;"><br>
+      </td>
+      <td style="vertical-align: top;">hardware and wiring</td>
+      <td style="vertical-align: top;"><br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;"><br>
+      </td>
+      <td style="vertical-align: top;">Point of Presence (PoP) computer
+system </td>
+      <td style="vertical-align: top;"><br>
+      </td>
+    </tr>
+    <tr style="font-weight: bold;">
+      <td colspan="3" rowspan="1" style="vertical-align: top;">PoP
+software</td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;"><br>
+      </td>
+      <td style="vertical-align: top; width: 300px;">remote login
+software<br>
+      </td>
+      <td style="vertical-align: top;"><br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;"><br>
+      </td>
+      <td style="vertical-align: top; width: 300px;">Java Runtime
+Environment</td>
+      <td style="vertical-align: top;"><br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;"><br>
+      </td>
+      <td style="vertical-align: top; width: 300px;">DataTurbine</td>
+      <td style="vertical-align: top;"><br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;"><br>
+      </td>
+      <td style="vertical-align: top; width: 300px;">DataTurbine source
+program</td>
+      <td style="vertical-align: top;"><br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;"><br>
+      </td>
+      <td style="vertical-align: top; width: 300px;">configure to
+recover into a functional state from
+power cycling </td>
+      <td style="vertical-align: top;"><br>
+      </td>
+    </tr>
+    <tr style="font-weight: bold;">
+      <td colspan="3" rowspan="1" style="vertical-align: top;">Bench-test
+Operational Validation of Integrated System</td>
+    </tr>
+    <tr>
+      <td colspan="3" rowspan="1"
+ style="height: 100px; vertical-align: top;"><br>
+      <br>
+      <br>
+      </td>
+    </tr>
+    <tr style="font-weight: bold;">
+      <td colspan="3" rowspan="1" style="vertical-align: top;">Installation
+Qualification</td>
+    </tr>
+    <tr>
+      <td colspan="3" rowspan="1"
+ style="height: 100px; vertical-align: top;"><br>
+      <br>
+      <br>
+      </td>
+    </tr>
+    <tr>
+      <td colspan="3" rowspan="1" style="vertical-align: top;"><span
+ style="font-weight: bold;">Operational
+Qualification</span> </td>
+    </tr>
+    <tr>
+      <td colspan="3" rowspan="1"
+ style="height: 100px; vertical-align: top;"><br>
+      <br>
+      <br>
+      </td>
+    </tr>
+    <tr style="font-weight: bold;">
+      <td colspan="3" rowspan="1" style="vertical-align: top;">Performance
+Qualification</td>
+    </tr>
+    <tr>
+      <td colspan="3" rowspan="1"
+ style="height: 100px; vertical-align: top;"><br>
+      <br>
+      <br>
+      </td>
+    </tr>
+    <tr style="font-weight: bold;">
+      <td colspan="3" rowspan="1" style="vertical-align: top;">Open
+Issues</td>
+    </tr>
+    <tr>
+      <td colspan="3" rowspan="1"
+ style="height: 100px; vertical-align: top;"><br>
+      <br>
+      <br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+<br>
+<table style="width: 100%; text-align: left;" border="1" cellpadding="2"
+ cellspacing="2">
+  <tbody>
+    <tr>
+      <td colspan="3" rowspan="1" style="vertical-align: top;"><span
+ style="font-weight: bold;">EXAMPLE
+Deployment
+Summary Checklist for
+Site:</span> Santa Margarita Ecological Reserve<br>
+      </td>
+    </tr>
+    <tr>
+      <td colspan="3" rowspan="1" style="vertical-align: top;">Indicate
+the date when each step was checked off and provide detail of
+each item in the space provided</td>
+    </tr>
+    <tr style="font-weight: bold;">
+      <td colspan="3" rowspan="1" style="vertical-align: top;">Site
+Prerequisites</td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top; width: 100px;">8/16/07<br>
+      </td>
+      <td style="vertical-align: top; width: 300px;">power</td>
+      <td style="vertical-align: top;">on-site 120 VAC ~7m away </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top; width: 100px;">8/16/07<br>
+      </td>
+      <td style="vertical-align: top; width: 300px;">local
+communications link</td>
+      <td style="vertical-align: top;">on-site access to HPWREN ~7m
+away </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top; width: 100px;">8/16/07<br>
+      </td>
+      <td style="vertical-align: top; width: 300px;">adaptations to
+physical environment</td>
+      <td style="vertical-align: top;">on-site anchored 1.5" mast </td>
+    </tr>
+    <tr style="font-weight: bold;">
+      <td colspan="3" rowspan="1"
+ style="vertical-align: top; width: 100px;">Materials</td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top; width: 100px;">n/a<br>
+      </td>
+      <td style="vertical-align: top;">sensors</td>
+      <td style="vertical-align: top;">Vaisala
+PTB-210 (analog voltage) and KXT510 (RS-232), Axis 223M network video
+camera </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top; width: 100px;">n/a<br>
+      </td>
+      <td style="vertical-align: top;">datalogger</td>
+      <td style="vertical-align: top;">National Instruments CompactRIO
+with 9205 analog voltage module<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top; width: 100px;">9/10/07<br>
+      </td>
+      <td style="vertical-align: top;">environmental adaptation</td>
+      <td style="vertical-align: top;">SMER site admin loaned CLEOS a
+Hyperlink enclosure </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top; width: 100px;">n/a<br>
+      </td>
+      <td style="vertical-align: top;">hardware and wiring</td>
+      <td style="vertical-align: top;">see additioal notes<br>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;">n/a<br>
+      </td>
+      <td style="vertical-align: top;">Point of Presence (PoP) computer
+system </td>
+      <td style="vertical-align: top;">Apple MacMini 500Mb RAM PoP
+software </td>
+    </tr>
+    <tr style="font-weight: bold;">
+      <td colspan="3" rowspan="1" style="vertical-align: top;">PoP
+software</td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;"> 9/18/07 </td>
+      <td style="vertical-align: top; width: 300px;">remote login
+software<br>
+      </td>
+      <td style="vertical-align: top;">stock OSX sshd and vnc
+server </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;"> 9/18/07 </td>
+      <td style="vertical-align: top; width: 300px;">Java Runtime
+Environment</td>
+      <td style="vertical-align: top;">stock OSX ships with Java
+1.5.0_07 </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;"> 9/18/07 </td>
+      <td style="vertical-align: top; width: 300px;">DataTurbine</td>
+      <td style="vertical-align: top;">v3.0,
+RBNB_HOME=/Applications/RBNB </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;"> 9/18/07 </td>
+      <td style="vertical-align: top; width: 300px;">DataTurbine source
+program</td>
+      <td style="vertical-align: top;">edu.sdsc.cleos.DaqToRbnb in
+cleos-apps-0.1.0.jar </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;">9/25/07<br>
+      </td>
+      <td style="vertical-align: top; width: 300px;">configure to
+recover into a functional state from
+power cycling </td>
+      <td style="vertical-align: top;"><br>
+      </td>
+    </tr>
+    <tr>
+      <td colspan="3" rowspan="1" style="vertical-align: top;"><span
+ style="font-weight: bold;">Bench-test
+Operational Validation of Integrated System</span> - 9/19/07<br>
+      </td>
+    </tr>
+    <tr>
+      <td colspan="3" rowspan="1"
+ style="height: 100px; vertical-align: top;">The LabVIEW data
+acquisition and TCP server software for the cRIO had been validated the
+previous
+week with a UCSD DataTurbine server. This was the final step once the
+MacMini was set up. A single-string was etstablished and verified using
+the RDV DataTurbine client.<br>
+      <br>
+      <br>
+      </td>
+    </tr>
+    <tr>
+      <td colspan="3" rowspan="1" style="vertical-align: top;"><span
+ style="font-weight: bold;">Installation
+Qualification</span> - 9/20/07<br>
+      </td>
+    </tr>
+    <tr>
+      <td colspan="3" rowspan="1"
+ style="height: 100px; vertical-align: top;">Once the instrument
+enclosure was mounted and connected to
+power and network, verified that the CompactRIO datalogger was on the
+network using the ping program. Once the PoP was installed at the north
+station, verified that real-time data acquisition into RBNB server
+running on the PoP was functional using RDV, a visual RBNB client.<br>
+      <br>
+      <br>
+      </td>
+    </tr>
+    <tr>
+      <td colspan="3" rowspan="1" style="vertical-align: top;"><span
+ style="font-weight: bold;">Operational
+Qualification</span> - 9/25/07<br>
+      </td>
+    </tr>
+    <tr>
+      <td colspan="3" rowspan="1"
+ style="height: 100px; vertical-align: top;">This step was completed
+upon return to UCSD. Verified that the PoP
+system could be connected to over ssh and vnc, and that the CompactRIO
+could be added as a target device in the National Instruments MAX
+software, and that LabVIEW programs could downloaded and run
+remotely. <br>
+      <br>
+      <br>
+      </td>
+    </tr>
+    <tr>
+      <td colspan="3" rowspan="1" style="vertical-align: top;"><span
+ style="font-weight: bold;">Performance
+Qualification</span> - 9/25/07<br>
+      </td>
+    </tr>
+    <tr>
+      <td colspan="3" rowspan="1"
+ style="height: 100px; vertical-align: top;">Verified that the
+temperature, barometric pressure, and
+humidity readings made sense. Parent-child route set up from the SMER
+DataTurbine server to the DataTurbine server on niagara.sdsc.edu at
+UCSD.<br>
+      <br>
+      <br>
+      </td>
+    </tr>
+    <tr style="font-weight: bold;">
+      <td colspan="3" rowspan="1" style="vertical-align: top;">Open
+Issues</td>
+    </tr>
+    <tr>
+      <td colspan="3" rowspan="1"
+ style="height: 100px; vertical-align: top;">system automatically
+resume data acquisition in the
+event of power cycle -CompactRIO must be configured to run startup VI
+and the PoP must be configured to run DataTurbine server and DAQ source
+program at statrup. <br>
+      <br>
+      <br>
+      </td>
+    </tr>
+    <tr>
+      <td colspan="3" rowspan="1" style="vertical-align: top;"><span
+ style="font-weight: bold;">Additional
+Notes</span><br>
+      </td>
+    </tr>
+    <tr>
+      <td colspan="3" rowspan="1"
+ style="height: 100px; vertical-align: top;">Hardware and Wiring<br>
+- 18 gauge copper wire was used for wiring inside the enclosure:<br>
+&nbsp;&nbsp; &nbsp;- distribute 15VDC from the power supply to the
+cRIO, WXT510, and the PTB210<br>
+&nbsp;&nbsp; &nbsp;- wire the PTB210 output voltage leads to the 9205
+cRIO module<br>
+&nbsp;&nbsp; &nbsp;- ground the cRIO chassis to the enclosure back plate<br>
+- DSUB DB-9 male connector was fitted to the RxD, TxD, and GND wires of
+the WXT510's M12 cable for a secure fit to the cRIO serial port. Power
+leads of the M12 were connected to the 15V power supply<br>
+&nbsp;- 8m outdoor extension cord was used to route line power into the
+enclosure. 3 cables, power, network (8m cat5), and M12, were routed
+into the enclosure through 3/4" holes drilled in the bottom of the
+enclosure that had screw pressure fittings<br>
+- 1.5" U-bolts were extremely useful for mounting both the enclosure
+and the WXT510 to the mounting post.<br>
+      <br>
+DataTurbine and DAQ Software<br>
+- Software applications used in this deployment were developed and
+distributed by the CLEOS group and UCSD<br>
+- CompactRIO DAQ programs (&#8220;firmware&#8221; specific to the NI CompactRIO):
+http://nladr-cvs.sdsc.edu/svn-public/CLEOS/labview/cleosRIO/<br>
+- DataTurbine source programs (DataTurbine drivers that support several
+dataloggers and devices):
+http://nladr-cvs.sdsc.edu/svn-public/CLEOS/cleos-rbnb-apps/</td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<br>
+<br>
+</body>
+</html>

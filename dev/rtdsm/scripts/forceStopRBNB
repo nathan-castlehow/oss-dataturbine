@@ -1,0 +1,13 @@
+scriptDir=/home/vinkolar/work/rtdsm/scripts
+RBNB_HOME=/home/vinkolar/myopt/RBNB/V2.6B3
+
+serverPid=`ps -ef | grep rbnb.jar | grep vinkolar |  grep -v grep | sed "s/[ \t][ \t]*/ /g" | cut -f 2 -d" "`
+apachePid=`ps -ef | grep ClassLoaderLogManager | grep vinkolar |  grep -v grep | sed "s/[ \t][ \t]*/ /g" | cut -f 2 -d" "`
+echo "Trying to stop Apache and kill RBNB webturbine.."
+echo "Apache Pid= ${apachePid}"
+echo "RBNB Webturbine Pid= ${serverPid}"
+kill -9 ${serverPid}
+/home/vinkolar/myopt/RBNB/V2.6B3/bin/Stop_Webserver.sh 1> apache.stop.out 2> apache.stop.err. &
+kill -9 ${apachePid}
+echo "Apache stop log is present in apache.stop.out / apache.stop.err"
+echo "Done."

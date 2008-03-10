@@ -1,0 +1,11 @@
+#!/bin/sh
+oldPkg=$1
+newPkg=$2
+echo "old=$oldPkg new=$newPkg"
+files=`find . -name "*.java"`
+
+for i in $files
+do
+  sed "s/$oldPkg/$newPkg/g" $i > _tmp
+  mv _tmp $i
+done

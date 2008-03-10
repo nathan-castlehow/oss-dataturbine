@@ -1,0 +1,4 @@
+#!/bin/sh
+scriptDir=/home/vinkolar/work/rtdsm/scripts
+nohup $scriptDir/runSampleLakeSink 2>sinkErr 1>sinkOut &
+nohup $scriptDir/runSampleLakeSrc 2>srcErr 1>srcOut &

@@ -1,0 +1,644 @@
+/*
+ * Created on Apr 5, 2005
+ */
+package org.nees.rbnb;
+
+import java.util.Vector;
+import java.util.Enumeration;
+import java.util.StringTokenizer;
+import java.util.Date;
+import java.util.TimeZone;
+import java.text.SimpleDateFormat;
+import java.io.BufferedReader;
+import java.io.StringReader;
+
+import org.nees.calculate.expression.Expression;
+import org.nees.calculate.numberList.NumberList;
+
+import com.rbnb.sapi.*;
+
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.Options;
+
+/**
+ * Produces an output channel whoes value is a functional computation 
+ * across input channels, For example an output channel that is computed from
+ * two input channes (c0, c1) as out = (c0 + c1) / (100.0 * (c0/(c1 + 1.0))).
+ * For the BNF of the expressions the comments at the end of the source file
+ * for this Class.
+ * 
+ * ASSMUPTIONS: 
+ * 	(1) the data channels a synchronized; that is they are closely
+ *		coupled in time and sample rate. A value on one channel will
+ *		always have a corresponding value
+ * 		on another channel with a "near by" time stamp.
+ * 	(2) the compute time, the time to process a set of block through
+ *      the calculations is shorter then the time between the arival
+ *      of blocks.
+ * 
+ * @author Terry E. Weymouth
+ */
+public class CalculateSource extends RBNBBase {
+
+	Channel[] channels = new Channel[0];
+	int[] current;
+	double[] outValue;
+	double[] outTime;
+	double[] outDuration;
+	
+	private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("MMM d, yyyy h:mm aa");
+	private static final TimeZone TZ = TimeZone.getTimeZone("GMT");
+
+	static
+	{
+		DATE_FORMAT.setTimeZone(TZ);
+	}
+
+	// defaults
+	static final String SOURCE_NAME = "Calculate";
+	static final String SOURCE_CHANNEL_NAME = "calculate";
+	static final int OUT_BLOCK_SIZE = 10;
+	static final int DEFAULT_CACHE_SIZE = 1000;
+	static final int DEFAULT_ARCHIVE_SIZE = 0;
+	
+	// parameters
+	String sourceName = SOURCE_NAME;
+	String channelName = SOURCE_CHANNEL_NAME;
+	int cacheSize = DEFAULT_CACHE_SIZE;
+	int archiveSize = DEFAULT_ARCHIVE_SIZE;
+	String channelListStr;
+	String[] channelList;
+	String inputExpression;
+	
+	static final long TEN_SECONDS = 10000;
+	int outBlockSize = OUT_BLOCK_SIZE;
+	int outIndex = 0;
+	
+	Source calc;
+	
+	Expression parseTree = null;
+	
+	boolean hostConnected = false;
+
+	Thread mainThread;
+	
+	public static void main(String[] args) {
+		CalculateSource c = new CalculateSource();
+		if (c.parseArgs(args))
+		{
+			try
+			{
+				c.exec();
+			} catch (Throwable t)
+			{
+				errorTrace("Argh...");
+				t.printStackTrace();
+			}
+		}
+	}
+	
+    protected String getCVSVersionString()
+    {
+        return
+            "  CVS information... \n" +
+            "  $Revision: 185 $\n" +
+            "  $Date: 2007-10-15 17:13:15 -0700 (Mon, 15 Oct 2007) $\n" +
+            "  $RCSfile: CalculateSource.java,v $ \n";
+    }
+
+	private static void errorTrace(String s){System.out.println(s);}
+	private static void debugTrace(String s){//System.out.println(s);
+    }
+		
+	/* (non-Javadoc)
+	 * @see org.nees.rbnb.RBNBBase#setOptions()
+	 */
+	protected Options setOptions() {
+		Options opt = setBaseOptions(new Options()); // uses h, s, p
+		opt.addOption("S",true,"source name *" + SOURCE_NAME);
+		opt.addOption("C",true,"source channel name *" + SOURCE_CHANNEL_NAME);
+		opt.addOption("a",true,"arguments: lsit of sink channel paths (required)");
+		opt.addOption("x",true,"expresion (required)");
+		opt.addOption("z",true,"cache size *" + DEFAULT_CACHE_SIZE);
+		opt.addOption("Z",true,"archive size *" + DEFAULT_ARCHIVE_SIZE);
+		return opt;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.nees.rbnb.RBNBBase#setArgs(org.apache.commons.cli.CommandLine)
+	 */
+	protected boolean setArgs(CommandLine cmd)
+	{
+		if (!cmd.hasOption('a'))
+		{
+			errorTrace("The list of sink channel path names is required " +
+				"(command line arg a)");
+			printUsage();
+			return false;
+		}
+		
+		if (!cmd.hasOption('x'))
+		{
+			errorTrace("expression for computation is required " +
+				"(command line arg x)");
+			printUsage();
+			return false;
+		}
+		
+		if (!setBaseArgs(cmd)) return false; // h, s, p
+
+		if (cmd.hasOption('a')) {
+			String a=cmd.getOptionValue('a');
+			if (a!=null) channelListStr=a;
+		}
+		if (cmd.hasOption('x')) {
+			String a=cmd.getOptionValue('x');
+			if (a!=null) inputExpression=a;
+		}
+		if (cmd.hasOption('S')) {
+			String a=cmd.getOptionValue('S');
+			if (a!=null) sourceName=a;
+		}
+		if (cmd.hasOption('C')) {
+			String a=cmd.getOptionValue('C');
+			if (a!=null) channelName=a;
+		}
+		if (cmd.hasOption('Z')) {
+			String a=cmd.getOptionValue('Z');
+			if (a!=null)
+			try
+			{
+				cacheSize = Integer.parseInt(a);
+			}
+			catch (Exception ignore) {} 
+		}
+		if (cmd.hasOption('z')) {
+			String a=cmd.getOptionValue('z');
+			if (a!=null)
+			try
+			{
+				archiveSize = Integer.parseInt(a);
+			}
+			catch (Exception ignore) {} 
+		}
+		
+        if ((archiveSize > 0) && (archiveSize < cacheSize)){
+            System.err.println(
+                "a non-zero archiveSize = " + archiveSize + " must be greater then " +
+                    "or equal to cacheSize = " + cacheSize);
+            return false;
+        }
+
+		StringTokenizer st = new StringTokenizer(channelListStr);
+		Vector v = new Vector();
+		while (st.hasMoreTokens()) v.addElement(st.nextElement());
+		if (v.size() == 0)
+		{
+			errorTrace("No expression channels in list of channel paths\n" +
+				"  " + channelListStr);
+			return false;
+		}
+		
+		channelList = new String [v.size()];
+		for (int i = 0; i < v.size(); i++)
+			channelList[i] = ((String)v.elementAt(i)).trim();
+		
+		outValue = new double[outBlockSize];
+		outTime = new double[outBlockSize];
+		outDuration  = new double[outBlockSize];		
+
+		System.out.println("Starting ComputeSource on " + getServer() +
+			": source name = " + sourceName + "channel name = " + channelName);
+		System.out.println("  computing expression = " + inputExpression);
+		System.out.print  ("  over input channel(s) : " + channelList[0]);
+				for (int i = 1; i < v.size(); i++)
+					System.out.print(", " + channelList[i]);
+				System.out.println();
+		System.out.println("  cache size = " + cacheSize + " archive size = " + archiveSize);
+		System.out.println("  Use ComputeSource -h to parameter list");
+		
+		return true;
+	}
+	
+	private void exec() throws Exception
+	{
+		try { // get an expression tree
+			debugTrace("Expression = " + inputExpression);
+			parseTree = new Expression(
+				new java.io.BufferedReader(
+					new java.io.StringReader(inputExpression) ));
+			parseTree.setup();
+			debugTrace("Expression parse tree...");
+			parseTree.printTree();
+		} catch (Exception pe)
+		{
+			errorTrace("Parse of expression failed:");
+			pe.printStackTrace();
+			return;
+		}
+		
+		// set channels 
+		setChannels(channelListStr);
+		boolean[] expressionChannels = parseTree.getChannelList();
+		if (channels.length < expressionChannels.length)
+		{
+			errorTrace("The expression refers to undefined " +
+				"channel(s). Processing halted.");
+			return;
+		}
+		
+		boolean goodToGo = connectHost();
+		for (int i = 0; i < channels.length; i++)
+		{
+			goodToGo = goodToGo && channels[i].isOpen();
+		}
+		if (goodToGo)
+			debugTrace("All sinks and the source are connected.");
+		else
+			errorTrace("What the... ");
+		if (!goodToGo) return;
+		mainThread = Thread.currentThread();
+		for (int i = 0; i < channels.length; i++)
+		{
+			channels[i].startThread();
+		}
+		boolean all;
+		while (isOutputConnected())
+		{
+			all = true;
+			for (int i = 0; i < channels.length; i++)
+			{
+				if (channels[i].isRunning())
+				{
+					if (!channels[i].isTriggered())
+						all = false;
+				}
+				else
+				{
+					errorTrace("Channel " + i + ": is not running.");
+					return;
+				}
+			} // for all channels
+//			debugTrace("all = " + all);
+			if (!all)
+			{
+//				errorTrace("Sleeping...");
+				try {
+					Thread.sleep(TEN_SECONDS);
+//					debugTrace("Done with sleep");
+				} catch (InterruptedException e) {
+//					debugTrace("interupt");
+				}
+//				debugTrace("Done with sleep.");
+			}
+			else // all channels are triggered
+			{
+				debugTrace("Computing a new value...");
+				process();
+			} // if all channels are triggered
+//			debugTrace("Back to top");
+		} // while
+	}
+
+	private void setChannels(String channelList)
+	{
+		// channelList is a comma seperated list of channel names
+		// leading and trialing blanks are stripped from each name
+
+		String name;
+		Vector chs = new Vector();
+		
+		StringTokenizer st = new StringTokenizer(channelList,",");
+		int n = 0;
+		while (st.hasMoreTokens())
+		{
+			name = st.nextToken();
+			while (name.startsWith(" ") && (name.length() > 1))
+				name = name.substring(1);
+			while (name.endsWith(" ") && (name.length() > 1))
+				name = name.substring(0,name.length()-1);
+			if (name.equals(" ")) continue;
+			chs.addElement(
+				new Channel("CalculatorSink" + ((n > 9)?("" + n):("0" + n)),
+					name));
+			n++;
+		}
+		channels = (Channel[])chs.toArray(new Channel[chs.size()]);
+		current = new int[channels.length];
+		for (int i = 0; i < channels.length; i++)
+		{
+			current[i] = 0;
+			Channel c = channels[i];
+			debugTrace(" channel " + i + ": Sink name = " + c.sinkName +
+				", Source path = " + c.sourcePath);
+		}
+	}
+	
+	private boolean connectHost()
+	{
+		if (isOutputConnected())
+		{
+			if (calc != null)
+			{
+				if (calc.VerifyConnection()) return hostConnected;
+				calc.CloseRBNBConnection();
+				calc = null;
+			}
+			hostConnected = false;
+		}
+		try {
+            // Create a source and connect:
+            if (archiveSize > 0)
+                calc = new Source(cacheSize, "create", archiveSize);
+            else
+                calc = new Source(cacheSize, "none", 0);
+			calc.OpenRBNBConnection(getServer(),sourceName);
+			hostConnected = true;
+			debugTrace("CalculateSource: Connection made to server = "
+				+ getServer() + " as " + sourceName + ".");
+		} catch (SAPIException se) { se.printStackTrace(); }
+		return hostConnected;		
+	}
+	
+	private void disconnectHost()
+	{
+		calc.CloseRBNBConnection();
+		hostConnected = false;
+	}
+	
+	private boolean isOutputConnected() {
+		if (hostConnected) return true;
+		if (calc == null)
+			return (hostConnected = false);
+		if (!calc.VerifyConnection())
+			return (hostConnected = false);
+		return hostConnected;
+	}
+
+	private void process() throws Exception
+	{
+		boolean goodToGo = true;
+		double values[] = new double[channels.length];
+		double times[] = new double[channels.length];
+		double result = 0.0;
+		double startTime, endTime;
+
+// debugTrace("In Process...");
+		while (goodToGo)
+		{
+			// get current values
+			for (int i = 0; i < channels.length; i++)
+			{
+				values[i] = channels[i].values[current[i]];
+				times[i] = channels[i].times[current[i]];
+				current[i]++;
+				if (current[i] >= channels[i].values.length)
+				{
+					// debugTrace("Exhausted channel " + i);
+					channels[i].reset();
+					current[i] = 0;
+					goodToGo = false;
+				}
+			}
+
+			// compute result value
+			result = compute(values);
+
+			// compute result time
+			startTime = endTime = times[0];
+			for (int i = 1; i < channels.length; i++)
+			{
+				if (startTime > times[i]) startTime = times[i];
+				if (endTime < times[i]) endTime = times[i];
+			}
+
+			// pack result time/value
+			outValue[outIndex] = result;
+			outTime[outIndex] = startTime;
+			outDuration[outIndex] = endTime - startTime;
+			long unixTime = (long)(startTime * 1000.0); // convert sec to millisec
+			String time = DATE_FORMAT.format(new Date(unixTime));
+// debugTrace("Output " + outIndex + ": data = " + result + " time = " + time);
+			outIndex++;
+			if (outIndex >= outBlockSize)
+			{
+				outIndex = 0;
+				post();
+			}
+		} // while good to go
+	} // process
+	
+	private double compute(double[] values)
+	throws Exception
+	{
+		parseTree.setValues(values);
+		return parseTree.eval();
+	} // compute
+	
+	private void post()
+	{
+		double duration =
+			outTime[outBlockSize-1] + outDuration[outBlockSize-1] - outTime[0]; 
+		try {
+			ChannelMap outMap = new ChannelMap();
+			int index = outMap.Add(sourceName);
+			outMap.PutTime(outTime[0],duration);
+			outMap.PutTimes(outTime);
+			outMap.PutDataAsFloat64(index,outValue);
+			calc.Flush(outMap);
+			// debugTrace("Posted.");
+		} catch (SAPIException e) {
+			e.printStackTrace();
+			errorTrace("CalculateSource: post to " + sourceName + " failed." +
+				" Disconnecting.");
+			disconnectHost();
+		}
+
+	}
+	
+	private class Channel
+	{
+		private boolean connected = false;
+		private String sinkName = "";
+		private String sourcePath = "";
+		private Sink sink = new Sink();
+		private boolean triggered = false;
+		private ChannelMap cMap;
+		private int cMapIndex;
+		private double[] times;
+		private double[] values;
+		
+		boolean runit = false;
+		Thread dataThread = null;
+		
+		Channel(String name, String path)
+		{
+			sinkName = name;
+			sourcePath = path;
+		}
+				
+		private boolean isOpen()
+		{
+			return (connected = (isOutputConnected() && connectSink()));
+		}
+
+		private boolean connectSink()
+		{
+			try {
+				// Create a sink and connect:
+				sink.OpenRBNBConnection(getServer(),sinkName);
+				connected = true;
+				debugTrace(sinkName + ": Connected to server = "
+					+ getServer() + " as " + sinkName + ".");
+			} catch (SAPIException e)
+			{
+				e.printStackTrace();
+				errorTrace(sinkName = ": connection failed.");
+			}
+			if (connected)
+			{
+				subscribe();
+			}
+			return connected;
+		}
+		
+		private void disconnectSink()
+		{
+			sink.CloseRBNBConnection();
+			connected = false;
+		}
+
+		private boolean subscribe()
+		{
+			try {
+				cMap = new ChannelMap();
+				cMapIndex = cMap.Add(sourcePath);
+				sink.Subscribe(cMap);
+			} catch (SAPIException e)
+			{
+				e.printStackTrace();
+				errorTrace(sinkName + ": subscribe failed. Disconnecting.");
+				disconnectSink();
+			}
+			return connected;
+		}
+
+		public void startThread()
+		{
+			if (!connected) return;
+		
+			// Use this inner class to hide the public run method
+			Runnable r = new Runnable() {
+				public void run() {
+				  runWork();
+				}
+			};
+			runit = true;
+			dataThread = new Thread(r, "Listen" + sinkName);
+			dataThread.start();
+			// debugTrace( sinkName + ": Started thread.");
+		}
+
+		public void stopThread()
+		{
+			runit = false;
+			dataThread.interrupt();
+			debugTrace(sinkName + ": Stopped thread.");
+		}
+	
+		private void runWork ()
+		{
+			try {
+				while(isRunning())
+				{
+					ChannelMap m = sink.Fetch(-1,cMap);
+					if (!triggered)
+					{
+						values = m.GetDataAsFloat64(cMapIndex);
+						times = m.GetTimes(cMapIndex);
+						trigger();
+					}
+//					else
+//						errorTrace(sinkName + ": overflow!");
+				}
+			} catch (SAPIException se) {
+				se.printStackTrace();
+				errorTrace(sinkName + ": Fetch failed. Disconnecting.");
+				disconnectSink();
+				runit = false;
+			}
+			dataThread = null;
+		}
+		
+		private void trigger() {
+			debugTrace("Triggered channel = " + sinkName);
+			triggered = true;
+			if (mainThread != null)
+				mainThread.interrupt();
+		}
+		
+		public void reset()
+		{
+			triggered = false;
+		}
+			
+		public boolean isTriggered()
+		{
+			return triggered;
+		}
+		
+		public boolean isRunning()
+		{
+			return (connected && runit);
+		}
+		
+	}
+}
+
+/************************************************************************
+ * 
+ * Full BNF for the expressions recognized by the parser
+ * 
+ * NOTE: in the BNF, below, a <channelIndex> is the, zero-based, index
+ * of the channel in the list of channels given as an argument to this
+ * application.
+ * 
+ * <ChannelID> ::= 'c'<channelIndex>
+ * <NumberDigits> ::= <digit> | <NumberDigit><diget>
+ * <DecimalFraction> ::= '.'<NumberDigits>
+ * <DecimalNumber> ::= <NumberDigits> | <NumberDigits><DecimalFraction>
+ * <Constants> ::= 'pi' | 'e'
+ * <AddingOperator> ::= '+' | '-'
+ * <MultiplyingOperator> ::= '*' | '/'
+ * <Primary> ::= <DecimalNumber> | '-'<DecimalNumber> | <ChannelID> |
+ *    (<Expression>) 
+ * <Factor> ::= <Primary> | <Factor> '^' <Primary>
+ * <Term> ::= <Factor> | <Term> <MultiplyingOperator> <Factor>
+ * <SimpleArithmetic> ::= <Term> |
+ *   <SimpleArithmetic> <AddingOperator> <Term> 
+ * <Expression> ::= <SimpleArithmetic> |
+ *   <BooleanExpression> '?' <Expression> ':' <Expression>
+ * <LogicalValue> ::= 'T' | 'F'
+ * <BooleanPrimary>::= <LogicalValue> | (<BooleanExpression>)
+ * <BooleanSecondary> ::= <BooleanPrimary> | '~'<BooleanPrimary>
+ * <BooleanFactor> ::= <BooleanSecondary> |
+ *   <BooleanFactor> '||' <BooleanSecondary> 
+ * <BooleanTerm> ::= <BooleanFactor> | <BooleanTerm> '&&' <BooleanFactor>
+ * <ComparisonOperator> ::= '==' | '!=' | '>' | '<' | '>=' | '<='
+ * <BooleanExpression> ::= <BooleanTerm> | 
+ *   <Expresssion> <ComparisonOperator> <Expression>
+ * <Parameter> ::= <Expression>
+ * <ParameterList> ::= <Parameter> | <ParameterList> ',' <Parameter>
+ * <ParameterPart> ::= () | (<ParameterList>)
+ * <FunctionDesignator> ::= <FunctionalIdentifier> <ParameterPart>
+ * 
+ * NOTE: the function identifiers corspond in paramerter list and
+ * action to the methods of the java Math class. The method called
+ * Math.IEEERemainder is denoted by 'rem'.
+ * 
+ * <FunctionalIdentifier> ::= 'abs' | 'acos' | 'asin' | 'atan' | 
+ *   'atan2' | 'ceil' | 'cos' | 'exp' | 'floor' | 'log' | 'max ' |
+ *   'min' | 'random' | 'round' | 'rem' | 'sin' | 'sqrt' | 'tan' |
+ *   'toDegrees' | 'toRadians'
+ * 
+ ************************************************************************/

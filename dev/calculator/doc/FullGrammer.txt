@@ -1,0 +1,46 @@
+TERMINALS
+	DOUBLE:	( <DIGIT> )+ ( "." ( <DIGIT> )* )? ( <EXP> )?
+		| 	"." ( <DIGIT> )+ ( <EXP> )?
+	CHANNEL: "c" <DIGIT>
+  		| "c" <DIGIT><DIGIT>
+  	#DIGIT: ["0" - "9"]
+  	#EXP: ["e", "E"] ( ["+", "-"] )? ( <DIGIT> )+
+  	SPECIAL: "pi" | "PI" | "e" | "E"
+  	FUNCTION0: "random"
+  	FUNCTION1: "abs" | "acos" | "asin" | "atan"
+	  | "ceil" | "cos" | "exp" | "floor" | "log" 
+	  | "round" | "sin" | "sqrt" | "tan" 
+	  | "toDegrees" | "toRadians"
+	FUNCTION2 : "atan2" | "max" | "min"
+	LOGICAL: "T" | "F"
+
+NON-TERMINALS
+	Start	:=	expression ";"
+	expression	:=	conditional
+		|	simpleArithmetic
+	simpleArithmetic	:=	product ( "+" product | "-" product )*
+	product	:=	term ( "*" term | "/" term )*
+	term	:=	"+" term
+		|	"-" term
+		|	"(" expression ")"
+		|	( <DOUBLE> )
+		|	( <CHANNEL> )
+		|	( <SPECIAL> )
+		|	( <FUNCTION0> "()" )
+		|	( <FUNCTION1> "(" expression ")" )
+		|	( <FUNCTION2> "(" expression "," expression ")" )
+	conditional	:=	booleanExpression "?" term ":" term
+	booleanExpression	:=	booleanSubExpression ( "|" booleanSubExpression )*
+	booleanSubExpression	:=	booleanTerm ( "&" booleanTerm )*
+	booleanTerm	:=	comparison
+		|	"!" booleanTerm
+		|	"(" booleanExpression ")"
+		|	( <LOGICAL> )
+	comparison	:=	term 
+			( "==" term 
+			| "!=" term 
+			| "<" term 
+			| ">" term 
+			| "<=" term 
+			| ">=" term
+			)

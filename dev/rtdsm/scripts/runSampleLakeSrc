@@ -1,0 +1,3 @@
+#!/bin/sh
+#java edu.sdsc.rtdsm.dig.sites.LakeSource srcConfigFbLake.xml
+java edu.sdsc.rtdsm.dig.sites.LakeSource

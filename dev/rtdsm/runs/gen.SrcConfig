@@ -1,0 +1,37 @@
+cacheSize=10
+archiveMode=none
+archiveSize=0
+
+i=1;
+last=${src}
+(( last = $last + 1))
+
+echo "<?xml version='1.0'?>"
+echo "<!DOCTYPE source SYSTEM \"srcConfig.dtd\">"
+echo "<SourceConfig>"
+while [ $i -ne $last ]
+do
+
+  echo "<source name=\"Source_${i}\">"
+  echo "  <mainChannels>"
+  echo "    <orbParams orbType=\"DataTurbine\">"
+  echo "      <storage cacheSize=\"${cacheSize}\" archiveMode=\"${archiveMode}\" archiveSize=\"${archiveSize}\"/>"
+  echo "      <server uri=\"compute-0-0.local:3333\" username=\"\" password=\"\">"
+  j=1
+  lastCh=${ch}
+  (( lastCh = ${lastCh} + 1))
+
+  while [ $j -ne ${lastCh} ]
+  do
+    echo "        <channel name=\"Channel_${j}\" dataType=\"double\"/>"
+    (( j=$j + 1 ))
+  done
+
+  echo "      </server>"
+  echo "    </orbParams>"
+  echo "  </mainChannels>"
+  echo "</source>"
+  (( i=$i + 1 ))
+done
+
+echo "</SourceConfig>"

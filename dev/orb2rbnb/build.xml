@@ -1,0 +1,127 @@
+<?xml version="1.0"?>
+
+<project default="all" basedir=".">
+<property file="build.properties"/>
+
+<property name="src.dir" value="./src"/>
+<property name="lib.dir" value="./lib"/>
+<property name="build.dir" value="./build"/>
+<property name="build.lib" value="${build.dir}/lib"/>
+<property name="build.dest" value="${build.dir}/classes"/>
+<property name="doc.dir" value="./doc"/>
+<property environment="env"/>
+			
+<property name="rbnb.home" value="${env.RBNB_HOME}"/>
+<target name="checkRBNB" unless="env.RBNB_HOME">
+	<fail message="RBNB_HOME must be defined in your environment."/>
+</target>
+	
+<target name="structure" depends="checkRBNB" description="Creation of build target directories">
+   <mkdir dir="${build.dest}"/>
+   <mkdir dir="${build.lib}"/>
+   <mkdir dir="${lib.dir}"/>
+   <mkdir dir="${doc.dir}"/>
+</target>
+
+<path id="classpath">
+   <pathelement location="."/>
+   <pathelement location="${java.home}"/>
+   <pathelement location="${build.dest}"/>
+   <fileset dir="${lib.dir}">
+      <include name="*.jar"/>
+   </fileset>
+   <pathelement path="${java.class.path}"/>
+</path>
+
+<!-- *** BUILD TARGETS *** -->
+<target name="javalope" depends="structure" description="Builds brtt's community Antelope Java API">
+   <javac srcdir="${javalopeSrc.root}" includes="${javalope.src.files}"
+      destdir="${build.dest}" debug="${debug}" listfiles="yes">
+      <classpath refid="classpath"/> 
+   </javac>
+</target>
+
+<target name="compile" depends="structure" description="javac's orb2rbnb source">
+	<javac srcdir="${src.dir}/${package.dir}" destdir="${build.dest}" debug="${debug}" listfiles="yes">
+    	  <classpath refid="classpath"/>
+  	 </javac>
+</target>
+
+<!-- add the doc target -->
+<target name="jar" depends="compile, doc" description="Builds an executable jar that includes docs, DataTurbine, and brtt's Javalope API">
+   <jar jarfile="${build.lib}/${jar.name}" basedir="${build.dest}">
+  	<!--include name="log4j.properties"/-->
+   	<include name="${package.dir}/*.class"/>
+   	<include name="${javalope.dir}/*.class"/>
+		<include name="${doc.dir}/**"/>
+   	<zipgroupfileset dir="${lib.dir}"/>
+   	<zipgroupfileset file="${rbnb.home}/bin/rbnb.jar"/>
+      <manifest>
+         <attribute name="Built-By" value="${user.name}"/>
+         <attribute name="Main-Class" value="${package}/Orb2Rbnb"/>
+         <!-- attribute name="Class-Path" value="$CLASSPATH"/-->
+         <attribute name="Implementation-Vendor" value="NEES Cyberinfrastructure Center, SDSC"/>
+         <attribute name="Implementation-Title" value="orb2rbnb"/>
+      </manifest>
+   </jar>
+</target>
+
+<target name="doc" depends="structure" description="Makes javadocs from orb2rbnb source and brtt's Javalope API">
+   <javadoc
+      sourcepath="${javalopeSrc.root}/${javalope.dir}"
+      destdir="${doc.dir}/javalope"
+      author="true"
+      version="true"
+      windowtitle="Java Antelope API - Community Source">
+         <fileset dir="${javalopeSrc.root}/${javalope.dir}">
+            <include name="*.java"/>
+         </fileset>
+   </javadoc>
+   <javadoc
+      destdir="${doc.dir}/orb2rnb"
+      author="true"
+      version="true"
+      windowtitle="orb2rbnb">
+         <fileset dir="${src.dir}/${package.dir}">
+            <include name="*.java"/>
+         </fileset>
+   </javadoc>
+</target>
+
+<target name="wc" depends="" description="Displays line and character counts for orb2rbnb work product files">
+   <exec executable="wc">
+      <arg value="-lL"/>
+      <arg value="${src.dir}/${package.dir}/Orb2Rbnb.java"/>
+      <arg value="${src.dir}/${package.dir}/Orb2RbnbTTask.java"/>
+      <arg value="build.xml"/>
+      <arg value="build.properties"/>
+   </exec>
+</target>
+
+<target name="sbsync" depends="jar">
+   <exec executable="scp">
+      <arg value="${jar.name}"/>
+      <arg value="rt@rattle.crustal.ucsb.edu:~/${user.name}"/>
+   </exec>
+</target>
+
+<!-- /**** BUILD TARGETS **** -->
+
+<target name="clean" description="Removes build products">
+   <delete dir="${build.dir}"/>
+   <delete dir="${doc.dir}"/>
+   <delete file="./${jar.name}"/>
+</target>
+
+<target name="distclean" depends="clean" description="Restores orb2rbnb project tree to the state it is in when distributed">
+   <delete file="./${dist.name}"/>
+</target>
+
+<target name="dist" depends="distclean" description="Creates a distributeable zip file">
+   <zip destfile="./${dist.name}" basedir="." />
+   <!-- comment="orb2rbnb by Lawrence J. Miller, NEESit, SDSC"/-->
+</target>
+
+<target name="all" depends="doc,jar" description="Builds a jar that contains all javadocs"/>
+
+</project>

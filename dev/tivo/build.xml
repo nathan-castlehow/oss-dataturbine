@@ -1,0 +1,90 @@
+<?xml version="1.0"?>
+
+<!-- build.xml from Ant book pfh 4/8/04 -->
+<project default="run" basedir=".">
+
+<property name="package.name" value="tivo" />
+<property file="build.properties"/>
+
+<!-- Source code directory tree -->
+<property name="src.dir" value="src"/>
+
+<!-- Lib directory - jarfiles we depend on to compile and run -->
+<property name="lib.dir" value="../common/lib"/>
+
+<!-- Documentation directory -->
+<property name ="doc.dir" value="docs"/>
+
+<!-- Build directory tree -->
+<property name="build.dir" value="build"/>
+<property name="build.classes" value="${build.dir}/classes"/>
+<property name="build.lib" value="${build.dir}/lib"/>
+
+<!-- environment access via env.* -->
+<property environment="env"/>
+
+<!-- Get OGSA, Turbine, JMF and NEES from environment -->
+<property name="rbnb.home" value="${env.RBNB_HOME}"/>
+
+<!-- classpath -->
+<path id="classpath">
+ <pathelement location="${java.home}/../lib/tools.jar"/>
+ <pathelement location="${build.classes}"/>
+ <pathelement path="${java.class.path}"/>
+ <fileset dir="${rbnb.home}">
+  <include name="*/*.jar"/>
+ </fileset>
+ <fileset dir="${lib.dir}">
+  <include name="*.jar" />
+ </fileset>
+</path>
+ 
+<!-- targets to check environment variables -->
+<target name="checkRBNB" unless="env.RBNB_HOME">
+  <fail message="RBNB_HOME must be defined in your environment."/>
+</target>
+
+<!-- Meta-target that depends on all environment variables -->
+<target name="checkEnvVars" depends="checkRBNB" 
+description="Check necessary environment variables"/>
+
+<!-- target to make temp dirs -->
+<target name="prepare" depends="checkEnvVars" description="Make directories">
+  <mkdir dir="${build.dir}"/>
+  <mkdir dir="${build.classes}"/>
+  <mkdir dir="${build.lib}"/>
+</target>
+
+<!-- target to clean build dir and doc dir -->
+<target name="clean" description="Remove all generated files">
+  <delete dir="${build.dir}"/>
+</target>
+
+<!-- Build target -->
+<target name="compile" depends="prepare" description="Build from source">
+ <javac srcdir="${src.dir}" 
+        destdir="${build.classes}"
+        classpathref="classpath" debug="on">
+ </javac>
+</target>
+
+<!-- Package (jar) target -->
+<target name="jar" depends="compile" description="Build jar file">
+  <jar jarfile="${build.lib}/${package.name}.jar" basedir="${build.classes}">
+	<manifest>
+		<attribute name="Main-Class" value="org.nees.tivo.ImageRepositoryViewer"/>
+	</manifest>
+    <include name="org/**" />
+  </jar>
+</target>
+
+<!-- Run the main GUI -->
+<target name="run" depends="compile" description="Run application">
+	<java classpathref="classpath"
+		classname="org.nees.tivo.ImageRepositoryViewer" fork="true" />
+</target>
+ 
+<!-- Catch-all target to aggregate everything -->
+<target name="all" depends="clean,jar" description="Clean, compile, jar">
+</target>
+</project>
