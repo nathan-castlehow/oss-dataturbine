@@ -6,7 +6,7 @@
  * @author San Diego Supercomputer Center (SDSC)
  * @date $LastChangedDate: 2008-02-14 08:52:53 -0800 (Thu, 14 Feb 2008) $
  * @version $LastChangedRevision: 248 $
- * @note $HeadURL: file:///Users/hubbard/code/cleos-svn/cleos-rbnb-apps-dev/turbine-dev/src/edu/sdsc/cleos/SeabirdParser.java $
+ * @note $HeadURL: http://nladr-cvs.sdsc.edu/svn-public/CLEOS/cleos-rbnb-apps-dev/turbine-dev/src/edu/sdsc/cleos/SeabirdParser.java $
  */
 
 package edu.sdsc.cleos;
@@ -44,7 +44,24 @@ class SeabirdParser extends Hashtable
 		super();
 		initMonthMap();
 		/*! @todo infer this from the setup config read off the seabird */
-		channelNames = new String[8];
+		
+		// configuration for MCR Seacat
+		channelNames = new String[4];
+		channelNames[0] = "Temperature";
+		channelNames[1] = "Conductivity";
+		channelNames[2] = "Pressure";
+		channelNames[3] = "Salinity";
+		units = new String[channelNames.length];
+		units[0] = "C";
+		units[1] = "S/M";
+		units[2] = "dbar";
+		units[3] = "psu";
+		metadataChannels = new String[2];
+		metadataChannels[0] = "Model";
+		metadataChannels[1] = "Serial Number";
+		
+		// configuration for SIO Seacat
+		/*channelNames = new String[8];
 		channelNames[0] = "Temperature";
 		channelNames[1] = "Conductivity";
 		channelNames[2] = "Pressure";
@@ -64,7 +81,7 @@ class SeabirdParser extends Hashtable
 		units[7] = "V";
 		metadataChannels = new String[2];
 		metadataChannels[0] = "Model";
-		metadataChannels[1] = "Serial Number";
+		metadataChannels[1] = "Serial Number";*/
 	}
 
 	
@@ -78,6 +95,9 @@ class SeabirdParser extends Hashtable
 			/*! @note S>ds bit is needed to clean up seabird cmd echo */
 			parseAndPut((String)get("ds"), "\\A[S>ds]+[\\s]+(.+) SERIAL NO\\. [0-9]+ ", "model");
 			parseAndPut((String)get("ds"), "SERIAL NO\\. ([0-9]+) ", "serial");
+		} else { //  hard-code info from MCR
+			put("model", "SeacatPlus V 1.7");
+			put("serial", "4974");
 		}
 	}
 	
@@ -104,6 +124,7 @@ class SeabirdParser extends Hashtable
 	 * @param seabirdLine a single data line read from the seabird, composed of comma-delimited deciaml values and two timesatmp tokens at the end
 	 * @return an array of data points; the last element is an rbnb timestamp (i.e. seconds since the epoch) */
 	public double[] getData (String seabirdLine) throws ParseException, SeabirdException {
+		logger.fine("getData line:" + seabirdLine);
 		String[] seabirdLineSplit = seabirdLine.split("[\\s]*,[\\s]*");
 		StringBuffer dateBuffer = new StringBuffer();
 		
@@ -208,7 +229,7 @@ class SeabirdParser extends Hashtable
 				"$LastChangedDate: 2008-02-14 08:52:53 -0800 (Thu, 14 Feb 2008) $\n" +
 				"$LastChangedRevision: 248 $\n" +
 				"$LastChangedBy: ljmiller $\n" +
-				"$HeadURL: file:///Users/hubbard/code/cleos-svn/cleos-rbnb-apps-dev/turbine-dev/src/edu/sdsc/cleos/SeabirdParser.java $"
+				"$HeadURL: http://nladr-cvs.sdsc.edu/svn-public/CLEOS/cleos-rbnb-apps-dev/turbine-dev/src/edu/sdsc/cleos/SeabirdParser.java $"
 		);
 	}
 } // class

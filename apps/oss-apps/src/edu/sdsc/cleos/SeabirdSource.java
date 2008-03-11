@@ -6,7 +6,7 @@
  * @author San Diego Supercomputer Center (SDSC)
  * @date $LastChangedDate: 2008-02-14 08:52:53 -0800 (Thu, 14 Feb 2008) $
  * @version $LastChangedRevision: 248 $
- * @note $HeadURL: file:///Users/hubbard/code/cleos-svn/cleos-rbnb-apps-dev/turbine-dev/src/edu/sdsc/cleos/SeabirdSource.java $
+ * @note $HeadURL: http://nladr-cvs.sdsc.edu/svn-public/CLEOS/cleos-rbnb-apps-dev/turbine-dev/src/edu/sdsc/cleos/SeabirdSource.java $
  */
 
 package edu.sdsc.cleos;
@@ -119,6 +119,7 @@ class SeabirdSource extends RBNBBase
 		while (portList.hasMoreElements()) {
 			portId = (CommPortIdentifier) portList.nextElement();
 			if (portId.getPortType() == CommPortIdentifier.PORT_SERIAL) {
+				logger.fine("Found serial port:" + portId.getName());
 				if (portId.getName().equals(portName)) { // then found the target port
 					try {
 						serialPort = (SerialPort) portId.open("Seabird->rxtx", 64);
@@ -130,15 +131,16 @@ class SeabirdSource extends RBNBBase
 						serialPort.setSerialPortParams(9600, SerialPort.DATABITS_8,
 								SerialPort.STOPBITS_1, SerialPort.PARITY_NONE);
 						logger.config("Initialized " + portId.getName() + " to 9600n81");
-						break; /* @note do not continue with serial port enumeration; duplicate devs cause trouble */
+						return; /* @note do not continue with serial port enumeration; duplicate devs cause trouble */
 					} catch (Exception e) { // generalized because rxtx can throw many kinds of exceptions
 						throw new IOException(e.toString());
 					}
-				} else {
-					throw new IOException("Requested port \"" + portName + "\" not found");
-				}
-			} // if match
+				} // if match
+			} // if serial port
 		} // while
+
+		throw new IOException("Requested port \"" + portName + "\" not found");
+		
 	}
 
 
@@ -287,7 +289,11 @@ class SeabirdSource extends RBNBBase
 
 		/*! @note examine last line as a token comms have ended */
 		/*! @todo do this properly with regexes */
-		String lastLineString = "    EXTFREQSF = 1.000120e+00";
+		// SIO Seacat
+		// String lastLineString = "    EXTFREQSF = 1.000120e+00";
+		// MCR Seacat
+		String lastLineString = "    EXTFREQSF = 9.999942e-01";
+		
 		boolean lastLine = false;
 
 		/*! @note read and acccumulte all lines on the stream */
@@ -551,7 +557,7 @@ class SeabirdSource extends RBNBBase
 				"$LastChangedDate: 2008-02-14 08:52:53 -0800 (Thu, 14 Feb 2008) $\n" +
 				"$LastChangedRevision: 248 $\n" +
 				"$LastChangedBy: ljmiller $\n" +
-				"$HeadURL: file:///Users/hubbard/code/cleos-svn/cleos-rbnb-apps-dev/turbine-dev/src/edu/sdsc/cleos/SeabirdSource.java $"
+				"$HeadURL: http://nladr-cvs.sdsc.edu/svn-public/CLEOS/cleos-rbnb-apps-dev/turbine-dev/src/edu/sdsc/cleos/SeabirdSource.java $"
 		);
 	}
 
