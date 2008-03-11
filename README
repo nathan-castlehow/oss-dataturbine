@@ -1,0 +1,18 @@
+
+March 11 2008
+
+Paul Hubbard hubbard@sdsc.edu
+
+This is the oss-dataturbine code from Subversion. Project URL is http://code.google.com/p/oss-dataturbine
+
+Directory/project layout is as follows:
+
+-apps Our main project, Java code for the DataTurbine. Sources, sinks, debug utilities, etc.
+-dev Stuff in development, one-off code, demos, prototypes and the like
+-build_system Scripts and config files for our NMI build and test
+-doc Documentation
+-fake_daq Threaded C to simulate a DAQ, talks to DaqToRbnb
+-labview Labview source code for compact RIO and desktop DAQ, also control code etc
+-papers Misc submitted papers
+-sandbox Developer scratch area
+
