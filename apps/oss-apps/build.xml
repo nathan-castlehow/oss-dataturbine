@@ -64,6 +64,10 @@ description="Check necessary environment variables"/>
         destdir="${build.classes}"
         classpathref="classpath" debug="on">
  </javac>
+	<javac srcdir="${isight.src.dir}" 
+		  	destdir="${build.classes}"
+		    classpathref="classpath" debug="on">
+	</javac>
  <javac srcdir="${rbnb.src.dir}" 
         destdir="${build.classes}"
         classpathref="classpath" debug="on">
@@ -72,6 +76,7 @@ description="Check necessary environment variables"/>
 	  	destdir="${build.classes}"
 	    classpathref="classpath" debug="on">
 </javac>
+
 </target>
 
 <!-- Package (jar) target -->
