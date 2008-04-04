@@ -30,14 +30,11 @@ public class IQEyeJPEGSource extends JPEGSource {
 
 	private final static int DEFAULT_CAMERA_FPS = 30;
 	private int cameraFPS = DEFAULT_CAMERA_FPS;
-	private double cameraFreqyency = 0.2;
 
 	private final static int DEFAULT_CAMERA_NUMBER = 1;
-	private int cameraNumber = DEFAULT_CAMERA_NUMBER;
 
 	/** the URL for the MJPEG video stream */
 	private URL mjpegURL;
-	private double cameraFrequency=0.2;
 
 	/** the maximum frames per second the camera can deliver */
 
@@ -148,14 +145,6 @@ public class IQEyeJPEGSource extends JPEGSource {
 			String cameraURLString = "http://"
 				+ getHostName()
 				+ "/now.jpg";
-			//	"?snap=spuchn=0.2"
-
-			//+ "/axis-cgi/mjpg/video.cgi?camera="
-			//+ cameraNumber;
-
-			//cameraURLString += 	"?snap=spuchn=" + Double.toString(cameraFrequency);
-			//cameraURLString += "&showlength=1&compression=25&clock=0&date=0&text=0";
-			//cameraURLString += "&req_fps=" + cameraFPS + "&deltatime=1";
 
 			mjpegURL = new URL(cameraURLString);
 			System.out.println (cameraURLString);
