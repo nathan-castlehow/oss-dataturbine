@@ -1,6 +1,6 @@
 [My Computer]
-My Computer = "137.110.118.52"
+My Computer = "192.168.1.100"
 
-[riogrande]
-riogrande = "riogrande.sdsc.edu"
+[SMER]
+SMER = "172.23.37.61"
 
