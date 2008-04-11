@@ -10,7 +10,7 @@
  */
 
 package edu.ucsd.osdt.source.numeric;
-import edu.ucsd.osdt.source.CleosSource;
+import edu.ucsd.osdt.source.BaseSource;
 import edu.ucsd.osdt.source.numeric.SeabirdParser;
 import edu.ucsd.osdt.util.RBNBBase;
 import edu.ucsd.osdt.util.ISOtoRbnbTime;
@@ -51,7 +51,7 @@ import org.apache.commons.cli.Options;
 /*! @brief A driver program that interfaces to the Seacat CTD profiler via
  * rs232, gathers and formats the data stream, and then puts this data stream
  * onto a DataTurbine ring buffer. */
-class SeabirdSource extends RBNBBase
+class SeabirdSource extends BaseSource
 {
 	// serial port / seabird
 	public static final String DEFAULT_SEABIRD_PORT = "COM1";
@@ -69,8 +69,9 @@ class SeabirdSource extends RBNBBase
 	private int rbnbCacheSize = DEFAULT_CACHE_SIZE;
 	private static final int DEFAULT_ARCHIVE_SIZE = 0;
 	private int rbnbArchiveSize = DEFAULT_ARCHIVE_SIZE;
-	private CleosSource source = null;
+	private RBNBBase mRBNBBase = null;
 	private ChannelMap cmap = null;
+	 
 	// timezone offset from GMT
 	private double timeOffset = 0.0;
 
@@ -85,6 +86,7 @@ class SeabirdSource extends RBNBBase
 	 * shutdown hook to trap ctrl-c. */
 	public SeabirdSource() {
 		super();
+		mRBNBBase = new RBNBBase(this);
 		rbnbClientName = "Seabird";
 		seabirdParser = new SeabirdParser();
 		if(writeFile) {
@@ -174,17 +176,17 @@ class SeabirdSource extends RBNBBase
 	/*! @brief Sets up the connection to an rbnb server. */
 	public void initRbnb() throws SAPIException {
 		if (rbnbArchiveSize > 0) {
-			source=new CleosSource(rbnbCacheSize, "append", rbnbArchiveSize);
+			super(rbnbCacheSize, "append", rbnbArchiveSize);
 		} else {
-			source=new CleosSource(rbnbCacheSize, "none", 0);
+			super(rbnbCacheSize, "none", 0);
 		}
 		this.initCmap();
-		source.OpenRBNBConnection(getServer(), getRBNBClientName());
-		logger.config("Set up connection to RBNB on " + getServer() +
-				" as source = " + getRBNBClientName());
+		OpenRBNBConnection(mRBNBBase.getServer(), mRBNBBase.getRBNBClientName());
+		logger.config("Set up connection to RBNB on " + mRBNBBase.getServer() +
+				" as source = " + mRBNBBase.getRBNBClientName());
 		logger.config(" with RBNB Cache Size = " + rbnbCacheSize + " and RBNB Archive Size = " + rbnbArchiveSize);
-		source.Register(cmap);
-		source.Flush(cmap);
+		this.Register(cmap);
+		this.Flush(cmap);
 	}
 
 
@@ -220,14 +222,11 @@ class SeabirdSource extends RBNBBase
 
 	/*! @brief Gracefully closes the rbnb connection. */
 	protected void closeRbnb() {
-		if(source == null) {
-			return;
-		}
-
+	
 		if (rbnbArchiveSize > 0) { // then close and keep the ring buffer
-			source.getSapiSource().Detach();
+			this.Detach();
 		} else { // close and scrap the cache
-			source.getSapiSource().CloseRBNBConnection();
+			this.CloseRBNBConnection();
 		}
 		logger.config("Closed RBNB connection");
 	}
@@ -400,7 +399,7 @@ class SeabirdSource extends RBNBBase
 			sae.printStackTrace();
 			throw sae;
 		}
-		source.Flush(cmap);
+		this.Flush(cmap);
 	}
 	
 
@@ -408,7 +407,7 @@ class SeabirdSource extends RBNBBase
 	/*****************************************************************************/
 	public static void main(String[] args) {
 		SeabirdSource seabird = new SeabirdSource();
-		if(! seabird.parseArgs(args)) {
+		if(! seabird.mRBNBBase.parseArgs(args)) {
 			logger.severe("Unable to process command line. Terminating.");
 			System.exit(1);
 		}
@@ -464,7 +463,7 @@ class SeabirdSource extends RBNBBase
 	/*! @brief Command-line processing.
 	 * @note required by interface RBNBBase */
 	protected Options setOptions() {
-		Options opt = setBaseOptions(new Options()); // uses h, v, s, p, S
+		Options opt = mRBNBBase.setBaseOptions(new Options()); // uses h, v, s, p, S
 
 		opt.addOption("P",true, "Serial port to read *" + DEFAULT_SEABIRD_PORT);
 		opt.addOption("z",true, "DataTurbine cache size *" + DEFAULT_CACHE_SIZE);
@@ -482,7 +481,7 @@ class SeabirdSource extends RBNBBase
 	/*! @brief Command-line processing.
 	 * @note required by interface RBNBBase */
 	protected boolean setArgs(CommandLine cmd) throws IllegalArgumentException {
-		if (!setBaseArgs(cmd)) return false;
+		if (!mRBNBBase.setBaseArgs(cmd)) return false;
 
 		if(cmd.hasOption('P')) { // seabird serial port
 			String v = cmd.getOptionValue("P");

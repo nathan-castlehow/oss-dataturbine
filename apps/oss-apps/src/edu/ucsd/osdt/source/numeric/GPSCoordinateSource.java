@@ -96,7 +96,7 @@ public class GPSCoordinateSource extends RBNBBase {
 	} // setOptions()
 	
 	/** @note required by interface RBNBBase */
-	protected boolean setArgs(CommandLine cmd) {
+	public boolean setArgs(CommandLine cmd) {
 		if (!setBaseArgs(cmd)) return false;
 
 		if (cmd.hasOption('t')) { // target source name

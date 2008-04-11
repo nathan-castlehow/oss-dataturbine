@@ -11,25 +11,31 @@ need to be overwriten or extended.\
  */
 package edu.ucsd.osdt.util;
 
+import edu.ucsd.osdt.source.BaseSource;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.PosixParser;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.HelpFormatter;
 
-public abstract class RBNBBase
+public class RBNBBase
 {
 	private static final String DEFAULT_SERVER_NAME = "localhost";
 	private static final String DEFAULT_SERVER_PORT = "3333";
 	private String serverName = DEFAULT_SERVER_NAME;
 	private String serverPort = DEFAULT_SERVER_PORT;
 	private String server = serverName + ":" + serverPort;
-  
-  protected final static String DEFAULT_RBNB_CLIENT_NAME = "CLEOS DAQ";
-  protected String rbnbClientName = DEFAULT_RBNB_CLIENT_NAME;
+	private BaseSource myBaseSource;
+    protected final static String DEFAULT_RBNB_CLIENT_NAME = "CLEOS DAQ";
+    protected String rbnbClientName = DEFAULT_RBNB_CLIENT_NAME;
    
 	private String optionNotes = null;
 	
-	protected boolean parseArgs(String[] args) throws IllegalArgumentException
+	public RBNBBase (BaseSource varBaseSource)
+	{
+		myBaseSource = varBaseSource;
+	}
+	
+	public boolean parseArgs(String[] args) throws IllegalArgumentException
 	{
 		try {
 			CommandLine cmd = (new PosixParser()).parse(setOptions(), args);
@@ -49,7 +55,7 @@ public abstract class RBNBBase
 	 * 
 	 * @see #setBaseArgs
 	 */
-	protected abstract boolean setArgs(CommandLine cmd);
+	public  boolean setArgs(CommandLine cmd);
 	
   /**
    * Set the arguments handled by this class.
@@ -58,7 +64,7 @@ public abstract class RBNBBase
    * @return     true if the command line is processed successfully, false
    *             otherwise
    */
-	protected boolean setBaseArgs(CommandLine cmd) {	
+	public boolean setBaseArgs(CommandLine cmd) {	
 		if (cmd.hasOption('h')) {
 			printUsage();
 			return false;
@@ -149,7 +155,7 @@ public abstract class RBNBBase
    * Print out the usage of this application to standard output.
    *
    */
-	protected void printUsage() {
+	public void printUsage() {
 		HelpFormatter f = new HelpFormatter();
 		f.printHelp(this.getClass().getName(),setOptions());
 		if (optionNotes != null)
@@ -164,7 +170,7 @@ public abstract class RBNBBase
 	 * @return org.apache.commons.cli.Options
 	 * @see #setBaseOptions
 	 */
-	protected abstract Options setOptions();
+	public Options setOptions();
 	
   /**
    * Set the options supported by this base class.
@@ -172,7 +178,7 @@ public abstract class RBNBBase
    * @param opt  the options instance to add to
    * @return     the options instance with base class options
    */
-	protected Options setBaseOptions(Options opt)
+	public Options setBaseOptions(Options opt)
 	{
 		opt.addOption("h",false,"Print help");
 		opt.addOption("s",true,"RBNB Server Hostname *" + DEFAULT_SERVER_NAME);
@@ -182,10 +188,10 @@ public abstract class RBNBBase
 		return opt;
 	}
 	
-	protected void setNotes(String n)
+	public void setNotes(String n)
 	{
 		optionNotes = n;
 	}
 
-  protected abstract String getCVSVersionString();
+  public String getCVSVersionString();
 }

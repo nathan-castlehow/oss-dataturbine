@@ -16,7 +16,7 @@ import edu.ucsd.osdt.daq.DaqListener;
 import edu.ucsd.osdt.daq.DataThread;
 import edu.ucsd.osdt.util.ISOtoRbnbTime;
 import edu.ucsd.osdt.util.RBNBBase;
-import edu.ucsd.osdt.source.CleosSource;
+import edu.ucsd.osdt.source.BaseSource;
 
 import java.io.IOException;
 import java.net.UnknownHostException;
@@ -78,7 +78,7 @@ public class DaqToRbnb extends RBNBBase
 	private Socket controlSocket = null;
 	private Socket dataSocket = null;
 	
-	private CleosSource source;
+	private BaseSource source;
 	boolean connected = false;
 
 	Thread mainThread;
@@ -493,9 +493,9 @@ public class DaqToRbnb extends RBNBBase
 		dataThread = new DataThread(dataSocket);
 		// Create a source and connect:
 		if (archiveSize > 0) {
-		  source=new CleosSource(cacheSize, "append", archiveSize);
+		  source=new BaseSource(cacheSize, "append", archiveSize);
 		} else {
-		  source=new CleosSource(cacheSize, "none", 0);
+		  source=new BaseSource(cacheSize, "none", 0);
 		}
             
 		source.OpenRBNBConnection(getServer(), getRBNBClientName());

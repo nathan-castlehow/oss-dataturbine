@@ -22,7 +22,7 @@ internal to this program. */
 
 package edu.ucsd.osdt.source.numeric;
 
-import edu.ucsd.osdt.source.CleosSource;
+import edu.ucsd.osdt.source.BaseSource;
 import edu.ucsd.osdt.daq.ControlConnectionThread;
 import edu.ucsd.osdt.util.RBNBBase;
 import edu.ucsd.osdt.util.ISOtoRbnbTime;
@@ -101,7 +101,7 @@ public class NwpToRbnb extends RBNBBase
 	private Socket controlSocket = null;
 	private Socket dataSocket = null;
 
-	private CleosSource source;
+	private BaseSource source;
 	boolean connected = false;
 
 	Thread mainThread;
@@ -327,9 +327,9 @@ public class NwpToRbnb extends RBNBBase
 		
 		// Create a source and connect to it
 		if (archiveSize > 0) {
-			source=new CleosSource(cacheSize, "append", archiveSize);
+			source=new BaseSource(cacheSize, "append", archiveSize);
 		} else {
-			source=new CleosSource(cacheSize, "none", 0);
+			source=new BaseSource(cacheSize, "none", 0);
 		}
 		source.OpenRBNBConnection(getServer(), rbnbSourceName);
 		log.info("Set up connection to RBNB on " + getServer() + " as source: \"" + rbnbSourceName + "\" with RBNB Cache Size: " + cacheSize + " and RBNB Archive Size: " + archiveSize);
@@ -394,7 +394,7 @@ public class NwpToRbnb extends RBNBBase
 	}
 	
 	/*! @brief an acessor to get this instance's @return edu.ucsd.osdt.CleosSource */
-	public CleosSource getSource() {
+	public BaseSource getSource() {
 		return this.source;
 	}
 	

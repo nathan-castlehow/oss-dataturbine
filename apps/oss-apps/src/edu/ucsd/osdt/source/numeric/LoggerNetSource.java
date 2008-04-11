@@ -13,7 +13,7 @@ package edu.ucsd.osdt.source.numeric;
 
 import edu.ucsd.osdt.util.RBNBBase;
 import edu.ucsd.osdt.util.ISOtoRbnbTime;
-import edu.ucsd.osdt.source.CleosSource;
+import edu.ucsd.osdt.source.BaseSource;
 
 //rbnb
 import com.rbnb.sapi.ChannelMap;
@@ -31,7 +31,7 @@ import edu.ucsd.osdt.util.ISOtoRbnbTime;
 
 /*! @brief A Dataturbine source accumulator that parses and puts Campbell
  *  Loggernet data onto the ring buffer. */
-class LoggerNetSource extends RBNBBase {
+class LoggerNetSource extends BaseSource {
 	private String DEFAULT_FILE_NAME = "loggernet.dat";
 	private String loggernetFileName = DEFAULT_FILE_NAME;
 	private BufferedReader loggernetFileBuffer = null;
@@ -42,7 +42,7 @@ class LoggerNetSource extends RBNBBase {
 	private int rbnbCacheSize = DEFAULT_CACHE_SIZE;
 	private static final int DEFAULT_ARCHIVE_SIZE = 0;
 	private int rbnbArchiveSize = DEFAULT_ARCHIVE_SIZE;
-	private CleosSource source = null;
+	private BaseSource source = null;
 	private ChannelMap cmap = null;
 	// java
 	private static Logger logger = Logger.getLogger(LoggerNetSource.class.getName());
@@ -98,13 +98,13 @@ class LoggerNetSource extends RBNBBase {
 	/*! @brief Sets up the connection to an rbnb server. */
 	public void initRbnb() throws SAPIException, IOException {
 		if (rbnbArchiveSize > 0) {
-			source=new CleosSource(rbnbCacheSize, "append", rbnbArchiveSize);
+			source=new BaseSource(rbnbCacheSize, "append", rbnbArchiveSize);
 		} else {
-			source=new CleosSource(rbnbCacheSize, "none", 0);
+			source=new BaseSource(rbnbCacheSize, "none", 0);
 		}
 		this.initCmap();
-		source.OpenRBNBConnection(getServer(), getRBNBClientName());
-		logger.config("Set up connection to RBNB on " + getServer() +
+		source.OpenRBNBConnection(mRBNBBase.getServer(), mRBNBBase.getRBNBClientName());
+		logger.config("Set up connection to RBNB on " + mRBNBBase.getServer() +
 				" as source = " + getRBNBClientName());
 		logger.config(" with RBNB Cache Size = " + rbnbCacheSize + " and RBNB Archive Size = " + rbnbArchiveSize);
 		source.Register(cmap);
@@ -119,9 +119,9 @@ class LoggerNetSource extends RBNBBase {
 		}
 
 		if (rbnbArchiveSize > 0) { // then close and keep the ring buffer
-			source.getSapiSource().Detach();
+			source.Detach();
 		} else { // close and scrap the cache
-			source.getSapiSource().CloseRBNBConnection();
+			source.CloseRBNBConnection();
 		}
 		logger.config("Closed RBNB connection");
 	}
@@ -198,7 +198,7 @@ class LoggerNetSource extends RBNBBase {
 	/*****************************************************************************/
 	public static void main(String[] args) {
 		LoggerNetSource loggernet = new LoggerNetSource();
-		if(! loggernet.parseArgs(args)) {
+		if(! loggernet.mRBNBBase.parseArgs(args)) {
 			logger.severe("Unable to process command line. Terminating.");
 			System.exit(1);
 		}
@@ -227,7 +227,7 @@ class LoggerNetSource extends RBNBBase {
 	/*! @brief Command-line processing.
 	 * @note required by interface RBNBBase */
 	protected Options setOptions() {
-		Options opt = setBaseOptions(new Options()); // uses h, v, s, p, S
+		Options opt = mRBNBBase.setBaseOptions(new Options()); // uses h, v, s, p, S
 
 		opt.addOption("z",true, "DataTurbine cache size *" + DEFAULT_CACHE_SIZE);
 		opt.addOption("Z",true, "Dataturbine archive size *" + DEFAULT_ARCHIVE_SIZE);

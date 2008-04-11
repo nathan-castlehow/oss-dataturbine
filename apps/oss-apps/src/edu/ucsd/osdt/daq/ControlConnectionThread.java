@@ -241,7 +241,7 @@ public class ControlConnectionThread extends Thread {
 				retval += Long.toString(runtime.totalMemory()/1024) + "k/" + Long.toString(runtime.maxMemory()/1024) + "k totalMem/maxMem";	
 			} else if(inputCmd.equals("get-nwptorbnb-network-statistics")) {
 				long bytesXferred = 0;
-				bytesXferred = myCaller.getSource().getSapiSource().BytesTransferred();
+				bytesXferred = myCaller.getSource().BytesTransferred();
 				retval += Long.toString(bytesXferred/1024) + "k";
 			} else if(inputCmd.equals("get-nwptorbnb-uptime")) {
 				long upTime = System.currentTimeMillis() - myCaller.getStartTime().getTime();
@@ -265,8 +265,8 @@ public class ControlConnectionThread extends Thread {
 					}
 				} catch(IOException e) {retval = "ERROR: Unable to query the system about rbnb";}
 			} else if(inputCmd.equals("get-rbnb-ringbuffer-resources")) {
-				int cacheSize = myCaller.getSource().getSapiSource().GetCacheSize();
-				int archSize = myCaller.getSource().getSapiSource().GetArchiveSize();
+				int cacheSize = myCaller.getSource().GetCacheSize();
+				int archSize = myCaller.getSource().GetArchiveSize();
 				retval += Integer.toString(cacheSize) + "/" + Integer.toString(archSize);
 			} else if(inputCmd.equals("get-rbnb-uptime")) {
 				try {
@@ -298,7 +298,7 @@ public class ControlConnectionThread extends Thread {
 			} else if(inputCmd.equals("verify-connections")) {
 				retval += "SNC:" + ( (myCaller.getControlSocket().isConnected())? "alive" : "dead" );
 				retval += "\tSND:" + ( (myCaller.getDataSocket().isConnected())? "alive" : "dead" );
-				retval += "\tSR:" + ( (myCaller.getSource().getSapiSource().VerifyConnection())? "alive" : "dead" );
+				retval += "\tSR:" + ( (myCaller.getSource().VerifyConnection())? "alive" : "dead" );
 				/*! @todo add the rbnb parent server status */
 			} else {log.warn("processInput command filter has failed");} // should never get here - input has been filtered
 			
