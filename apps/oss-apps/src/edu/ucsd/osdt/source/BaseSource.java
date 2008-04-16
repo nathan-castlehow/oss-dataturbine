@@ -9,38 +9,38 @@ import java.util.Hashtable;
 import java.util.Enumeration;
 import java.util.StringTokenizer;
 
-/*! @brief
- * This class provides the core functionality needed by OSDT for source "driver" applications and extends the RBNB com.rbnb.sapi.Source class
+/*! 
+ * @file BaseSource.java
+ * @brief
+ * This class provides the core functionality needed by OSDT for source driver
+ * applications and extends the RBNB com.rbnb.sapi.Source class
  * @author Lawrence J. Miller
- * @todo append host address to all source names that get registered on the dataturbine server
+ * @note $HeadURL$
+ * @note $LastChangedRevision$
+ * @author $LastChangedBy$
+ * @date $LastChangedDate$
+ * 
+ * @todo make an abstact "generateCMap", or perhaps an interface to set up
+ * channel names, units, and metadata
+ * @todo include the channels that key the trackKML plugin
  */
 public class BaseSource extends com.rbnb.sapi.Source 
 {
 
 	// holds the serverAddress
 	private String serverAddress;
-	protected RBNBBase mRBNBBase;
 	private int rbnbArchiveSize;
 	private int rbnbCacheSize;
 	
-	/**
-	 * Create a NeesSource object (based on an RBNB source) with the default
-	 * arguments. A _units channel will be created.
-	 */
 	public BaseSource()
 	{
 		super();
-		mRBNBBase = new RBNBBase(this);
 	}
 	
-	/**
-	 * Create a NeesSource object (based on an RBNB source) with the standard RBNB
-	 * arguments. An _units channel will be created.
-	 */
+	
 	public BaseSource(int cacheSize, String archiveMode, int archiveSize)
 	{
 		super(cacheSize,archiveMode,archiveSize);
-		mRBNBBase = new RBNBBase(this);
 	}
 	
 	/**
@@ -55,7 +55,5 @@ public class BaseSource extends com.rbnb.sapi.Source
 		 /* if (mRBNBBase.getserverAddress()== null)
 			throw new SAPIException("You must connect to the server before you can" +
 				" post units."); */
-		
-		
 	}
 }			

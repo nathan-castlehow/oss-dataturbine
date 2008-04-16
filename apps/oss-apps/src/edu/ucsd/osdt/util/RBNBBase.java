@@ -1,14 +1,17 @@
 /* @file RBNBBase.java 
-@brief A base class for RBNB Widgets. Includes base parameters and constents. For actual usage
-this class must be extended. Specifically: the arguments must be precessed by
-calling the methods of the supper class; usage, and other methods
-need to be overwriten or extended.\
-@author Lawrence J. Miller
-@note $HeadURL$
-@note $LastChangedRevision$
-@author $LastChangedBy$
-@date $LastChangedDate$
- */
+ * @brief A base class for RBNB Widgets. Includes base parameters and constents.
+ * For actual usage, this class must be extended. Specifically: the arguments must
+ * be precessed by calling the methods of the supper class; usage, and other methods
+ * need to be overwriten or extended.
+ * @author Lawrence J. Miller
+ * @note $HeadURL$
+ * @note $LastChangedRevision$
+ * @author $LastChangedBy$
+ * @date $LastChangedDate$
+ * 
+ * @todo append host address to all source names that get registered on the dataturbine server
+ * 
+*/
 package edu.ucsd.osdt.util;
 
 import edu.ucsd.osdt.source.BaseSource;
@@ -54,11 +57,9 @@ public class RBNBBase
 	
 	
 	/**
-	 * Process the parsed command line; will usuall call setBaseArgs
-	 * 
+	 * Process the parsed command line; will usually call setBaseArgs
 	 * @param cmd (org.apache.commons.cli.CommandLine) -- the parsed command line
-	 * @return true if the command line processed sucessfully
-	 * 
+	 * @return true if the command line processed sucessfull
 	 * @see #setBaseArgs
 	 */
 	protected boolean setArgs(CommandLine cmd)
@@ -68,10 +69,8 @@ public class RBNBBase
 	
   /**
    * Set the arguments handled by this class.
-   * 
    * @param cmd  the command line
-   * @return     true if the command line is processed successfully, false
-   *             otherwise
+   * @return     true if the command line is processed successfully, false otherwise
    */
 	protected boolean setBaseArgs(CommandLine cmd)
 	{	
@@ -106,7 +105,6 @@ public class RBNBBase
   
   /**
    * Get the RBNB server host name.
-   * 
    * @param name  the host name of the server
    */
   public void setServerName(String name)
@@ -116,7 +114,6 @@ public class RBNBBase
 
   /**
    * Get the RBNB server port number.
-   * 
    * @param port  the port number of the server
    */
   public void setServerPort(String port)
@@ -136,7 +133,6 @@ public class RBNBBase
 
   /**
    * Get the server name and port string.
-   * 
    * @return  the server and port
    */
   public String getServer()
@@ -147,7 +143,6 @@ public class RBNBBase
 
   /**
    * Get the name of this rbnb client.
-   * 
    * @return  the name of the client
    */
   public String getRBNBClientName()
@@ -157,7 +152,6 @@ public class RBNBBase
 
   /**
    * Print out the usage of this application to standard output.
-   *
    */
 	public void printUsage()
 	{
@@ -171,7 +165,6 @@ public class RBNBBase
 
 	/**
 	 * Set the Options object for command line parsing; will usually call setBaseOptions
-	 * 
 	 * @return org.apache.commons.cli.Options
 	 * @see #setBaseOptions
 	 */
@@ -182,7 +175,6 @@ public class RBNBBase
 	
   /**
    * Set the options supported by this base class.
-   * 
    * @param opt  the options instance to add to
    * @return     the options instance with base class options
    */
