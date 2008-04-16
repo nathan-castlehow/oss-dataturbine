@@ -10,15 +10,16 @@ import java.util.Enumeration;
 import java.util.StringTokenizer;
 
 /*! @brief
- * This class provides a extends the RBNB Source class
+ * This class provides the core functionality needed by OSDT for source "driver" applications and extends the RBNB com.rbnb.sapi.Source class
  * @author Lawrence J. Miller
+ * @todo append host address to all source names that get registered on the dataturbine server
  */
 public class BaseSource extends com.rbnb.sapi.Source 
 {
 
 	// holds the serverAddress
 	private String serverAddress;
-	private RBNBBase mRBNBBase;
+	protected RBNBBase mRBNBBase;
 	private int rbnbArchiveSize;
 	private int rbnbCacheSize;
 	

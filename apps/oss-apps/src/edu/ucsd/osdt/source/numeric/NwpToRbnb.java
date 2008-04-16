@@ -4,10 +4,10 @@
 @author Lawrence J. Miller
 @brief A dispatcher for routing DAQ channels from the NWP to RBNB channels. 
 @note Modeled after code written by Paul Hubbard in May 07 2003.
-@note $HeadURL: file:///Users/hubbard/code/cleos-svn/cleos-rbnb-apps/trunk/src/edu/sdsc/cleos/NwpToRbnb.java $
-@note $LastChangedRevision: 153 $
-@author $LastChangedBy: ljmiller $
-@date $LastChangedDate: 2007-09-24 13:10:37 -0700 (Mon, 24 Sep 2007) $
+@note $HeadURL$
+@note $LastChangedRevision$
+@author $LastChangedBy$
+@date $LastChangedDate$
 @brief A command line application; translate data from NWP to RBNB
 
 This command line application takes parameters for a NWP server and an RBNB server,
@@ -377,13 +377,13 @@ public class NwpToRbnb extends RBNBBase
 	} // setupChannels()
 	
 	
-	protected String getCVSVersionString ()
+	public String getCVSVersionString ()
 	{
 		return (
-				"$LastChangedDate: 2007-09-24 13:10:37 -0700 (Mon, 24 Sep 2007) $\n" +
-				"$LastChangedRevision: 153 $" +
-				"$LastChangedBy: ljmiller $" +
-				"$HeadURL: file:///Users/hubbard/code/cleos-svn/cleos-rbnb-apps/trunk/src/edu/sdsc/cleos/NwpToRbnb.java $"
+				"$LastChangedDate$\n" +
+				"$LastChangedRevision$" +
+				"$LastChangedBy$" +
+				"$HeadURL$"
 		);
 	}
 
@@ -425,7 +425,7 @@ public class NwpToRbnb extends RBNBBase
 	}
 
 	
-	/*! @brief function to parse the arguments (retuired by superclass)
+	/*! @brief function to parse the arguments (required by superclass)
 	 * @see org.nees.rbnb.RBNBBase#setArgs(org.apache.commons.cli.CommandLine) */
 	protected boolean setArgs(CommandLine cmd) {
 		if (!setBaseArgs(cmd)) return false;

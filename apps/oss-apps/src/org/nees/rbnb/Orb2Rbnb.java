@@ -7,10 +7,10 @@ package org.nees.rbnb;
  * @since 051108
  *
  * svn keywords:
- * $LastChangedDate: 2007-09-24 13:10:37 -0700 (Mon, 24 Sep 2007) $
- * $LastChangedRevision: 153 $
- * $LastChangedBy: ljmiller $
- * $HeadURL: file:///Users/hubbard/code/cleos-svn/cleos-rbnb-apps/trunk/src/org/nees/rbnb/Orb2Rbnb.java $
+ * $LastChangedDate$
+ * $LastChangedRevision$
+ * $LastChangedBy$
+ * $HeadURL$
  */
  
  /** Copyright (c) 2005, 2006, Lawrence J. Miller and NEESit
@@ -550,10 +550,10 @@ public class Orb2Rbnb {
    
    protected static String getCVSVersionString() {
       return (
-            "$LastChangedDate: 2007-09-24 13:10:37 -0700 (Mon, 24 Sep 2007) $\n" +
-            "$LastChangedRevision: 153 $" +
-            "$LastChangedBy: ljmiller $" +
-            "$HeadURL: file:///Users/hubbard/code/cleos-svn/cleos-rbnb-apps/trunk/src/org/nees/rbnb/Orb2Rbnb.java $"
+            "$LastChangedDate$\n" +
+            "$LastChangedRevision$" +
+            "$LastChangedBy$" +
+            "$HeadURL$"
              );
    }
    

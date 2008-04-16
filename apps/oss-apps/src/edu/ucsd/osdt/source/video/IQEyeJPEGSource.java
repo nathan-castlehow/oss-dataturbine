@@ -62,10 +62,10 @@ public class IQEyeJPEGSource extends JPEGSource {
 
 	protected String getCVSVersionString()	 {
 		return (
-				"$LastChangedDate: 2007-12-17 16:13:22 -0800 (Mon, 17 Dec 2007) $\n" +
-				"$LastChangedRevision: 208 $" +
-				"$LastChangedBy: ljmiller $" +
-				"$HeadURL: file:///Users/hubbard/code/cleos-svn/cleos-rbnb-apps/trunk/src/edu/sdsc/cleos/IQEyeSource.java $"
+				"$LastChangedDate$\n" +
+				"$LastChangedRevision$" +
+				"$LastChangedBy$" +
+				"$HeadURL$"
 		);
 	}
 

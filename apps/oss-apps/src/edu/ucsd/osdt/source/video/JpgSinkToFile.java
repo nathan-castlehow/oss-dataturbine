@@ -98,10 +98,10 @@ public class JpgSinkToFile extends org.nees.rbnb.RBNBBase {
 	}
 
 	protected String getCVSVersionString() {
-		return ("$LastChangedDate: 2008-02-19 00:00:00 +0000 $\n"
-				+ "$LastChangedRevision: 1 $"
-				+ "$LastChangedBy: ebbe $"
-				+ "$HeadURL: ... $"); 
+		return ("$LastChangedDate$\n"
+				+ "$LastChangedRevision$"
+				+ "$LastChangedBy$"
+				+ "$HeadURL$"); 
 	}
 
 	protected Options setOptions() {

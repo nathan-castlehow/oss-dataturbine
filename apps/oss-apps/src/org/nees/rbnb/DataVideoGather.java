@@ -40,7 +40,7 @@ import com.rbnb.sapi.*;
  * 2002-11-13T15:48:55.56499 -0.005798 -0.003662 -0.009766 -0.006714
  * 
  * @author Terry E Weymouth
- * @version $Revision: 153 $
+ * @version $Revision$
  * 
  */
 public class DataVideoGather extends RBNBBase {
@@ -124,8 +124,8 @@ public class DataVideoGather extends RBNBBase {
     {
         return
             "  CVS information... \n" +
-            "  $Revision: 153 $\n" +
-            "  $Date: 2007-09-24 13:10:37 -0700 (Mon, 24 Sep 2007) $\n" +
+            "  $Revision$\n" +
+            "  $Date$\n" +
             "  $RCSfile: DataVideoGather.java,v $ \n";
     }
 

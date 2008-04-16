@@ -88,8 +88,8 @@ public class GrabDataMultipleSink extends RBNBBase {
     {
         return
             "  CVS information... \n" +
-            "  $Revision: 153 $\n" +
-            "  $Date: 2007-09-24 13:10:37 -0700 (Mon, 24 Sep 2007) $\n" +
+            "  $Revision$\n" +
+            "  $Date$\n" +
             "  $RCSfile: GrabDataMultipleSink.java,v $ \n";
     }
 

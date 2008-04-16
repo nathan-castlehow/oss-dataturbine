@@ -3,7 +3,7 @@
 @date May 8, 2003
 @author Paul Hubbard
 @brief Handles data feed from DAQ to turbine
-@version CVS:$Revision: 153 $
+@version CVS:$Revision$
 */
 package org.nees.daq;
 

@@ -3,10 +3,10 @@
  * @author Cyberinfrastructure Laboratory for Environmental Observing Systems (CLEOS)
  * @author San Diego Supercomputer Center (SDSC)
  * @note Please see copywrite information at the end of this file.
- * @since $LastChangedDate: 2007-09-24 13:10:37 -0700 (Mon, 24 Sep 2007) $
- * $LastChangedRevision: 153 $
- * @author $LastChangedBy: ljmiller $
- * $HeadURL: file:///Users/hubbard/code/cleos-svn/cleos-rbnb-apps/trunk/src/edu/sdsc/cleos/RbnbToSrb.java $
+ * @since $LastChangedDate$
+ * $LastChangedRevision$
+ * @author $LastChangedBy$
+ * $HeadURL$
  */
 /*! @class RbnbToSrb utility class to process input messages that have been
  * constructed from RBNB Sink output and to mirror the rbnb channel tree in the

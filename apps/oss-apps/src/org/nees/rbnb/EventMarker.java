@@ -23,10 +23,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  * 
- * $URL: file:///Users/hubbard/code/cleos-svn/cleos-rbnb-apps/trunk/src/org/nees/rbnb/marker/EventMarker.java $
- * $Revision: 153 $
- * $Date: 2007-09-24 13:10:37 -0700 (Mon, 24 Sep 2007) $
- * $Author: ljmiller $
+ * $URL$
+ * $Revision$
+ * $Date$
+ * $Author$
  */
 package org.nees.rbnb.marker;
 

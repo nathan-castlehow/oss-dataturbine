@@ -4,10 +4,10 @@ this class must be extended. Specifically: the arguments must be precessed by
 calling the methods of the supper class; usage, and other methods
 need to be overwriten or extended.\
 @author Lawrence J. Miller
-@note $HeadURL: file:///Users/hubbard/code/cleos-svn/cleos-rbnb-apps/trunk/src/edu/sdsc/cleos/RBNBBase.java $
-@note $LastChangedRevision: 153 $
-@author $LastChangedBy: ljmiller $
-@date $LastChangedDate: 2007-09-24 13:10:37 -0700 (Mon, 24 Sep 2007) $
+@note $HeadURL$
+@note $LastChangedRevision$
+@author $LastChangedBy$
+@date $LastChangedDate$
  */
 package edu.sdsc.cleos;
 

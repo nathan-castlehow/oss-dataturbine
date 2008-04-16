@@ -2,10 +2,10 @@
 @see edu.sdsc.cleos.NwpToRbnb
 @author Lawrence J. Miller
 @since 3/9/07
-@note $HeadURL: file:///Users/hubbard/code/cleos-svn/cleos-rbnb-apps/trunk/src/edu/sdsc/cleos/ControlConnectionThread.java $
-@note $LastChangedRevision: 153 $
-@author $LastChangedBy: ljmiller $
-@date $LastChangedDate: 2007-09-24 13:10:37 -0700 (Mon, 24 Sep 2007) $
+@note $HeadURL$
+@note $LastChangedRevision$
+@author $LastChangedBy$
+@date $LastChangedDate$
  */
 package edu.ucsd.osdt.daq;
 

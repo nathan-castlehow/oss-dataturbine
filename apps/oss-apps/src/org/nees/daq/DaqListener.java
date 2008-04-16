@@ -3,7 +3,7 @@
 @date Feb 11, 2005
 @author Terry Weymouth
 @brief An interface for classes that will be listening for DAQ data.
-@version CVS:$Revision: 153 $
+@version CVS:$Revision$
 */
 package org.nees.daq;
 

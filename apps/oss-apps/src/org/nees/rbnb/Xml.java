@@ -19,7 +19,7 @@ import java.io.*;
 * @author The Chef team
 * @author Glenn Golden
 * @author Terry E Weymouth
-* @version CVS Revision number $Revision: 153 $
+* @version CVS Revision number $Revision$
 */
 public class Xml
 {

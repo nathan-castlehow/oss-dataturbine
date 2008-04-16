@@ -35,10 +35,10 @@ import javax.sound.sampled.UnsupportedAudioFileException;
  * @author Terry E. Weymouth
  * 
  * SVN Source information...
- *   $LastChangedRevision: 153 $
- *   $LastChangedDate: 2007-09-24 13:10:37 -0700 (Mon, 24 Sep 2007) $
- *   $HeadURL: file:///Users/hubbard/code/cleos-svn/cleos-rbnb-apps-dev/turbine-dev/src/org/nees/audioExample/SimpleAudio.java $
- *   $LastChangedBy: ljmiller $
+ *   $LastChangedRevision$
+ *   $LastChangedDate$
+ *   $HeadURL$
+ *   $LastChangedBy$
  */
 public class SimpleAudio {
 

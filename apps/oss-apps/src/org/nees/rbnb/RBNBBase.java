@@ -22,10 +22,10 @@ import org.apache.commons.cli.HelpFormatter;
  * @author Lawrence J. Miller
  * @author Jason P. Hanley
  * 
- * $LastChangedDate: 2007-09-24 13:10:37 -0700 (Mon, 24 Sep 2007) $
- * $LastChangedRevision: 153 $
- * $LastChangedBy: ljmiller $
- * $HeadURL: file:///Users/hubbard/code/cleos-svn/cleos-rbnb-apps/trunk/src/org/nees/rbnb/RBNBBase.java $
+ * $LastChangedDate$
+ * $LastChangedRevision$
+ * $LastChangedBy$
+ * $HeadURL$
  */
 public abstract class RBNBBase
 {

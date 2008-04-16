@@ -3,10 +3,10 @@
 @brief DAQ interface, this portion is the 'control channel' TCP port
 @date Thu May 08 2003.
 @version CVS:$Revision:3101 $
-@note $HeadURL: file:///Users/hubbard/code/cleos-svn/cleos-rbnb-apps/trunk/src/edu/sdsc/cleos/ControlPort.java $
-@note $LastChangedRevision: 153 $
-@author $LastChangedBy: ljmiller $
-@date $LastChangedDate: 2007-09-24 13:10:37 -0700 (Mon, 24 Sep 2007) $
+@note $HeadURL$
+@note $LastChangedRevision$
+@author $LastChangedBy$
+@date $LastChangedDate$
 @brief Mediates the connection between DAQ and any internal requester
 This class presents a DAQ control port with support to get the DAQ channel list.
 One uses this to connect to the controller, get the list of availabe channels,

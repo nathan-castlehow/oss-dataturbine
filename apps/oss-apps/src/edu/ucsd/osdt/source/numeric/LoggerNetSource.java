@@ -1,12 +1,12 @@
 /*!
  * @file LoggerNetSource.java
  * @author Lawrence J. Miller <ljmiller@sdsc.edu>
- * @author $LastChangedBy: ljmiller $
+ * @author $LastChangedBy$
  * @author Cyberinfrastructure Laboratory for Environmental Observing Systems (CLEOS)
  * @author San Diego Supercomputer Center (SDSC)
- * @date $LastChangedDate: 2008-02-27 17:14:17 -0800 (Wed, 27 Feb 2008) $
- * @version $LastChangedRevision: 259 $
- * @note $HeadURL: http://nladr-cvs.sdsc.edu/svn-public/CLEOS/cleos-rbnb-apps-dev/turbine-dev/src/edu/sdsc/cleos/LoggerNetSource.java $
+ * @date $LastChangedDate$
+ * @version $LastChangedRevision$
+ * @note $HeadURL$
  */
 package edu.ucsd.osdt.source.numeric;
 
@@ -31,7 +31,7 @@ import edu.ucsd.osdt.util.ISOtoRbnbTime;
 
 /*! @brief A Dataturbine source accumulator that parses and puts Campbell
  *  Loggernet data onto the ring buffer. */
-class LoggerNetSource extends BaseSource {
+class LoggerNetSource extends RBNBBase {
 	private String DEFAULT_FILE_NAME = "loggernet.dat";
 	private String loggernetFileName = DEFAULT_FILE_NAME;
 	private BufferedReader loggernetFileBuffer = null;
@@ -103,9 +103,9 @@ class LoggerNetSource extends BaseSource {
 			source=new BaseSource(rbnbCacheSize, "none", 0);
 		}
 		this.initCmap();
-		source.OpenRBNBConnection(mRBNBBase.getServer(), mRBNBBase.getRBNBClientName());
-		logger.config("Set up connection to RBNB on " + mRBNBBase.getServer() +
-				" as source = " + getRBNBClientName());
+		myBaseSource.OpenRBNBConnection(serverName, rbnbClientName);
+		logger.config("Set up connection to RBNB on " + serverName +
+				" as source = " + rbnbClientName);
 		logger.config(" with RBNB Cache Size = " + rbnbCacheSize + " and RBNB Archive Size = " + rbnbArchiveSize);
 		source.Register(cmap);
 		source.Flush(cmap);
@@ -198,7 +198,7 @@ class LoggerNetSource extends BaseSource {
 	/*****************************************************************************/
 	public static void main(String[] args) {
 		LoggerNetSource loggernet = new LoggerNetSource();
-		if(! loggernet.mRBNBBase.parseArgs(args)) {
+		if(! loggernet.parseArgs(args)) {
 			logger.severe("Unable to process command line. Terminating.");
 			System.exit(1);
 		}
@@ -227,7 +227,7 @@ class LoggerNetSource extends BaseSource {
 	/*! @brief Command-line processing.
 	 * @note required by interface RBNBBase */
 	protected Options setOptions() {
-		Options opt = mRBNBBase.setBaseOptions(new Options()); // uses h, v, s, p, S
+		Options opt = setBaseOptions(new Options()); // uses h, v, s, p, S
 
 		opt.addOption("z",true, "DataTurbine cache size *" + DEFAULT_CACHE_SIZE);
 		opt.addOption("Z",true, "Dataturbine archive size *" + DEFAULT_ARCHIVE_SIZE);
@@ -274,22 +274,5 @@ class LoggerNetSource extends BaseSource {
 		}
 		return true;
 	} // setArgs()
-	
-	
-	/*! @note required by interface RBNBBase */
-	protected String getCVSVersionString() {
-		return getSVNVersionString();
-	}
-
-
-	/*! @note svn keywords */
-	protected String getSVNVersionString() {
-		return(
-				"$LastChangedDate: 2008-02-27 17:14:17 -0800 (Wed, 27 Feb 2008) $\n" +
-				"$LastChangedRevision: 259 $\n" +
-				"$LastChangedBy: ljmiller $\n" +
-				"$HeadURL: http://nladr-cvs.sdsc.edu/svn-public/CLEOS/cleos-rbnb-apps-dev/turbine-dev/src/edu/sdsc/cleos/LoggerNetSource.java $"
-		);
-	}
 	
 } // class

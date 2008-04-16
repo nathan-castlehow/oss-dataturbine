@@ -8,10 +8,10 @@ package org.nees.rbnb;
  * @since 050928
  * Copyright (c) 2005, NEES Cyberinfrastructure Center (NEESit), San Diego Supercomputer Center
  * All rights reserved. See full notice in the source, at the end of the file.
- * $LastChangedDate: 2007-09-24 13:10:37 -0700 (Mon, 24 Sep 2007) $
- * $LastChangedRevision: 153 $
- * $LastChangedBy: ljmiller $
- * $HeadURL: file:///Users/hubbard/code/cleos-svn/cleos-rbnb-apps/trunk/src/org/nees/rbnb/DataTurbine.java $ 
+ * $LastChangedDate$
+ * $LastChangedRevision$
+ * $LastChangedBy$
+ * $HeadURL$ 
  */
 
 import com.rbnb.sapi.Source;

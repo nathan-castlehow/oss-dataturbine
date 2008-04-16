@@ -10,8 +10,8 @@
  * Science Foundation under Award Numbers CMS-0117853 and CMS-0402490.
  * 
  * CVS information...
- *   $Revision: 153 $
- *   $Date: 2007-09-24 13:10:37 -0700 (Mon, 24 Sep 2007) $
+ *   $Revision$
+ *   $Date$
  *   $RCSfile: MetadataTest.java,v $ 
  * 
  */
@@ -38,8 +38,8 @@ public class MetadataTest {
     private final static long THREAD_SLEEP_TIME = 1*1000; // times one second
 
     static final String CVS_INFO = "CVS Information \n" +
-        "  $Revision: 153 $ \n" +
-        "  $Date: 2007-09-24 13:10:37 -0700 (Mon, 24 Sep 2007) $ \n" +
+        "  $Revision$ \n" +
+        "  $Date$ \n" +
         "  $RCSfile: MetadataTest.java,v $"; 
 
     public static void main(String[] args)

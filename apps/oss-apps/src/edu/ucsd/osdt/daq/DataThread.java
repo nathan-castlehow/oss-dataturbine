@@ -3,11 +3,11 @@
 @date May 8, 2003
 @author Paul Hubbard
 @brief Handles data feed from DAQ to turbine
-@version CVS:$Revision: 153 $
-@note $HeadURL: file:///Users/hubbard/code/cleos-svn/cleos-rbnb-apps/trunk/src/edu/sdsc/cleos/DataThread.java $
-@note $LastChangedRevision: 153 $
-@author $LastChangedBy: ljmiller $
-@date $LastChangedDate: 2007-09-24 13:10:37 -0700 (Mon, 24 Sep 2007) $
+@version CVS:$Revision$
+@note $HeadURL$
+@note $LastChangedRevision$
+@author $LastChangedBy$
+@date $LastChangedDate$
 @brief For a java thread to monitor for DAQ data.
 Creates a runable for a java thread to monitor and relay data. Only relays data to
 those listeners that have been added. This thread sorts the data by

@@ -5,7 +5,7 @@
 @author Lawrence J. Miller
 @brief An interface for classes that will be listening for DAQ data.
 @not modified to handle the nwp as a daq
-@version CVS:$Revision: 153 $
+@version CVS:$Revision$
 @brief The interface for classes that want to receive DAQ data.
 The assumptions for this API are that it will receive data from a number of
 channels. The channels that are expected are first registered with the method

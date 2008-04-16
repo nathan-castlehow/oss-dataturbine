@@ -42,10 +42,10 @@ public class DLinkSource extends MJPEGSource {
     protected String getCVSVersionString()
     {
         return (
-              "$LastChangedDate: 2007-09-24 13:10:37 -0700 (Mon, 24 Sep 2007) $\n" +
-              "$LastChangedRevision: 153 $" +
-              "$LastChangedBy: ljmiller $" +
-              "$HeadURL: file:///Users/hubbard/code/cleos-svn/cleos-rbnb-apps/trunk/src/org/nees/rbnb/DLinkSource.java $"
+              "$LastChangedDate$\n" +
+              "$LastChangedRevision$" +
+              "$LastChangedBy$" +
+              "$HeadURL$"
                );
     }
 

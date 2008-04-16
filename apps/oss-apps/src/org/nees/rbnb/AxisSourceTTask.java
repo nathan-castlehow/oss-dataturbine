@@ -8,13 +8,13 @@ package org.nees.rbnb;
 * Please see copywrite information at the end of this file.
 *
 * Perforce RCS info:
-* $Id: AxisSourceTTask.java 153 2007-09-24 20:10:37Z ljmiller $
+* $Id$
 * $Header: $
-* $Date: 2007-09-24 13:10:37 -0700 (Mon, 24 Sep 2007) $
+* $Date$
 * $Change: $
 * $File: $
-* $Revision: 153 $
-* $Author: ljmiller $
+* $Revision$
+* $Author$
 */
 
 import java.util.TimerTask;

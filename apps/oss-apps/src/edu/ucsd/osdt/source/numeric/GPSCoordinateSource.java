@@ -4,10 +4,10 @@ package edu.ucsd.osdt.source.numeric;
  * @author Lawrence J. Miller <ljmiller@sdsc.edu>
  * @author Cyberinfrastructure Laboratory for Environmental Observing Systems (CLEOS)
  * @author San Diego Supercomputer Center (SDSC)
- * @since $LastChangedDate: 2007-12-17 16:13:22 -0800 (Mon, 17 Dec 2007) $
- * $LastChangedRevision: 208 $
- * @author $LastChangedBy: ljmiller $
- * $HeadURL: file:///Users/hubbard/code/cleos-svn/cleos-rbnb-apps/trunk/src/edu/sdsc/cleos/GPSCoordinateSource.java $
+ * @since $LastChangedDate$
+ * $LastChangedRevision$
+ * @author $LastChangedBy$
+ * $HeadURL$
  */
 
 /*! @class a classs that will add channels required by the RBNB KML plugin to a specified
@@ -52,17 +52,17 @@ public class GPSCoordinateSource extends RBNBBase {
 	} // putToHash()
 	
 	/** @note required by interface RBNBBase */
-	protected String getCVSVersionString() {
+	public String getCVSVersionString() {
 		return getSVNVersionString();
 	}
 	
 	/** @note svn keywords */
-	protected String getSVNVersionString() {
+	public String getSVNVersionString() {
 		return (
-	             "$LastChangedDate: 2007-12-17 16:13:22 -0800 (Mon, 17 Dec 2007) $\n" +
-	             "$LastChangedRevision: 208 $\n" +
-	             "$LastChangedBy: ljmiller $\n" +
-	             "$HeadURL: file:///Users/hubbard/code/cleos-svn/cleos-rbnb-apps/trunk/src/edu/sdsc/cleos/GPSCoordinateSource.java $"
+	             "$LastChangedDate$\n" +
+	             "$LastChangedRevision$\n" +
+	             "$LastChangedBy$\n" +
+	             "$HeadURL$"
 	              );
 	}
 	

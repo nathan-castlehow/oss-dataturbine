@@ -96,13 +96,13 @@ public class DaqToRbnb extends RBNBBase
 	}
 
     /*! @brief returns rcs information; curently svn, but left with the name "cvs" for backwards compatibility */
-    protected String getCVSVersionString ()
+    public String getCVSVersionString ()
     {
        return (
-             "$LastChangedDate: 2007-09-24 13:10:37 -0700 (Mon, 24 Sep 2007) $\n" +
-             "$LastChangedRevision: 153 $" +
-             "$LastChangedBy: ljmiller $" +
-             "$HeadURL: file:///Users/hubbard/code/cleos-svn/cleos-rbnb-apps/trunk/src/edu/sdsc/cleos/DaqToRbnb.java $"
+             "$LastChangedDate$\n" +
+             "$LastChangedRevision$" +
+             "$LastChangedBy$" +
+             "$HeadURL$"
               );
     }
     

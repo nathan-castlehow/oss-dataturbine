@@ -29,10 +29,10 @@ Vaisala WXT510 Weather Transmitter			Vaisala			WXT510	WXT510WDMAX	Wind Direction
 Vaisala WXT510 Weather Transmitter			Vaisala			WXT510	WXT510WSMIN	Wind Speed Min		m/s
 Vaisala WXT510 Weather Transmitter			Vaisala			WXT510	WXT510WSAVG	Wind Speed Avg		m/s
 Vaisala WXT510 Weather Transmitter			Vaisala			WXT510	WXT510WSMAX	Wind Speed Max		m/s
-@note $HeadURL: file:///Users/hubbard/code/cleos-svn/cleos-rbnb-apps/trunk/src/edu/sdsc/cleos/NeonSingleStringData.java $
-@note $LastChangedRevision: 153 $
-@author $LastChangedBy: ljmiller $
-@date $LastChangedDate: 2007-09-24 13:10:37 -0700 (Mon, 24 Sep 2007) $
+@note $HeadURL$
+@note $LastChangedRevision$
+@author $LastChangedBy$
+@date $LastChangedDate$
 */
 
 //PTB210,LI190QS,HMP45T,HMP45H,BF3TR,BF3DR,BF3SS,WXT510T,WXT510H,WXT510P,WXT510RA,WXT510RD,WXT510RI,WXT510HA,WXT510HD,WXT510HI,WXT510RPI,WXT510HPI,WXT510WDMIN,WXT510WDAVG,WXT510WDMAX,WXT510WSMIN,WXT510WSAVG,WXT510WSMAX,NWPLOG,GPSLOG

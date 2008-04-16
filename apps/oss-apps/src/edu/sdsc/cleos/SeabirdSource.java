@@ -1,12 +1,12 @@
 /*!
  * @file SeabirdSource.java
  * @author Lawrence J. Miller <ljmiller@sdsc.edu>
- * @author $LastChangedBy: ljmiller $
+ * @author $LastChangedBy$
  * @author Cyberinfrastructure Laboratory for Environmental Observing Systems (CLEOS)
  * @author San Diego Supercomputer Center (SDSC)
- * @date $LastChangedDate: 2008-02-14 08:52:53 -0800 (Thu, 14 Feb 2008) $
- * @version $LastChangedRevision: 248 $
- * @note $HeadURL: http://nladr-cvs.sdsc.edu/svn-public/CLEOS/cleos-rbnb-apps-dev/turbine-dev/src/edu/sdsc/cleos/SeabirdSource.java $
+ * @date $LastChangedDate$
+ * @version $LastChangedRevision$
+ * @note $HeadURL$
  */
 
 package edu.sdsc.cleos;
@@ -554,10 +554,10 @@ class SeabirdSource extends RBNBBase
 	/*! @note svn keywords */
 	protected String getSVNVersionString() {
 		return(
-				"$LastChangedDate: 2008-02-14 08:52:53 -0800 (Thu, 14 Feb 2008) $\n" +
-				"$LastChangedRevision: 248 $\n" +
-				"$LastChangedBy: ljmiller $\n" +
-				"$HeadURL: http://nladr-cvs.sdsc.edu/svn-public/CLEOS/cleos-rbnb-apps-dev/turbine-dev/src/edu/sdsc/cleos/SeabirdSource.java $"
+				"$LastChangedDate$\n" +
+				"$LastChangedRevision$\n" +
+				"$LastChangedBy$\n" +
+				"$HeadURL$"
 		);
 	}
 

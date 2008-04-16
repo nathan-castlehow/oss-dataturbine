@@ -10,8 +10,8 @@
  * Science Foundation under Award Numbers CMS-0117853 and CMS-0402490.
  * 
  * CVS information...
- *   $Revision: 153 $
- *   $Date: 2007-09-24 13:10:37 -0700 (Mon, 24 Sep 2007) $
+ *   $Revision$
+ *   $Date$
  *   $RCSfile: RbnbToMovie.java,v $ 
  * 
  */
@@ -133,8 +133,8 @@ implements ControllerListener, DataSinkListener
     {
         return
             "  CVS information... \n" +
-            "  $Revision: 153 $\n" +
-            "  $Date: 2007-09-24 13:10:37 -0700 (Mon, 24 Sep 2007) $\n" +
+            "  $Revision$\n" +
+            "  $Date$\n" +
             "  $RCSfile: RbnbToMovie.java,v $ \n";
     }
 

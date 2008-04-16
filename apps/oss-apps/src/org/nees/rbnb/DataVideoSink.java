@@ -48,7 +48,7 @@ import com.rbnb.sapi.*;
  * Gets data from a data stream sink, and then fetches the
  * "nearest" video for each data fetched. 
  * @author Terry E. Weymouth
- * @version $Revision: 153 $
+ * @version $Revision$
  */
 public class DataVideoSink extends RBNBBase {
 	
@@ -151,8 +151,8 @@ public class DataVideoSink extends RBNBBase {
     {
         return
             "  CVS information... \n" +
-            "  $Revision: 153 $\n" +
-            "  $Date: 2007-09-24 13:10:37 -0700 (Mon, 24 Sep 2007) $\n" +
+            "  $Revision$\n" +
+            "  $Date$\n" +
             "  $RCSfile: DataVideoSink.java,v $ \n";
     }
 

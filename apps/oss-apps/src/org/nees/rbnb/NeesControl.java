@@ -19,7 +19,7 @@ package org.nees.rbnb;
  * 	</server-side-application>
  * 
  * @author Terry E. Weymouth
- * @version $Revision: 153 $ (CVS Revision number)
+ * @version $Revision$ (CVS Revision number)
  * @see org.nees.rbnb.ServerSideApplication
  * 
  */

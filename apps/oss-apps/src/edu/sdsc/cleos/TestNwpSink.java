@@ -224,10 +224,10 @@ public class TestNwpSink extends RBNBBase{
 	protected String getCVSVersionString ()
 	{
 		return (
-				"$LastChangedDate: 2007-09-24 13:10:37 -0700 (Mon, 24 Sep 2007) $\n" +
-				"$LastChangedRevision: 153 $\n" +
-				"$LastChangedBy: ljmiller $\n" +
-				"$HeadURL: file:///Users/hubbard/code/cleos-svn/cleos-rbnb-apps/trunk/src/edu/sdsc/cleos/TestNwpSink.java $\n"
+				"$LastChangedDate$\n" +
+				"$LastChangedRevision$\n" +
+				"$LastChangedBy$\n" +
+				"$HeadURL$\n"
 		);
 	}
 	

@@ -1,12 +1,12 @@
 /*!
  * @file LoggerNetSource.java
  * @author Lawrence J. Miller <ljmiller@sdsc.edu>
- * @author $LastChangedBy: ljmiller $
+ * @author $LastChangedBy$
  * @author Cyberinfrastructure Laboratory for Environmental Observing Systems (CLEOS)
  * @author San Diego Supercomputer Center (SDSC)
- * @date $LastChangedDate: 2008-02-27 17:14:17 -0800 (Wed, 27 Feb 2008) $
- * @version $LastChangedRevision: 259 $
- * @note $HeadURL: http://nladr-cvs.sdsc.edu/svn-public/CLEOS/cleos-rbnb-apps-dev/turbine-dev/src/edu/sdsc/cleos/LoggerNetSource.java $
+ * @date $LastChangedDate$
+ * @version $LastChangedRevision$
+ * @note $HeadURL$
  */
 package edu.sdsc.cleos;
 
@@ -281,10 +281,10 @@ class LoggerNetSource extends RBNBBase {
 	/*! @note svn keywords */
 	protected String getSVNVersionString() {
 		return(
-				"$LastChangedDate: 2008-02-27 17:14:17 -0800 (Wed, 27 Feb 2008) $\n" +
-				"$LastChangedRevision: 259 $\n" +
-				"$LastChangedBy: ljmiller $\n" +
-				"$HeadURL: http://nladr-cvs.sdsc.edu/svn-public/CLEOS/cleos-rbnb-apps-dev/turbine-dev/src/edu/sdsc/cleos/LoggerNetSource.java $"
+				"$LastChangedDate$\n" +
+				"$LastChangedRevision$\n" +
+				"$LastChangedBy$\n" +
+				"$HeadURL$"
 		);
 	}
 	

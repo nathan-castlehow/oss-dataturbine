@@ -4,7 +4,7 @@
 @author Paul Hubbard 
 @date Tue Aug 12 2003.
 @note Based on code from Chuck Severance, extensively cleaned up by Terry Weymouth
-@version CVS:$Revision: 153 $
+@version CVS:$Revision$
 */
 
 package org.nees.daq;
