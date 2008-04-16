@@ -1,4 +1,4 @@
-package org.nchc.rbnb;
+package edu.ucsd.osdt.source.video;
 
 import java.io.File;
 import java.io.IOException;
@@ -16,7 +16,8 @@ import com.rbnb.sapi.Sink;
  * This is a re-write of org.nees.rbnb.JpgSaverSink
  * <p>This class grabs the latest image from an RBNB image source and save it as a regular file into a
  * directory, or writes it to a named pipe (Linux only).
- * <p>The named pipe can be used to read and display the data stream with for example VLC. 
+ * <p>The named pipe can be used to read and display the data stream with for example VLC.
+ * @note package name changed and writeMessage() calls changed to System.out.println() to get this program to build in osdt source tree - LJM 080416 
  * 
  * @see org.nees.rbnb.JpgLoaderSink
  * 
@@ -170,7 +171,7 @@ public class JpgSinkToFile extends org.nees.rbnb.RBNBBase {
 	public boolean setup(String serverName, int serverPort, String sinkName, String channelPath ) {
 
 		setServerName(serverName);
-		setServerPort(serverPort);
+		setServerPort(Integer.toString(serverPort));
 
 		this.sinkName = sinkName;
 		this.channelPath = channelPath;
@@ -187,9 +188,9 @@ public class JpgSinkToFile extends org.nees.rbnb.RBNBBase {
 	 * Prints the setup parameters.
 	 */
 	private void printSetup() {
-		writeMessage("Starting JpgSaverToPipe on " + getServer() +
+		System.out.println("Starting JpgSaverToPipe on " + getServer() +
 				" as " + sinkName);
-		writeMessage("  Archiving channel " + channelPath + " to file/pipe " + outputFile);
+		System.out.println("  Archiving channel " + channelPath + " to file/pipe " + outputFile);
 	}
 
 
@@ -240,16 +241,16 @@ public class JpgSinkToFile extends org.nees.rbnb.RBNBBase {
 			imagesExported = exportVideo(sMap);
 
 		} catch (SAPIException e) {
-			writeMessage("Error getting data from server: " + e.getMessage() + ".");
+			System.out.println("Error getting data from server: " + e.getMessage() + ".");
 			return false;
 		} catch (IOException e) {
-			writeMessage("Error writing data to file: " + e.getMessage() + ".");
+			System.out.println("Error writing data to file: " + e.getMessage() + ".");
 			return false;
 		} finally {
 			disconnect();
 		}
 
-		writeMessage("Export stopped. Wrote " + imagesExported + " JPEG images.               ");
+		System.out.println("Export stopped. Wrote " + imagesExported + " JPEG images.               ");
 		return true;
 	}
 
@@ -278,13 +279,13 @@ public class JpgSinkToFile extends org.nees.rbnb.RBNBBase {
 			ChannelMap m = sink.Fetch(1000);
 
 			if (m.GetIfFetchTimedOut()) {
-				writeMessage("Warning: Request for data timed out, retrying.");
+				System.out.println("Warning: Request for data timed out, retrying.");
 				continue;
 			}
 			
 			int index = m.GetIndex(channelPath);
 			if (index < 0) {
-				writeMessage("Warning: Channel index < 0, retrying.");
+				System.out.println("Warning: Channel index < 0, retrying.");
 				continue;
 			}
 
@@ -296,7 +297,7 @@ public class JpgSinkToFile extends org.nees.rbnb.RBNBBase {
 					out = new FileOutputStream(outputFile);
 					out.write(data[i]);
 				}catch (IOException e){
-					writeMessage("Warning: IOException (" + e.getMessage() + "), retrying.");
+					System.out.println("Warning: IOException (" + e.getMessage() + "), retrying.");
 				}finally{
 					if( out != null )
 						out.close();
@@ -321,7 +322,7 @@ public class JpgSinkToFile extends org.nees.rbnb.RBNBBase {
 		try {
 			sink.OpenRBNBConnection(getServer(), sinkName);
 		} catch (SAPIException e) {
-			writeMessage("Error: Unable to connect to server.");
+			System.out.println("Error: Unable to connect to server.");
 			disconnect();
 			return false;
 		}
