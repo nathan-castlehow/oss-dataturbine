@@ -51,7 +51,7 @@ import org.apache.commons.cli.Options;
 /*! @brief A driver program that interfaces to the Seacat CTD profiler via
  * rs232, gathers and formats the data stream, and then puts this data stream
  * onto a DataTurbine ring buffer. */
-class SeabirdSource extends BaseSource
+class SeabirdSource extends RBNBBase
 {
 	// serial port / seabird
 	public static final String DEFAULT_SEABIRD_PORT = "COM1";
@@ -69,7 +69,6 @@ class SeabirdSource extends BaseSource
 	private int rbnbCacheSize = DEFAULT_CACHE_SIZE;
 	private static final int DEFAULT_ARCHIVE_SIZE = 0;
 	private int rbnbArchiveSize = DEFAULT_ARCHIVE_SIZE;
-	private RBNBBase mRBNBBase = null;
 	private ChannelMap cmap = null;
 	 
 	// timezone offset from GMT
@@ -86,7 +85,6 @@ class SeabirdSource extends BaseSource
 	 * shutdown hook to trap ctrl-c. */
 	public SeabirdSource() {
 		super();
-		mRBNBBase = new RBNBBase(this);
 		rbnbClientName = "Seabird";
 		seabirdParser = new SeabirdParser();
 		if(writeFile) {
@@ -176,17 +174,17 @@ class SeabirdSource extends BaseSource
 	/*! @brief Sets up the connection to an rbnb server. */
 	public void initRbnb() throws SAPIException {
 		if (rbnbArchiveSize > 0) {
-			super(rbnbCacheSize, "append", rbnbArchiveSize);
+			myBaseSource = new BaseSource(rbnbCacheSize, "append", rbnbArchiveSize);
 		} else {
-			super(rbnbCacheSize, "none", 0);
+			myBaseSource = new BaseSource(rbnbCacheSize, "none", 0);
 		}
 		this.initCmap();
-		OpenRBNBConnection(mRBNBBase.getServer(), mRBNBBase.getRBNBClientName());
-		logger.config("Set up connection to RBNB on " + mRBNBBase.getServer() +
-				" as source = " + mRBNBBase.getRBNBClientName());
+		this.myBaseSource.OpenRBNBConnection(getServer(), getRBNBClientName());
+		logger.config("Set up connection to RBNB on " + getServer() +
+				" as source = " + getRBNBClientName());
 		logger.config(" with RBNB Cache Size = " + rbnbCacheSize + " and RBNB Archive Size = " + rbnbArchiveSize);
-		this.Register(cmap);
-		this.Flush(cmap);
+		this.myBaseSource.Register(cmap);
+		this.myBaseSource.Flush(cmap);
 	}
 
 
@@ -224,9 +222,9 @@ class SeabirdSource extends BaseSource
 	protected void closeRbnb() {
 	
 		if (rbnbArchiveSize > 0) { // then close and keep the ring buffer
-			this.Detach();
+			this.myBaseSource.Detach();
 		} else { // close and scrap the cache
-			this.CloseRBNBConnection();
+			this.myBaseSource.CloseRBNBConnection();
 		}
 		logger.config("Closed RBNB connection");
 	}
@@ -399,7 +397,7 @@ class SeabirdSource extends BaseSource
 			sae.printStackTrace();
 			throw sae;
 		}
-		this.Flush(cmap);
+		this.myBaseSource.Flush(cmap);
 	}
 	
 
@@ -407,7 +405,7 @@ class SeabirdSource extends BaseSource
 	/*****************************************************************************/
 	public static void main(String[] args) {
 		SeabirdSource seabird = new SeabirdSource();
-		if(! seabird.mRBNBBase.parseArgs(args)) {
+		if(! seabird.parseArgs(args)) {
 			logger.severe("Unable to process command line. Terminating.");
 			System.exit(1);
 		}
@@ -463,7 +461,7 @@ class SeabirdSource extends BaseSource
 	/*! @brief Command-line processing.
 	 * @note required by interface RBNBBase */
 	protected Options setOptions() {
-		Options opt = mRBNBBase.setBaseOptions(new Options()); // uses h, v, s, p, S
+		Options opt = setBaseOptions(new Options()); // uses h, v, s, p, S
 
 		opt.addOption("P",true, "Serial port to read *" + DEFAULT_SEABIRD_PORT);
 		opt.addOption("z",true, "DataTurbine cache size *" + DEFAULT_CACHE_SIZE);
@@ -478,10 +476,9 @@ class SeabirdSource extends BaseSource
 	} // setOptions()
 
 
-	/*! @brief Command-line processing.
-	 * @note required by interface RBNBBase */
+	/*! @brief Command-line processing. */
 	protected boolean setArgs(CommandLine cmd) throws IllegalArgumentException {
-		if (!mRBNBBase.setBaseArgs(cmd)) return false;
+		if (! setBaseArgs(cmd)) return false;
 
 		if(cmd.hasOption('P')) { // seabird serial port
 			String v = cmd.getOptionValue("P");
@@ -546,23 +543,6 @@ class SeabirdSource extends BaseSource
 		}
 		return true;
 	} // setArgs()
-
-
-	/*! @note required by interface RBNBBase */
-	protected String getCVSVersionString() {
-		return getSVNVersionString();
-	}
-
-
-	/*! @note svn keywords */
-	protected String getSVNVersionString() {
-		return(
-				"$LastChangedDate$\n" +
-				"$LastChangedRevision$\n" +
-				"$LastChangedBy$\n" +
-				"$HeadURL$"
-		);
-	}
 
 
 	/*! @brief Convenience to hide exception "handling" (not sure what to do if thread sleep gets interrupted). */
