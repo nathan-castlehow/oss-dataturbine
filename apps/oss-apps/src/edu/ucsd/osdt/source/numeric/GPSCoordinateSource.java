@@ -14,6 +14,7 @@ package edu.ucsd.osdt.source.numeric;
   * RBNB Source and channel name */
 
 import edu.ucsd.osdt.util.RBNBBase;
+import edu.ucsd.osdt.source.BaseSource;
 
 import com.rbnb.sapi.ChannelMap;
 import com.rbnb.sapi.Source;
@@ -33,7 +34,7 @@ public class GPSCoordinateSource extends RBNBBase {
 	
 	/*! constructor */
 	public GPSCoordinateSource() {
-		super();
+		super(new BaseSource());
 		coordinateValueHash = new HashMap();
 	}
 	

@@ -84,7 +84,7 @@ class SeabirdSource extends RBNBBase
 	/*! @brief A constructor that simply constructs the super class and adds a
 	 * shutdown hook to trap ctrl-c. */
 	public SeabirdSource() {
-		super();
+		super(new BaseSource());
 		rbnbClientName = "Seabird";
 		seabirdParser = new SeabirdParser();
 		if(writeFile) {

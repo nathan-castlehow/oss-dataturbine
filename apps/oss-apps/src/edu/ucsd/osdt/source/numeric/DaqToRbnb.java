@@ -314,6 +314,7 @@ public class DaqToRbnb extends RBNBBase
 		@see #main
 	*/
 	public DaqToRbnb() {
+		super(new BaseSource());
 		computeDefaultTimeOffset();
        // LJM 060522
       /* Add in a hook for ctrl-c's and other abrupt death */

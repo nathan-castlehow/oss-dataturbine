@@ -48,7 +48,7 @@ class LoggerNetSource extends RBNBBase {
 	private static Logger logger = Logger.getLogger(LoggerNetSource.class.getName());
 	
 	public LoggerNetSource() {
-		super();
+		super(new BaseSource());
 		/*! @note Add in a hook for ctrl-c's and other abrupt death */
 		Runtime.getRuntime().addShutdownHook(new Thread() {
 			public void run() {

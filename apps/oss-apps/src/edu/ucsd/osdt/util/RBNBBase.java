@@ -27,6 +27,10 @@ public class RBNBBase
 	protected String serverName = DEFAULT_SERVER_NAME;
 	private String serverPort = DEFAULT_SERVER_PORT;
 	private String server = serverName + ":" + serverPort;
+	/*! @var myBaseSource accumulated in the case of a source, else null */
+	/*! @todo have this acccumulate an osdt-wrapped sink, too; this gets around
+	 *  the need for multiple inheritance for sapi and basal functionality that
+	 *   we want to add to osdt apps */
 	protected BaseSource myBaseSource;
     protected final static String DEFAULT_RBNB_CLIENT_NAME = "OSDT Client";
     protected String rbnbClientName = DEFAULT_RBNB_CLIENT_NAME;
@@ -37,11 +41,6 @@ public class RBNBBase
 	public RBNBBase (BaseSource varBaseSource)
 	{
 		myBaseSource = varBaseSource;
-	}
-	
-	public RBNBBase()
-	{
-		myBaseSource = new BaseSource();
 	}
 	
 	protected boolean parseArgs(String[] args) throws IllegalArgumentException
