@@ -1,8 +1,9 @@
-# $LastChangedDate: 2007-10-02 16:13:29 -0700 (Tue, 02 Oct 2007) $
+# $LastChangedDate: 2007-10-02 18:13:29 -0500 (Tue, 02 Oct 2007) $
 # $LastChangedRevision: 163 $
 # $LastChangedBy: ljmiller $
-# $HeadURL: file:///Users/hubbard/code/cleos-svn/nmi_rbnb/cleosRbnb.cvs $
+# $HeadURL: http://nladr-cvs.sdsc.edu/svn-public/CLEOS/nmi_rbnb/cleosRbnb.cvs $
 
 method = svn
 user = ljmiller
-url = https://scm.neesforge.nees.org/svn/rbnb/trunk
+#url = https://scm.neesforge.nees.org/svn/rbnb/trunk
+url = http://dataturbine.googlecode.com/svn/trunk

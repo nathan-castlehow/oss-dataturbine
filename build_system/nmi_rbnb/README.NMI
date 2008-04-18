@@ -1,8 +1,8 @@
 NMI BUILD AND TEST FOR TURBINE and RDV
-# $LastChangedDate: 2007-10-02 16:13:29 -0700 (Tue, 02 Oct 2007) $
+# $LastChangedDate: 2007-10-02 18:13:29 -0500 (Tue, 02 Oct 2007) $
 # $LastChangedRevision: 163 $
 # $LastChangedBy: ljmiller $
-# $HeadURL: file:///Users/hubbard/code/cleos-svn/nmi_rbnb/README.NMI $
+# $HeadURL: http://nladr-cvs.sdsc.edu/svn-public/CLEOS/nmi_rbnb/README.NMI $
 
 - on the host 'grandcentral.cs.wisc.edu', which is the NMI
 build and test submission host, do:
