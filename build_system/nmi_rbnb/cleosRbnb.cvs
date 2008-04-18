@@ -1,7 +1,7 @@
-# $LastChangedDate: 2007-10-02 18:13:29 -0500 (Tue, 02 Oct 2007) $
-# $LastChangedRevision: 163 $
-# $LastChangedBy: ljmiller $
-# $HeadURL: http://nladr-cvs.sdsc.edu/svn-public/CLEOS/nmi_rbnb/cleosRbnb.cvs $
+# $LastChangedDate$
+# $LastChangedRevision$
+# $LastChangedBy$
+# $HeadURL$
 
 method = svn
 user = ljmiller
