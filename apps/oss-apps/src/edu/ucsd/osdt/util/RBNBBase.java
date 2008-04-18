@@ -56,23 +56,19 @@ public class RBNBBase
 	}
 	
 	
-	/**
-	 * Process the parsed command line; will usually call setBaseArgs
+	 /* Process the parsed command line; will usually call setBaseArgs
 	 * @param cmd (org.apache.commons.cli.CommandLine) -- the parsed command line
 	 * @return true if the command line processed sucessfull
-	 * @see #setBaseArgs
-	 */
+	 * @see #setBaseArgs */
 	protected boolean setArgs(CommandLine cmd)
 	{
 		return setBaseArgs(cmd);
 	}
 	
 	
-  /**
-   * Set the arguments handled by this class.
+   /* Set the arguments handled by this class.
    * @param cmd  the command line
-   * @return     true if the command line is processed successfully, false otherwise
-   */
+   * @return     true if the command line is processed successfully, false otherwise */
 	protected boolean setBaseArgs(CommandLine cmd)
 	{	
 		if (cmd.hasOption('h')) {
@@ -104,7 +100,7 @@ public class RBNBBase
 		return true;
 	}
   
-	/* getter/setter block */
+	/* getter/setter block *******************/
 	public String getServerName()
 	{
 		return this.serverName;  
@@ -135,11 +131,16 @@ public class RBNBBase
 	{
 		return rbnbClientName;
 	}
-	/* getter/setter block */
+	/* getter/setter block *******************/
   
-  /**
-   * Print out the usage of this application to standard output.
-   */
+	/* @fn predicate to introspect accumulated source */
+	public hasSource()
+	{
+		return this.myBaseSource != null;
+	}
+	
+	
+   /* Print out the usage of this application to standard output */
 	public void printUsage()
 	{
 		HelpFormatter f = new HelpFormatter();
@@ -151,22 +152,18 @@ public class RBNBBase
 	}
 
 	
-	/**
-	 * Set the Options object for command line parsing; will usually call setBaseOptions
+	 /* Set the Options object for command line parsing; will usually call setBaseOptions
 	 * @return org.apache.commons.cli.Options
-	 * @see #setBaseOptions
-	 */
+	 * @see #setBaseOptions */
 	protected Options setOptions()
 	{
 		return null;
 	}
 	
 	
-  /**
-   * Set the options supported by this base class.
+   /* Set the options supported by this base class.
    * @param opt  the options instance to add to
-   * @return     the options instance with base class options
-   */
+   * @return     the options instance with base class options */
 	protected Options setBaseOptions(Options opt)
 	{
 		/*! @todo prop file to reflect these common args */
