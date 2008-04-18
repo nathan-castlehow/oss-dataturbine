@@ -1,4 +1,4 @@
-/* @file RBNBBase.java 
+/*! @file RBNBBase.java 
  * @brief A base class for RBNB Widgets. Includes base parameters and constents.
  * For actual usage, this class must be extended. Specifically: the arguments must
  * be precessed by calling the methods of the supper class; usage, and other methods
@@ -34,15 +34,16 @@ public class RBNBBase
 	protected BaseSource myBaseSource;
     protected final static String DEFAULT_RBNB_CLIENT_NAME = "OSDT Client";
     protected String rbnbClientName = DEFAULT_RBNB_CLIENT_NAME;
-   
-	private String optionNotes = null;
 	
-	
+    
+    /*! @fn constructor */
 	public RBNBBase (BaseSource varBaseSource)
 	{
 		myBaseSource = varBaseSource;
 	}
 	
+	
+	/*! @fn cli handling */
 	protected boolean parseArgs(String[] args) throws IllegalArgumentException
 	{
 		try {
@@ -65,6 +66,7 @@ public class RBNBBase
 	{
 		return setBaseArgs(cmd);
 	}
+	
 	
   /**
    * Set the arguments handled by this class.
@@ -102,53 +104,39 @@ public class RBNBBase
 		return true;
 	}
   
-  /**
-   * Get the RBNB server host name.
-   * @param name  the host name of the server
-   */
-  public void setServerName(String name)
-  {
-    serverName = name;
-  }
+	/* getter/setter block */
+	public String getServerName()
+	{
+		return this.serverName;  
+	}
 
-  /**
-   * Get the RBNB server port number.
-   * @param port  the port number of the server
-   */
-  public void setServerPort(String port)
-  {
-    serverPort = port;
-  }  
-	
-  public String getServerName()
-  {
-	  return this.serverName;  
-  }
+	public void setServerName(String name)
+	{
+		serverName = name;
+	}
+
+	public int getServerPort()
+	{
+		return Integer.parseInt(this.serverPort);
+	}
+
+	public void setServerPort(String port)
+	{
+		serverPort = port;
+	}  
+
+	public String getServer()
+	{
+		server = serverName + ":" + serverPort;
+		return server;
+	}
+
+	public String getRBNBClientName()
+	{
+		return rbnbClientName;
+	}
+	/* getter/setter block */
   
-  public int getServerPort()
-  {
-	  return Integer.parseInt(this.serverPort);
-  }
-
-  /**
-   * Get the server name and port string.
-   * @return  the server and port
-   */
-  public String getServer()
-  {
-	  server = serverName + ":" + serverPort;
-	  return server;
-  }
-
-  /**
-   * Get the name of this rbnb client.
-   * @return  the name of the client
-   */
-  public String getRBNBClientName()
-  {
-    return rbnbClientName;
-  }
-
   /**
    * Print out the usage of this application to standard output.
    */
@@ -162,6 +150,7 @@ public class RBNBBase
 		}
 	}
 
+	
 	/**
 	 * Set the Options object for command line parsing; will usually call setBaseOptions
 	 * @return org.apache.commons.cli.Options
@@ -172,6 +161,7 @@ public class RBNBBase
 		return null;
 	}
 	
+	
   /**
    * Set the options supported by this base class.
    * @param opt  the options instance to add to
@@ -179,19 +169,17 @@ public class RBNBBase
    */
 	protected Options setBaseOptions(Options opt)
 	{
+		/*! @todo prop file to reflect these common args */
 		opt.addOption("h",false,"Print help");
 		opt.addOption("s",true,"RBNB Server Hostname *" + DEFAULT_SERVER_NAME);
 		opt.addOption("p",true,"RBNB Server Port Number *" + DEFAULT_SERVER_PORT);
-		opt.addOption("S", true, "RBNB Source Name *" + DEFAULT_RBNB_CLIENT_NAME);
+		opt.addOption("S", true, "RBNB Client Name *" + DEFAULT_RBNB_CLIENT_NAME);
 		opt.addOption("v",false,"Print Version information");
 		return opt;
 	}
 	
-	public void setNotes(String n)
-	{
-		optionNotes = n;
-	}
-
+	
+	/*! @brief version control information */
 	public String getSVNVersionString()
 	{
 		StringBuffer retval = new StringBuffer();
@@ -202,6 +190,8 @@ public class RBNBBase
 		return retval.toString();
 	}
 	
+	
+	/*! @version legacy version control information */
 	public String getCVSVersionString()
 	{
 		return getSVNVersionString();
