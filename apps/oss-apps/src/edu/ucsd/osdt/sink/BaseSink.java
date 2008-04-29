@@ -12,10 +12,10 @@ import java.util.logging.Logger;
  * This class provides the core functionality needed by OSDT for sink clients
  * applications and extends the RBNB com.rbnb.sapi.Sink class
  * @author Lawrence J. Miller
- * @note $HeadURL: https://oss-dataturbine.googlecode.com/svn/trunk/apps/oss-apps/src/edu/ucsd/osdt/source/BaseSource.java $
- * @note $LastChangedRevision: 39 $
- * @author $LastChangedBy: ljmiller.ucsd $
- * @date $LastChangedDate: 2008-04-16 14:41:49 -0700 (Wed, 16 Apr 2008) $
+ * @note $HeadURL$
+ * @note $LastChangedRevision$
+ * @author $LastChangedBy$
+ * @date $LastChangedDate$
  * 
  * @todo set up a chanel map for the different types of requests
  */
