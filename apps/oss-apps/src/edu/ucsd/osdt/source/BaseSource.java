@@ -4,10 +4,7 @@ import edu.ucsd.osdt.util.RBNBBase;
 import com.rbnb.sapi.Source;
 import com.rbnb.sapi.SAPIException;
 import com.rbnb.sapi.ChannelMap;
-import java.util.Properties;
-import java.util.Hashtable;
-import java.util.Enumeration;
-import java.util.StringTokenizer;
+import java.util.logging.Logger;
 
 /*! 
  * @file BaseSource.java
@@ -31,6 +28,8 @@ public class BaseSource extends com.rbnb.sapi.Source
 	private String serverAddress;
 	private int rbnbArchiveSize;
 	private int rbnbCacheSize;
+	/*! @var logger that needs to be instantiated by the derived class with "logger = Logger.getLogger(DerivedClass.class.getName());" */
+	private static Logger logger;
 	
 	public BaseSource()
 	{

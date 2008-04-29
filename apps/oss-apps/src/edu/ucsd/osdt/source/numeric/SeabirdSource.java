@@ -78,13 +78,14 @@ class SeabirdSource extends RBNBBase
 	private String fileName = DEFAULT_FILE_NAME;
 	boolean writeFile = false;
 	DataOutputStream fileOut = null;
-	private static Logger logger = Logger.getLogger(SeabirdSource.class.getName());
+	
 	
 
 	/*! @brief A constructor that simply constructs the super class and adds a
 	 * shutdown hook to trap ctrl-c. */
 	public SeabirdSource() {
-		super(new BaseSource());
+		super(new BaseSource(), null);
+		logger = Logger.getLogger(SeabirdSource.class.getName());
 		rbnbClientName = "Seabird";
 		seabirdParser = new SeabirdParser();
 		if(writeFile) {

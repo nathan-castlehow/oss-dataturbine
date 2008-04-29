@@ -15,31 +15,37 @@
 package edu.ucsd.osdt.util;
 
 import edu.ucsd.osdt.source.BaseSource;
+import edu.ucsd.osdt.sink.BaseSink;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.PosixParser;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.HelpFormatter;
+import java.util.logging.Logger;
 
 public class RBNBBase
 {
 	private static final String DEFAULT_SERVER_NAME = "localhost";
 	private static final String DEFAULT_SERVER_PORT = "3333";
+	protected final static String DEFAULT_RBNB_CLIENT_NAME = "OSDT Client";
 	protected String serverName = DEFAULT_SERVER_NAME;
 	private String serverPort = DEFAULT_SERVER_PORT;
+	protected String rbnbClientName = DEFAULT_RBNB_CLIENT_NAME;
 	private String server = serverName + ":" + serverPort;
 	/*! @var myBaseSource accumulated in the case of a source, else null */
 	/*! @todo have this acccumulate an osdt-wrapped sink, too; this gets around
 	 *  the need for multiple inheritance for sapi and basal functionality that
-	 *   we want to add to osdt apps */
+	 *  we want to add to osdt apps */
 	protected BaseSource myBaseSource;
-    protected final static String DEFAULT_RBNB_CLIENT_NAME = "OSDT Client";
-    protected String rbnbClientName = DEFAULT_RBNB_CLIENT_NAME;
-	
+	protected BaseSink myBaseSink;
+	/*! @var logger that needs to be instantiated by the derived class with "logger = Logger.getLogger(DerivedClass.class.getName());" */
+	protected static Logger logger;
     
-    /*! @fn constructor */
-	public RBNBBase (BaseSource varBaseSource)
+    /*! @fn constructor
+     * @todo put the shutdown hook in this class and add a "shutdown" method that can be customized */
+	public RBNBBase (BaseSource varBaseSource, BaseSink varBaseSink)
 	{
 		myBaseSource = varBaseSource;
+		myBaseSink = varBaseSink;
 	}
 	
 	
@@ -134,21 +140,21 @@ public class RBNBBase
 	/* getter/setter block *******************/
   
 	/* @fn predicate to introspect accumulated source */
-	public hasSource()
+	public boolean hasSource()
 	{
 		return this.myBaseSource != null;
 	}
 	
+	public boolean hasSink()
+	{
+		return this.myBaseSink != null;
+	}
 	
    /* Print out the usage of this application to standard output */
 	public void printUsage()
 	{
 		HelpFormatter f = new HelpFormatter();
 		f.printHelp(this.getClass().getName(),setOptions());
-		if (optionNotes != null)
-		{
-			System.out.println("Note: " + optionNotes);
-		}
 	}
 
 	

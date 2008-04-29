@@ -119,7 +119,7 @@ public class NwpToRbnb extends RBNBBase
 	
 	/*! @brief constructor that is used in conjunction with main() for this program's functionality */ 
 	public NwpToRbnb() {
-		super(new BaseSource());
+		super(new BaseSource(), null);
 		computeDefaultTimeOffset();
 		/* Add in a hook for ctrl-c's and other abrupt death */
 		Runtime.getRuntime().addShutdownHook (new Thread() {

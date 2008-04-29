@@ -34,7 +34,7 @@ public class GPSCoordinateSource extends RBNBBase {
 	
 	/*! constructor */
 	public GPSCoordinateSource() {
-		super(new BaseSource());
+		super(new BaseSource(), null);
 		coordinateValueHash = new HashMap();
 	}
 	

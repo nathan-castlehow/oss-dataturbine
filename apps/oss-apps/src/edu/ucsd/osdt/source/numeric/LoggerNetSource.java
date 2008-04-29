@@ -44,11 +44,10 @@ class LoggerNetSource extends RBNBBase {
 	private int rbnbArchiveSize = DEFAULT_ARCHIVE_SIZE;
 	private BaseSource source = null;
 	private ChannelMap cmap = null;
-	// java
-	private static Logger logger = Logger.getLogger(LoggerNetSource.class.getName());
 	
 	public LoggerNetSource() {
-		super(new BaseSource());
+		super(new BaseSource(), null);
+		logger = Logger.getLogger(LoggerNetSource.class.getName());
 		/*! @note Add in a hook for ctrl-c's and other abrupt death */
 		Runtime.getRuntime().addShutdownHook(new Thread() {
 			public void run() {
