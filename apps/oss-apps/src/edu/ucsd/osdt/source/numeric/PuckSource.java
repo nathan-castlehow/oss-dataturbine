@@ -1,5 +1,5 @@
 /*!
- * @file SeabirdSource.java
+ * @file PuckSource.java
  * @author Lawrence J. Miller <ljmiller@sdsc.edu>
  * @author $LastChangedBy$
  * @author Cyberinfrastructure Laboratory for Environmental Observing Systems (CLEOS)
@@ -27,19 +27,13 @@ import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.DataOutputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
-import java.text.ParseException;
-import java.util.Calendar;
 import java.util.Enumeration;
-import java.util.GregorianCalendar;
 import java.util.logging.Logger;
-import java.util.TimerTask;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.commons.cli.CommandLine;
@@ -47,17 +41,15 @@ import org.apache.commons.cli.Options;
 
 class PuckSource extends RBNBBase
 {
-	// serial port / seabird
-	public static final String DEFAULT_SEABIRD_PORT = "COM1";
-	private String seabirdPort = DEFAULT_SEABIRD_PORT;
-	public static final int DEFAULT_SAMPLE_PERIOD = 5000;
-	private int seabirdSamplePeriod = DEFAULT_SAMPLE_PERIOD;
+	// serial port / puck
+	public static final String DEFAULT_PUCK_PORT = "COM1";
+	private String puckPort = DEFAULT_PUCK_PORT;
 	private SerialPort serialPort = null;
 	private InputStream serialPortInputStream;
 	private OutputStream serialPortOutputStream;
-	private BufferedWriter writeToBird = null;
-	private BufferedReader readFromBird = null;
-	private SeabirdParser seabirdParser = null;
+	private BufferedWriter writeToPuck = null;
+	private BufferedReader readFromPuck = null;
+	
 	// rbnb
 	private static final int DEFAULT_CACHE_SIZE = 900;
 	private int rbnbCacheSize = DEFAULT_CACHE_SIZE;
@@ -71,6 +63,8 @@ class PuckSource extends RBNBBase
 	public PuckSource()
 	{
 		super(new BaseSource(), null);
+		logger = Logger.getLogger(PuckSource.class.getName());
+		rbnbClientName = "PUCK";
 	}
 	
 	
@@ -87,12 +81,12 @@ class PuckSource extends RBNBBase
 				logger.fine("Found serial port:" + portId.getName());
 				if (portId.getName().equals(portName)) { // then found the target port
 					try {
-						serialPort = (SerialPort) portId.open("Seabird->rxtx", 64);
+						serialPort = (SerialPort) portId.open("PUCK->rxtx", 64);
 
 						serialPortInputStream = serialPort.getInputStream();
-						readFromBird = new BufferedReader(new InputStreamReader(serialPortInputStream));
+						readFromPuck = new BufferedReader(new InputStreamReader(serialPortInputStream));
 						serialPortOutputStream = serialPort.getOutputStream();
-						writeToBird = new BufferedWriter(new OutputStreamWriter(serialPortOutputStream));
+						writeToPuck = new BufferedWriter(new OutputStreamWriter(serialPortOutputStream));
 						serialPort.setSerialPortParams(9600, SerialPort.DATABITS_8,
 								SerialPort.STOPBITS_1, SerialPort.PARITY_NONE);
 						logger.info("Initialized " + portId.getName() + " to 9600n81");
@@ -145,15 +139,15 @@ class PuckSource extends RBNBBase
 			serialPortOutputStream = null;
 		}
 
-		if(writeToBird != null) {
-			writeToBird.close();
+		if(writeToPuck != null) {
+			writeToPuck.close();
 		}
-		if(readFromBird != null) {
-			readFromBird.close();
+		if(readFromPuck != null) {
+			readFromPuck.close();
 		}
 
-		writeToBird = null;
-		readFromBird = null;
+		writeToPuck = null;
+		readFromPuck = null;
 		serialPort = null;
 		logger.config("Closed serial port");
 	}
@@ -175,11 +169,10 @@ class PuckSource extends RBNBBase
 	protected Options setOptions() {
 		Options opt = setBaseOptions(new Options()); // uses h, v, s, p, S
 
-		opt.addOption("P",true, "Serial port to read *" + DEFAULT_SEABIRD_PORT);
+		opt.addOption("P",true, "Serial port to read *" + DEFAULT_PUCK_PORT);
 		opt.addOption("z",true, "DataTurbine cache size *" + DEFAULT_CACHE_SIZE);
 		opt.addOption("Z",true, "Dataturbine archive size *" + DEFAULT_ARCHIVE_SIZE);
 		
-		opt.addOption("r",true,"Data sample polling rate (ms) *" + DEFAULT_SAMPLE_PERIOD);
 		double hours = timeOffset/(60.0*60.0);
 		opt.addOption("o",true," time offset, floating point, hours to GMT *" + hours);
 
@@ -191,9 +184,9 @@ class PuckSource extends RBNBBase
 	protected boolean setArgs(CommandLine cmd) throws IllegalArgumentException {
 		if (! setBaseArgs(cmd)) return false;
 
-		if(cmd.hasOption('P')) { // seabird serial port
+		if(cmd.hasOption('P')) { // puck serial port
 			String v = cmd.getOptionValue("P");
-			seabirdPort = v;
+			puckPort = v;
 		}
 		if(cmd.hasOption('z')) {
 			String a=cmd.getOptionValue('z');
@@ -219,19 +212,6 @@ class PuckSource extends RBNBBase
 					logger.severe("Enter a numeric value for -Z option. " + a + " is not valid!");
 					return false;   
 				} 
-			}
-		}
-		if(cmd.hasOption('r')) { // sampling period
-			String a = cmd.getOptionValue("r");
-			if(a!=null) {
-				try {
-					Integer i =  new Integer(a);
-					int value = i.intValue();
-					seabirdSamplePeriod = value;
-				} catch(Exception e) {
-					logger.severe("Enter a numeric value for -r option. " + a + " is not valid!");
-					return false;   
-				}
 			}
 		}
 		if (cmd.hasOption('o')) {

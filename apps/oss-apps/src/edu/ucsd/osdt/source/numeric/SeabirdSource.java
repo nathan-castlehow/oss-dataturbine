@@ -135,7 +135,7 @@ class SeabirdSource extends RBNBBase
 						writeToBird = new BufferedWriter(new OutputStreamWriter(serialPortOutputStream));
 						serialPort.setSerialPortParams(9600, SerialPort.DATABITS_8,
 								SerialPort.STOPBITS_1, SerialPort.PARITY_NONE);
-						logger.config("Initialized " + portId.getName() + " to 9600n81");
+						logger.info("Initialized " + portId.getName() + " to 9600n81");
 						return; /* @note do not continue with serial port enumeration; duplicate devs cause trouble */
 					} catch (Exception e) { // generalized because rxtx can throw many kinds of exceptions
 						throw new IOException(e.toString());
