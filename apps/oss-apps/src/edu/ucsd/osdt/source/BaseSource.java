@@ -31,6 +31,7 @@ public class BaseSource extends com.rbnb.sapi.Source
 	/*! @var logger that needs to be instantiated by the derived class with "logger = Logger.getLogger(DerivedClass.class.getName());" */
 	private static Logger logger;
 	
+	
 	public BaseSource()
 	{
 		super();
@@ -39,8 +40,9 @@ public class BaseSource extends com.rbnb.sapi.Source
 	
 	public BaseSource(int cacheSize, String archiveMode, int archiveSize)
 	{
-		super(cacheSize,archiveMode,archiveSize);
+		super(cacheSize, archiveMode, archiveSize);
 	}
+	
 	
 	/**
 	 * Post a units description to this channel. It will be given the timestamp

@@ -13,12 +13,17 @@ package edu.ucsd.osdt.source.numeric;
 import edu.ucsd.osdt.source.BaseSource;
 import edu.ucsd.osdt.util.RBNBBase;
 
+// puck
+import org.mbari.puck.Puck;
+import org.mbari.puck.Puck_1_3;
+
 //rbnb
 import com.rbnb.sapi.ChannelMap;
 import com.rbnb.sapi.SAPIException;
 import com.rbnb.sapi.Source;
 //rxtx
 import gnu.io.CommPortIdentifier;
+import gnu.io.NoSuchPortException;
 import gnu.io.PortInUseException;
 import gnu.io.SerialPort;
 import gnu.io.UnsupportedCommOperationException;
@@ -49,6 +54,7 @@ class PuckSource extends RBNBBase
 	private OutputStream serialPortOutputStream;
 	private BufferedWriter writeToPuck = null;
 	private BufferedReader readFromPuck = null;
+	private Puck_1_3 puck = null;
 	
 	// rbnb
 	private static final int DEFAULT_CACHE_SIZE = 900;
@@ -63,8 +69,8 @@ class PuckSource extends RBNBBase
 	public PuckSource()
 	{
 		super(new BaseSource(), null);
-		logger = Logger.getLogger(PuckSource.class.getName());
-		rbnbClientName = "PUCK";
+		logger = Logger.getLogger(this.getClass().getName());
+		rbnbClientName = "PUCK";	
 	}
 	
 	
@@ -81,7 +87,7 @@ class PuckSource extends RBNBBase
 				logger.fine("Found serial port:" + portId.getName());
 				if (portId.getName().equals(portName)) { // then found the target port
 					try {
-						serialPort = (SerialPort) portId.open("PUCK->rxtx", 64);
+						serialPort = (SerialPort) portId.open(this.getClass().getName(), 1000);
 
 						serialPortInputStream = serialPort.getInputStream();
 						readFromPuck = new BufferedReader(new InputStreamReader(serialPortInputStream));
@@ -105,9 +111,9 @@ class PuckSource extends RBNBBase
 	/*! @brief Sets up the connection to an rbnb server. */
 	public void initRbnb() throws SAPIException {
 		if (rbnbArchiveSize > 0) {
-			myBaseSource = new BaseSource(rbnbCacheSize, "append", rbnbArchiveSize);
+			myBaseSource.SetRingBuffer(rbnbCacheSize, "append", rbnbArchiveSize);
 		} else {
-			myBaseSource = new BaseSource(rbnbCacheSize, "none", 0);
+			myBaseSource.SetRingBuffer(rbnbCacheSize, "none", 0);
 		}
 		this.initCmap();
 		this.myBaseSource.OpenRBNBConnection(getServer(), getRBNBClientName());
@@ -118,9 +124,27 @@ class PuckSource extends RBNBBase
 		this.myBaseSource.Flush(cmap);
 	}
 
-	private void initCmap()
+	/*! a puck datasheet generally looks like:
+		UUID        : 3e6b8f72-c5f8-11dc-95ff-0800200c9a66
+		ver         : 2
+		size        : 96
+		man id      : 1
+		man model   : 0
+		man version : 0
+		man serial  : 62232003
+		name        : MBARI Reference Design PUCK
+	*/
+	private void initCmap() throws SAPIException
 	{
 		this.cmap = new ChannelMap();
+		cmap.Add("UUID");
+		cmap.Add("ver");
+		cmap.Add("size");
+		cmap.Add("man id");
+		cmap.Add("man model");
+		cmap.Add("man version");
+		cmap.Add("man serial");
+		cmap.Add("name");
 	}
 	
 	/*! @brief Gracefully shuts down the serial port using rxtx. */
@@ -164,17 +188,36 @@ class PuckSource extends RBNBBase
 		logger.config("Closed RBNB connection");
 	}
 	
-	/*! @brief Command-line processing.
-	 * @note required by interface RBNBBase */
+	/*! @brief the main execution */
+	public static void main(String[] args)
+	{
+		try
+		{
+			PuckSource app = new PuckSource();
+			app.parseArgs(args);
+			app.initSerialPort(app.puckPort);
+			app.initRbnb();
+			
+			// put some strings into rbnb
+			app.puck = new Puck_1_3(app.serialPort);
+			app.puck.setPuckMode(3);
+			Puck.Datasheet datasheet = app.puck.readDatasheet();
+			logger.info("\n"+datasheet.toString());
+			app.puck.setInstrumentMode();
+			app.puck.close();
+			//System.exit(0);
+		} catch(Exception e) {
+			logger.severe("croak! " + e.toString());
+		}
+	}
+	
+	/*! @brief Command-line processing. */
 	protected Options setOptions() {
 		Options opt = setBaseOptions(new Options()); // uses h, v, s, p, S
 
 		opt.addOption("P",true, "Serial port to read *" + DEFAULT_PUCK_PORT);
 		opt.addOption("z",true, "DataTurbine cache size *" + DEFAULT_CACHE_SIZE);
 		opt.addOption("Z",true, "Dataturbine archive size *" + DEFAULT_ARCHIVE_SIZE);
-		
-		double hours = timeOffset/(60.0*60.0);
-		opt.addOption("o",true," time offset, floating point, hours to GMT *" + hours);
 
 		return opt;
 	} // setOptions()
