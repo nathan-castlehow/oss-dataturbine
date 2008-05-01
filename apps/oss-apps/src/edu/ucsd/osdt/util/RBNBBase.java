@@ -14,6 +14,7 @@
 */
 package edu.ucsd.osdt.util;
 
+import com.rbnb.sapi.ChannelMap;
 import edu.ucsd.osdt.source.BaseSource;
 import edu.ucsd.osdt.sink.BaseSink;
 import org.apache.commons.cli.Options;
@@ -46,6 +47,13 @@ public class RBNBBase
 	{
 		myBaseSource = varBaseSource;
 		myBaseSink = varBaseSink;
+	}
+	
+	
+	/*! @note override me */
+	public ChannelMap generateCmap()
+	{
+		return null;
 	}
 	
 	
@@ -137,6 +145,7 @@ public class RBNBBase
 	{
 		return rbnbClientName;
 	}
+	
 	/* getter/setter block *******************/
   
 	/* @fn predicate to introspect accumulated source */
