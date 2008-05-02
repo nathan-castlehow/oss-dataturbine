@@ -37,10 +37,15 @@ import java.io.InputStreamReader;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.io.StringReader;
+import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.StringTokenizer;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
 
@@ -115,7 +120,6 @@ class PuckSource extends RBNBBase
 		} else {
 			myBaseSource.SetRingBuffer(rbnbCacheSize, "none", 0);
 		}
-		this.initCmap();
 		this.myBaseSource.OpenRBNBConnection(getServer(), getRBNBClientName());
 		logger.config("Set up connection to RBNB on " + getServer() +
 				" as source = " + getRBNBClientName());
@@ -124,28 +128,31 @@ class PuckSource extends RBNBBase
 		this.myBaseSource.Flush(cmap);
 	}
 
-	/*! a puck datasheet generally looks like:
-		UUID        : 3e6b8f72-c5f8-11dc-95ff-0800200c9a66
-		ver         : 2
-		size        : 96
-		man id      : 1
-		man model   : 0
-		man version : 0
-		man serial  : 62232003
-		name        : MBARI Reference Design PUCK
-	*/
-	private void initCmap() throws SAPIException
+	
+	/*! @brief */
+	private void initCmap(Object[] varChannels) throws SAPIException
 	{
 		this.cmap = new ChannelMap();
-		cmap.Add("UUID");
-		cmap.Add("ver");
-		cmap.Add("size");
-		cmap.Add("man id");
-		cmap.Add("man model");
-		cmap.Add("man version");
-		cmap.Add("man serial");
-		cmap.Add("name");
+		for(int i=0; i<varChannels.length; i++)
+		{
+			cmap.Add((String)varChannels[i]);
+			cmap.PutMime(cmap.GetIndex((String)varChannels[i]), "text/plain");
+		}
 	}
+	
+	
+	/*! @brief */
+	private void postAsString(Object[] varPost) throws SAPIException
+	{
+		String[] channels = cmap.GetChannelList();
+		cmap.PutTimeAuto("timeofday");
+		for(int i=0; i<channels.length; i++)
+		{
+			this.cmap.PutDataAsString(cmap.GetIndex(channels[i]), (String)varPost[i]);
+			this.myBaseSource.Flush(cmap);
+		}
+	}
+	
 	
 	/*! @brief Gracefully shuts down the serial port using rxtx. */
 	protected void closeSerialPort() throws IOException {
@@ -196,18 +203,60 @@ class PuckSource extends RBNBBase
 			PuckSource app = new PuckSource();
 			app.parseArgs(args);
 			app.initSerialPort(app.puckPort);
-			app.initRbnb();
 			
-			// put some strings into rbnb
 			app.puck = new Puck_1_3(app.serialPort);
 			app.puck.setPuckMode(3);
 			Puck.Datasheet datasheet = app.puck.readDatasheet();
-			logger.info("\n"+datasheet.toString());
+			String puckSheet = datasheet.toString();
+			logger.info("\n" + puckSheet);
+			
+			
+			/*! a puck datasheet generally looks like:
+			UUID        : 3e6b8f72-c5f8-11dc-95ff-0800200c9a66
+			ver         : 2
+			size        : 96
+			man id      : 1
+			man model   : 0
+			man version : 0
+			man serial  : 62232003
+			name        : MBARI Reference Design PUCK
+			*/
+			HashMap puckHash = new HashMap();
+			StringTokenizer puckToker = new StringTokenizer(puckSheet, "\n");
+			while(puckToker.hasMoreTokens())
+			{
+				String sheetLine = puckToker.nextToken();
+				logger.finest(sheetLine);
+				String[] lineSplit = sheetLine.split(":");
+				puckHash.put(lineSplit[0].trim(), lineSplit[1].trim());
+			}
+			logger.finest(puckHash.keySet().toString());
+			
+			/* Build channel and data arrays from sheet  */
+			Iterator<String> keyIt = puckHash.keySet().iterator();
+			ArrayList keyArray = new ArrayList();
+			ArrayList valArray = new ArrayList();
+			while(keyIt.hasNext())
+			{
+				String key = keyIt.next();
+				keyArray.add(key);
+				valArray.add(puckHash.get(key));
+				logger.fine(key+":"+(String)puckHash.get(key));
+			}
+			
+			
+			app.initCmap(keyArray.toArray());
+			
+			app.initRbnb();
+			Thread.sleep(1000);
+			
+			app.postAsString(valArray.toArray());
 			app.puck.setInstrumentMode();
 			app.puck.close();
 			//System.exit(0);
 		} catch(Exception e) {
 			logger.severe("croak! " + e.toString());
+			e.printStackTrace();
 		}
 	}
 	
