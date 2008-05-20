@@ -14,6 +14,7 @@ package edu.ucsd.osdt.source.numeric;
 import edu.ucsd.osdt.util.RBNBBase;
 import edu.ucsd.osdt.util.ISOtoRbnbTime;
 import edu.ucsd.osdt.source.BaseSource;
+import edu.ucsd.osdt.source.numeric.LoggerNetParser;
 
 //rbnb
 import com.rbnb.sapi.ChannelMap;
@@ -44,9 +45,11 @@ class LoggerNetSource extends RBNBBase {
 	private int rbnbArchiveSize = DEFAULT_ARCHIVE_SIZE;
 	private BaseSource source = null;
 	private ChannelMap cmap = null;
+	private LoggerNetParser parser = null;
 	
 	public LoggerNetSource() {
 		super(new BaseSource(), null);
+		parser = new LoggerNetParser();
 		logger = Logger.getLogger(LoggerNetSource.class.getName());
 		/*! @note Add in a hook for ctrl-c's and other abrupt death */
 		Runtime.getRuntime().addShutdownHook(new Thread() {

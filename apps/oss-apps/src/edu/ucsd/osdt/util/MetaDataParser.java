@@ -11,9 +11,11 @@
 
 package edu.ucsd.osdt.util;
 import com.rbnb.sapi.ChannelMap;
+/*! extend a hashtable make this data structure generic and extensible */
+import java.util.Hashtable;
 
-public abstract class MetaDataParser {
-	protected ChannelMap cmap;
-	protected String[] channels;
-	protected String[] units;
+public abstract class MetaDataParser extends Hashtable {
+	protected ChannelMap cmap = null;
+	protected String[] channels = null;
+	protected String[] units = null;
 }
