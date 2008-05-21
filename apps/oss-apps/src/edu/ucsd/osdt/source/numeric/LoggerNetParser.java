@@ -32,7 +32,7 @@ public class LoggerNetParser extends MetaDataParser {
 		return this.units;
 	}
 	
-	public boolean parse(String mdFromInstr) {
+	public boolean parse(String cmdFromInstr) {
 		this.cmap = new ChannelMap();
 		this.channels = new String[1];
 		this.units = new String[channels.length];

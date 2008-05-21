@@ -76,8 +76,6 @@ description="Check necessary environment variables"/>
 	  	destdir="${build.classes}"
 	    classpathref="classpath" debug="on">
 </javac -->
-
-
 <javac srcdir="${osdt.src.dir}" 
 	        destdir="${build.classes}"
 	        classpathref="classpath" debug="on">
@@ -117,11 +115,6 @@ description="Check necessary environment variables"/>
         packagenames="edu.sdsc.cleos.*"
 		sourcepath="${src.dir}" 
 	/>
-</target>
-
-<!-- target to package the jar dependencies of this jar-->
-<target name="deps" description="Package the jar dependencies of this package">
-    <zip destfile="./turbine-deps.zip" basedir="./lib" />
 </target>
 
 <!-- target to generate an RPM distro - only makes sense on RedHat systems -->
@@ -172,6 +165,21 @@ description="Check necessary environment variables"/>
   <zip destfile="./${jar.name}.zip" basedir="${build.dir}/dist"/>
 </target>
  
+<!-- unit test target -->
+<target name="tdd" depends="clean, jar" description="runs some junit tdd tests">
+	<junit printsummary="yes" fork="true" haltonfailure="yes">
+		<classpath>
+	    	<fileset dir="${build.lib}" includes="*.jar" />
+	    </classpath>
+	    <formatter type="xml" />
+	    <batchtest haltonfailure="no" todir="${test.reports}">
+	    	<fileset dir="${src.dir}">
+	        	<include name="**/*test*.java"/>
+	        </fileset>          
+	    </batchtest>
+	</junit>
+</target>
+	
 <!-- Catch-all target to aggregate everything -->
 <target name="all" depends="clean,jar" description="Clean, compile, jar">
 </target>

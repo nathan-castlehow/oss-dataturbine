@@ -75,11 +75,19 @@ class LoggerNetSource extends RBNBBase {
 		 	"TIMESTAMP","RECORD","AirTemp_C_Max","AirTemp_C_TMx","AirTemp_C_Min","AirTemp_C_TMn","AirTemp_C_Avg","RH_Avg","Rain_mm_Tot","WindSp_ms_Max","WindSp_ms_TMx","BP_mbar_Avg","SoilTemp_C_Avg","SoilWVC_Avg"
 			"TS","RN","Deg C","Deg C","Deg C","Deg C","Deg C","%","mm","meters/second","meters/second","mbar","Deg C","%"
 		 */
+		
+		//! @todo move functionality to LoggerNetParser.parse() and wrap here to get input
+		StringBuffer mdBuffer = new StringBuffer();
 		loggernetFileBuffer.readLine();
-		String[] channelsTmp = loggernetFileBuffer.readLine().split(",");
-		String[] unitsTmp = loggernetFileBuffer.readLine().split(",");
+		String lineRead = loggernetFileBuffer.readLine();
+		mdBuffer.append(lineRead);
+		String[] channelsTmp = lineRead.split(",");
+		lineRead = loggernetFileBuffer.readLine();
+		mdBuffer.append(lineRead);
+		String[] unitsTmp = lineRead.split(",");
 		channels = new String[channelsTmp.length];
 		units = new String[unitsTmp.length];
+		parser.parse(mdBuffer.toString());
 		
 		// clean off the double quotes
 		for(int i=0; i<channelsTmp.length; i++) {
