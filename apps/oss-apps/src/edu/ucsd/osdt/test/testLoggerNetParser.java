@@ -12,7 +12,7 @@ package edu.ucsd.osdt.test;
 
 import edu.ucsd.osdt.source.numeric.LoggerNetParser;
 import org.junit.After;
-import org.junit.Assert.*;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -26,7 +26,7 @@ public class testLoggerNetParser {
 	@Test public void testParse() {
 		String loggernetHeader1 = "\"TIMESTAMP\",\"RECORD\",\"AirTemp_C_Max\",\"AirTemp_C_TMx\",\"AirTemp_C_Min\",\"AirTemp_C_TMn\",\"AirTemp_C_Avg\",\"RH_Avg\",\"Rain_mm_Tot\",\"WindSp_ms_Max\",\"WindSp_ms_TMx\",\"BP_mbar_Avg\",\"SoilTemp_C_Avg\",\"SoilWVC_Avg\"";
 		String loggernetHeader2	= "\"TS\",\"RN\",\"Deg C\",\"Deg C\",\"Deg C\",\"Deg C\",\"Deg C\",\"%\",\"mm\",\"meters/second\",\"meters/second\",\"mbar\",\"Deg C\",\"%\"";
-		//assertTrue(true);
+		Assert.assertTrue(true);
 	}
 
 	@After public void tearDown() {
