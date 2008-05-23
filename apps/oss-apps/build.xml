@@ -167,11 +167,11 @@ description="Check necessary environment variables"/>
  
 <!-- unit test target -->
 <target name="tdd" depends="clean, jar" description="runs some junit tdd tests">
-	<junit printsummary="yes" fork="true" haltonfailure="yes">
+	<junit printsummary="withOutAndErr" fork="false" haltonfailure="no">
 		<classpath>
 	    	<fileset dir="${build.lib}" includes="*.jar" />
 	    </classpath>
-	    <formatter type="xml" />
+	    <formatter type="plain" />
 	    <batchtest haltonfailure="no" todir="${test.reports}">
 	    	<fileset dir="${src.dir}">
 	        	<include name="**/*test*.java"/>
