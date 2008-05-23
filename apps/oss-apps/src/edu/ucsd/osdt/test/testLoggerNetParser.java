@@ -1,12 +1,12 @@
 /*!
  * @file testLoggerNetParser.java
  * @author Lawrence J. Miller <ljmiller@sdsc.edu>
- * @author $LastChangedBy: ljmiller.ucsd $
+ * @author $LastChangedBy$
  * @author Cyberinfrastructure Laboratory for Environmental Observing Systems (CLEOS)
  * @author San Diego Supercomputer Center (SDSC)
- * @date $LastChangedDate: 2008-05-20 08:48:42 -0700 (Tue, 20 May 2008) $
- * @version $LastChangedRevision: 57 $
- * @note $HeadURL: https://oss-dataturbine.googlecode.com/svn/trunk/apps/oss-apps/src/edu/ucsd/osdt/source/numeric/LoggerNetSource.java $
+ * @date $LastChangedDate$
+ * @version $LastChangedRevision$
+ * @note $HeadURL$
  */
 package edu.ucsd.osdt.test;
 
