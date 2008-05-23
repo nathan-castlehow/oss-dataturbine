@@ -1,13 +1,13 @@
 /*!
-@file LoggerNetParser.java
-@brief A parser to process instrument metadata to form a dataturbine channel map in conjunction with MDParserInterface.java
-@author Lawrence J. Miller 
-@date Mon May 19 2008
-@note $HeadURL:http://nladr-cvs.sdsc.edu/svn-private/NEON/telepresence/dataturbine/trunk/src/edu/sdsc/cleos/ISOtoRbnbTime.java $
-@note $LastChangedRevision:129M $
-@author $LastChangedBy:(local) $
-@date $LastChangedDate:2007-03-16 15:30:24 -0700 (Fri, 16 Mar 2007) $
-*/
+ * @file LoggerNetParser.java
+ * @author Lawrence J. Miller <ljmiller@sdsc.edu>
+ * @author $LastChangedBy$
+ * @author Cyberinfrastructure Laboratory for Environmental Observing Systems (CLEOS)
+ * @author San Diego Supercomputer Center (SDSC)
+ * @date $LastChangedDate$
+ * @version $LastChangedRevision$
+ * @note $HeadURL$
+ */
 
 package edu.ucsd.osdt.source.numeric;
 
