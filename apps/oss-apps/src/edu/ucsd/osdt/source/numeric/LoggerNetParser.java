@@ -69,8 +69,7 @@ public class LoggerNetParser extends MetaDataParser {
 			}
 			
 			this.cmap = new ChannelMap();
-			this.channels = channelsTmp;
-			this.units = unitsTmp;
+			
 			// assume all data are doubles
 			for(int i=0; i<channelsTmp.length; i++) {
 				this.cmap.Add(channels[i]);

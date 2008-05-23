@@ -166,7 +166,7 @@ description="Check necessary environment variables"/>
 </target>
  
 <!-- unit test target -->
-<target name="tdd" depends="clean, jar" description="runs some junit tdd tests">
+<target name="test" depends="clean, jar" description="runs some junit tdd tests">
 	<junit printsummary="withOutAndErr" fork="false" haltonfailure="no">
 		<classpath>
 	    	<fileset dir="${build.lib}" includes="*.jar" />
