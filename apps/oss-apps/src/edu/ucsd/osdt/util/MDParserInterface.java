@@ -21,4 +21,6 @@ public interface MDParserInterface {
 	public String[] getUnits();
 	/*! @brief device-specific method to process information that is made available by the instrument to populate implementations with channels and a channel map */ 
 	public boolean parse(String mdFromInstr);
+	/*! @brief convert device-specific timeestamp to DataTurbine timestamps, whcich are second since the epoch */
+	public double getRbnbTimestamp(String instrTimestamp);
 }

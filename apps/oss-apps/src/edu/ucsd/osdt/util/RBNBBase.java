@@ -43,23 +43,20 @@ public class RBNBBase
     
     /*! @fn constructor
      * @todo put the shutdown hook in this class and add a "shutdown" method that can be customized */
-	public RBNBBase (BaseSource varBaseSource, BaseSink varBaseSink)
-	{
+	public RBNBBase (BaseSource varBaseSource, BaseSink varBaseSink) {
 		myBaseSource = varBaseSource;
 		myBaseSink = varBaseSink;
 	}
 	
 	
 	/*! @note override me */
-	public ChannelMap generateCmap()
-	{
+	public ChannelMap generateCmap() {
 		return null;
 	}
 	
 	
 	/*! @fn cli handling */
-	protected boolean parseArgs(String[] args) throws IllegalArgumentException
-	{
+	protected boolean parseArgs(String[] args) throws IllegalArgumentException {
 		try {
 			CommandLine cmd = (new PosixParser()).parse(setOptions(), args);
 			return setArgs(cmd);
@@ -74,8 +71,7 @@ public class RBNBBase
 	 * @param cmd (org.apache.commons.cli.CommandLine) -- the parsed command line
 	 * @return true if the command line processed sucessfull
 	 * @see #setBaseArgs */
-	protected boolean setArgs(CommandLine cmd)
-	{
+	protected boolean setArgs(CommandLine cmd) {
 		return setBaseArgs(cmd);
 	}
 	
@@ -83,8 +79,7 @@ public class RBNBBase
    /* Set the arguments handled by this class.
    * @param cmd  the command line
    * @return     true if the command line is processed successfully, false otherwise */
-	protected boolean setBaseArgs(CommandLine cmd)
-	{	
+	protected boolean setBaseArgs(CommandLine cmd) {	
 		if (cmd.hasOption('h')) {
 			printUsage();
 			return false;
@@ -115,53 +110,44 @@ public class RBNBBase
 	}
   
 	/* getter/setter block *******************/
-	public String getServerName()
-	{
+	public String getServerName() {
 		return this.serverName;  
 	}
 
-	public void setServerName(String name)
-	{
+	public void setServerName(String name) {
 		serverName = name;
 	}
 
-	public int getServerPort()
-	{
+	public int getServerPort() {
 		return Integer.parseInt(this.serverPort);
 	}
 
-	public void setServerPort(String port)
-	{
+	public void setServerPort(String port) {
 		serverPort = port;
 	}  
 
-	public String getServer()
-	{
+	public String getServer() {
 		server = serverName + ":" + serverPort;
 		return server;
 	}
 
-	public String getRBNBClientName()
-	{
+	public String getRBNBClientName() {
 		return rbnbClientName;
 	}
 	
 	/* getter/setter block *******************/
   
 	/* @fn predicate to introspect accumulated source */
-	public boolean hasSource()
-	{
+	public boolean hasSource() {
 		return this.myBaseSource != null;
 	}
 	
-	public boolean hasSink()
-	{
+	public boolean hasSink() {
 		return this.myBaseSink != null;
 	}
 	
    /* Print out the usage of this application to standard output */
-	public void printUsage()
-	{
+	public void printUsage() {
 		HelpFormatter f = new HelpFormatter();
 		f.printHelp(this.getClass().getName(),setOptions());
 	}
@@ -170,8 +156,7 @@ public class RBNBBase
 	 /* Set the Options object for command line parsing; will usually call setBaseOptions
 	 * @return org.apache.commons.cli.Options
 	 * @see #setBaseOptions */
-	protected Options setOptions()
-	{
+	protected Options setOptions() {
 		return null;
 	}
 	
@@ -179,8 +164,7 @@ public class RBNBBase
    /* Set the options supported by this base class.
    * @param opt  the options instance to add to
    * @return     the options instance with base class options */
-	protected Options setBaseOptions(Options opt)
-	{
+	protected Options setBaseOptions(Options opt) {
 		/*! @todo prop file to reflect these common args */
 		opt.addOption("h",false,"Print help");
 		opt.addOption("s",true,"RBNB Server Hostname *" + DEFAULT_SERVER_NAME);
@@ -192,8 +176,7 @@ public class RBNBBase
 	
 	
 	/*! @brief version control information */
-	public String getSVNVersionString()
-	{
+	public String getSVNVersionString() {
 		StringBuffer retval = new StringBuffer();
 		retval.append("$HeadURL$" + "\n");
 		retval.append("$LastChangedRevision$" + "\n");
@@ -204,8 +187,7 @@ public class RBNBBase
 	
 	
 	/*! @version legacy version control information */
-	public String getCVSVersionString()
-	{
+	public String getCVSVersionString() {
 		return getSVNVersionString();
 	}
 }

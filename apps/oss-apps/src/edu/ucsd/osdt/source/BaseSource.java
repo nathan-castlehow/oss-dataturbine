@@ -17,8 +17,6 @@ import java.util.logging.Logger;
  * @author $LastChangedBy$
  * @date $LastChangedDate$
  * 
- * @todo make an abstact "generateCMap", or perhaps an interface to set up
- * channel names, units, and metadata
  * @todo include the channels that key the trackKML plugin
  */
 public class BaseSource extends com.rbnb.sapi.Source 
@@ -32,29 +30,18 @@ public class BaseSource extends com.rbnb.sapi.Source
 	private static Logger logger;
 	
 	
-	public BaseSource()
-	{
+	public BaseSource() {
 		super();
 	}
 	
 	
-	public BaseSource(int cacheSize, String archiveMode, int archiveSize)
-	{
+	public BaseSource(int cacheSize, String archiveMode, int archiveSize) {
 		super(cacheSize, archiveMode, archiveSize);
 	}
 	
-	
-	/**
-	 * Post a units description to this channel. It will be given the timestamp
-	 * correcponding to the current time.
-	 * 
-	 * @param unitsArgs
-	 */
-	public void postUnits(String Channel, String units)
-		throws IllegalArgumentException, SAPIException 
-	{
-		 /* if (mRBNBBase.getserverAddress()== null)
-			throw new SAPIException("You must connect to the server before you can" +
-				" post units."); */
+	/*! @fn postDoubles loads the @param doubleData into the @param cmap channelmap and then flushes to this sources dataturbine connection
+	 * @note establish the convention of putting the timestamp as the last element of the data array */
+	protected void postDoubles(double[] doubleData, ChannelMap cmap) throws SAPIException {
+		this.Flush(cmap);
 	}
 }			

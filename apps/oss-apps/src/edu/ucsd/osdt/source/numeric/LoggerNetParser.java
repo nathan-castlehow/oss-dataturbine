@@ -18,6 +18,7 @@ import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import edu.ucsd.osdt.util.MetaDataParser;
+import edu.ucsd.osdt.util.ISOtoRbnbTime;
 import com.rbnb.sapi.ChannelMap;
 import com.rbnb.sapi.SAPIException;
 
@@ -40,11 +41,17 @@ public class LoggerNetParser extends MetaDataParser {
 		return (String[])this.get("units");
 	}
 	
-	public boolean parse(String cmdFromInstr) throws IOException, SAPIException {
+	public boolean parse(String cmdFromInstr) throws IOException, SAPIException {		
 		BufferedReader cmdReader = new BufferedReader(new StringReader(cmdFromInstr));
-		String[] channelsTmp = cmdReader.readLine().split(",");
+		
+		String channelsString = cmdReader.readLine();
+		logger.fine("channelsString: " + channelsString);
+		String[] channelsTmp = channelsString.split(",");
 		channels = new String[channelsTmp.length];
-		String[] unitsTmp = cmdReader.readLine().split(",");
+		
+		String unitsString = cmdReader.readLine();
+		logger.fine("unitsString: " + unitsString);
+		String[] unitsTmp = unitsString.split(",");
 		units = new String[unitsTmp.length];
 		
 		if( (channelsTmp.length != unitsTmp.length) || (channelsTmp.length == 0) ) {
@@ -81,5 +88,22 @@ public class LoggerNetParser extends MetaDataParser {
 			this.put("cmap", cmap);
 			return true;
 		}
+	}
+	
+	public double getRbnbTimestamp(String loggernetDate) {
+		/*! @note ISORbnbTime uses ISO8601 timestamp, e.g. 2003-08-12T19:21:22.30095 */
+		/*! @note from loggernet: "2007-11-12 07:30:00" */
+		String[] loggernetDateTokens = loggernetDate.split(" ");
+		StringBuffer retval = new StringBuffer();
+		
+		retval.append(loggernetDateTokens[0]);
+		retval.append("T");
+		retval.append(loggernetDateTokens[1]);
+		// time
+		retval.append(".00000");
+		String iso8601String = retval.toString();
+		logger.finer("ISO8601:" + iso8601String);
+		ISOtoRbnbTime rbnbTimeConvert = new ISOtoRbnbTime(iso8601String);
+		return rbnbTimeConvert.getValue();
 	}
 } // class

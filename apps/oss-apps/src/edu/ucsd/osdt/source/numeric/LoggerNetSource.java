@@ -36,14 +36,11 @@ class LoggerNetSource extends RBNBBase {
 	private String DEFAULT_FILE_NAME = "loggernet.dat";
 	private String loggernetFileName = DEFAULT_FILE_NAME;
 	private BufferedReader loggernetFileBuffer = null;
-	private String[] channels = null;
-	private String[] units = null;
 	// rbnb
 	private static final int DEFAULT_CACHE_SIZE = 900;
 	private int rbnbCacheSize = DEFAULT_CACHE_SIZE;
 	private static final int DEFAULT_ARCHIVE_SIZE = 0;
 	private int rbnbArchiveSize = DEFAULT_ARCHIVE_SIZE;
-	private BaseSource source = null;
 	private ChannelMap cmap = null;
 	private LoggerNetParser parser = null;
 	
@@ -71,101 +68,61 @@ class LoggerNetSource extends RBNBBase {
 	/*! @brief Sets up the rbnb channel map using a LoggerNetParser */
 	public void initCmap() throws IOException, SAPIException {
 		StringBuffer mdBuffer = new StringBuffer();
+		
+		// junk line
 		loggernetFileBuffer.readLine();
-		mdBuffer.append(loggernetFileBuffer.readLine());
-		mdBuffer.append(loggernetFileBuffer.readLine());
 		
-		parser.parse(loggernetFileBuffer.toString());
-		this.cmap = (ChannelMap)parser.get("cmap");
+		String fileLine1 = loggernetFileBuffer.readLine();
+		mdBuffer.append(fileLine1);
+		logger.info("file line 1: " + fileLine1);
+		mdBuffer.append("\n");
 		
-		// cmap = new ChannelMap();
-		/* todo setp channels and units from file header like these:
-		 	"TIMESTAMP","RECORD","AirTemp_C_Max","AirTemp_C_TMx","AirTemp_C_Min","AirTemp_C_TMn","AirTemp_C_Avg","RH_Avg","Rain_mm_Tot","WindSp_ms_Max","WindSp_ms_TMx","BP_mbar_Avg","SoilTemp_C_Avg","SoilWVC_Avg"
-			"TS","RN","Deg C","Deg C","Deg C","Deg C","Deg C","%","mm","meters/second","meters/second","mbar","Deg C","%"
-		 */
+		String fileLine2 = loggernetFileBuffer.readLine();
+		mdBuffer.append(fileLine2);
+		logger.info("file line 2: " + fileLine2);
+		mdBuffer.append("\n");
 		
-		//! @todo move functionality to LoggerNetParser.parse() and wrap here to get input
-		/*
-		StringBuffer mdBuffer = new StringBuffer();
+		// junk line
 		loggernetFileBuffer.readLine();
-		String lineRead = loggernetFileBuffer.readLine();
-		mdBuffer.append(lineRead);
-		String[] channelsTmp = lineRead.split(",");
-		lineRead = loggernetFileBuffer.readLine();
-		mdBuffer.append(lineRead);
-		String[] unitsTmp = lineRead.split(",");
-		channels = new String[channelsTmp.length];
-		units = new String[unitsTmp.length];
+		
 		parser.parse(mdBuffer.toString());
-		
-		// clean off the double quotes
-		for(int i=0; i<channelsTmp.length; i++) {
-			channels[i] = channelsTmp[i].substring(1, channelsTmp[i].length()-1);
-			units[i] = unitsTmp[i].substring(1, unitsTmp[i].length()-1);
-		}
-		
-		loggernetFileBuffer.readLine();
-		logger.finer("Channel length:" + Integer.toString(channels.length) + " Unit length:" + Integer.toString(units.length));
-		for(int i=0; i<channels.length; i++) {
-			cmap.Add(channels[i]);
-			cmap.PutUserInfo( cmap.GetIndex(channels[i]), ("units="+units[i]) );
-			cmap.PutMime(cmap.GetIndex(channels[i]), "application/octet-stream");
-		}
-		*/
+		this.cmap = (ChannelMap)parser.get("cmap");
 	}
 	
 
 	/*! @brief Sets up the connection to an rbnb server. */
 	public void initRbnb() throws SAPIException, IOException {
-		if (rbnbArchiveSize > 0) {
-			source=new BaseSource(rbnbCacheSize, "append", rbnbArchiveSize);
+		if (0 < rbnbArchiveSize) {
+			myBaseSource = new BaseSource(rbnbCacheSize, "append", rbnbArchiveSize);
 		} else {
-			source=new BaseSource(rbnbCacheSize, "none", 0);
+			myBaseSource = new BaseSource(rbnbCacheSize, "none", 0);
 		}
 		this.initCmap();
 		myBaseSource.OpenRBNBConnection(serverName, rbnbClientName);
 		logger.config("Set up connection to RBNB on " + serverName +
 				" as source = " + rbnbClientName);
 		logger.config(" with RBNB Cache Size = " + rbnbCacheSize + " and RBNB Archive Size = " + rbnbArchiveSize);
-		source.Register(cmap);
-		source.Flush(cmap);
+		myBaseSource.Register(cmap);
+		myBaseSource.Flush(cmap);
 	}
 	
 	
 	/*! @brief Gracefully closes the rbnb connection. */
 	protected void closeRbnb() {
-		if(source == null) {
+		if(myBaseSource == null) {
 			return;
 		}
 
 		if (rbnbArchiveSize > 0) { // then close and keep the ring buffer
-			source.Detach();
+			myBaseSource.Detach();
 		} else { // close and scrap the cache
-			source.CloseRBNBConnection();
+			myBaseSource.CloseRBNBConnection();
 		}
 		logger.config("Closed RBNB connection");
 	}
 	
 	
-	public double getRBNBDate(String loggernetDate) {
-		/*! @note ISORbnbTime uses ISO8601 timestamp, e.g. 2003-08-12T19:21:22.30095 */
-		/*! @note from loggernet: "2007-11-12 07:30:00" */
-		String[] loggernetDateTokens = loggernetDate.split(" ");
-		StringBuffer retval = new StringBuffer();
-		
-		retval.append(loggernetDateTokens[0]);
-		retval.append("T");
-		retval.append(loggernetDateTokens[1]);
-		// time
-		retval.append(".00000");
-		String iso8601String = retval.toString();
-		logger.finer("ISO8601:" + iso8601String);
-		ISOtoRbnbTime rbnbTimeConvert = new ISOtoRbnbTime(iso8601String);
-		return rbnbTimeConvert.getValue();
-	}
-	
-	
-	/* todo parse out data from line like this:
+	/* @todo move this functionality to the parser
 	"2007-11-12 07:30:00",0,1.994,1.885,253.6,18.72,0,24.27,84.5,542.1,381.2,0.19,533.3,0.272,739.2,0.134,402.2,0.037,91.5,0,26.02,0.011,12.23,22.56,13.08,0.209,0.302,0.148
 	*/
 	private void processFile() throws IOException, SAPIException {
@@ -184,10 +141,9 @@ class LoggerNetSource extends RBNBBase {
 				if(i==0) { // timestamp - handle specially
 					
 				
-					dateString = lineSplit[i].substring( 1, (lineSplit[i].length()-1) );
-					lineData[i] = getRBNBDate(dateString);
-					logger.finer( "Nice date:" + ISOtoRbnbTime.formatDate((long)lineData[i]*1000) );
-				
+					dateString = lineSplit[i].substring(1, (lineSplit[i].length()-1) );
+					lineData[i] = parser.getRbnbTimestamp(dateString);
+					logger.fine("Nice date:" + ISOtoRbnbTime.formatDate((long)lineData[i]*1000) );
 				
 				
 				} else if(lineSplit[i].equals("\"NAN\"")) {
@@ -207,9 +163,10 @@ class LoggerNetSource extends RBNBBase {
 				cmap.PutTime(someData[0], 0.0);
 				double[] dataTmp = new double[1];
 				dataTmp[0] = someData[i];
-				cmap.PutDataAsFloat64(cmap.GetIndex(channels[i]), dataTmp);
-				logger.finer("Posted data:" + someData[i] + " into channel:" + channels[i]);
-				source.Flush(cmap);
+				String[] varChannels = (String[])parser.get("channels");
+				cmap.PutDataAsFloat64(cmap.GetIndex(varChannels[i]), dataTmp);
+				logger.fine("Posted data:" + someData[i] + " into channel: " + varChannels[i]);
+				myBaseSource.Flush(cmap);
 			}
 	}
 	
@@ -222,12 +179,12 @@ class LoggerNetSource extends RBNBBase {
 			logger.severe("Unable to process command line. Terminating.");
 			System.exit(1);
 		}
-		// setup
-		try {
+		try {	
 			
 			loggernet.initFile();
 			loggernet.initRbnb();
 			loggernet.processFile();
+			loggernet.closeRbnb();
 			
 		} catch(SAPIException sae) {
 			logger.severe("Unable to communicate with DataTurbine server. Terminating: " + sae.toString());
@@ -244,8 +201,7 @@ class LoggerNetSource extends RBNBBase {
 	/*****************************************************************************/
 	
 	
-	/*! @brief Command-line processing.
-	 * @note required by interface RBNBBase */
+	/*! @brief Command-line processing */
 	protected Options setOptions() {
 		Options opt = setBaseOptions(new Options()); // uses h, v, s, p, S
 
