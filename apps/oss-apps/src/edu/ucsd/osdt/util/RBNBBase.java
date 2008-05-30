@@ -15,42 +15,50 @@
 package edu.ucsd.osdt.util;
 
 import com.rbnb.sapi.ChannelMap;
+import com.rbnb.sapi.SAPIException;
 import edu.ucsd.osdt.source.BaseSource;
 import edu.ucsd.osdt.sink.BaseSink;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.PosixParser;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.HelpFormatter;
+import java.io.IOException;
 import java.util.logging.Logger;
 
-public class RBNBBase
+public abstract class RBNBBase
 {
-	private static final String DEFAULT_SERVER_NAME = "localhost";
-	private static final String DEFAULT_SERVER_PORT = "3333";
-	protected final static String DEFAULT_RBNB_CLIENT_NAME = "OSDT Client";
+	protected static final String DEFAULT_SERVER_NAME = "localhost";
+	protected static final String DEFAULT_SERVER_PORT = "3333";
+	protected static final String DEFAULT_RBNB_CLIENT_NAME = "OSDT Client";
+	protected static final int DEFAULT_CACHE_SIZE = 900;
+	protected static final int DEFAULT_ARCHIVE_SIZE = 0;
+	
 	protected String serverName = DEFAULT_SERVER_NAME;
-	private String serverPort = DEFAULT_SERVER_PORT;
+	protected String serverPort = DEFAULT_SERVER_PORT;
 	protected String rbnbClientName = DEFAULT_RBNB_CLIENT_NAME;
-	private String server = serverName + ":" + serverPort;
+	protected String server = serverName + ":" + serverPort;
+	protected int rbnbCacheSize = DEFAULT_CACHE_SIZE;
+	protected int rbnbArchiveSize = DEFAULT_ARCHIVE_SIZE;
 	/*! @var myBaseSource accumulated in the case of a source, else null */
 	/*! @todo have this acccumulate an osdt-wrapped sink, too; this gets around
 	 *  the need for multiple inheritance for sapi and basal functionality that
 	 *  we want to add to osdt apps */
 	protected BaseSource myBaseSource;
 	protected BaseSink myBaseSink;
+	protected ChannelMap cmap;
 	/*! @var logger that needs to be instantiated by the derived class with "logger = Logger.getLogger(DerivedClass.class.getName());" */
 	protected static Logger logger;
     
     /*! @fn constructor
-     * @todo put the shutdown hook in this class and add a "shutdown" method that can be customized */
+     *  @todo put the shutdown hook in this class and add a "shutdown" method that can be customized */
 	public RBNBBase (BaseSource varBaseSource, BaseSink varBaseSink) {
 		myBaseSource = varBaseSource;
 		myBaseSink = varBaseSink;
 	}
 	
 	
-	/*! @note override me */
-	public ChannelMap generateCmap() {
+	/*! @todo override me */
+	public ChannelMap generateCmap() throws IOException, SAPIException {
 		return null;
 	}
 	
@@ -67,7 +75,7 @@ public class RBNBBase
 	}
 	
 	
-	 /* Process the parsed command line; will usually call setBaseArgs
+	/* Process the parsed command line; will usually call setBaseArgs
 	 * @param cmd (org.apache.commons.cli.CommandLine) -- the parsed command line
 	 * @return true if the command line processed sucessfull
 	 * @see #setBaseArgs */
@@ -77,8 +85,8 @@ public class RBNBBase
 	
 	
    /* Set the arguments handled by this class.
-   * @param cmd  the command line
-   * @return     true if the command line is processed successfully, false otherwise */
+   * @param cmd the command line
+   * @return true if the command line is processed successfully, false otherwise */
 	protected boolean setBaseArgs(CommandLine cmd) {	
 		if (cmd.hasOption('h')) {
 			printUsage();
@@ -166,11 +174,11 @@ public class RBNBBase
    * @return     the options instance with base class options */
 	protected Options setBaseOptions(Options opt) {
 		/*! @todo prop file to reflect these common args */
-		opt.addOption("h",false,"Print help");
-		opt.addOption("s",true,"RBNB Server Hostname *" + DEFAULT_SERVER_NAME);
-		opt.addOption("p",true,"RBNB Server Port Number *" + DEFAULT_SERVER_PORT);
+		opt.addOption("h", false, "Print help");
+		opt.addOption("s", true, "RBNB Server Hostname *" + DEFAULT_SERVER_NAME);
+		opt.addOption("p", true, "RBNB Server Port Number *" + DEFAULT_SERVER_PORT);
 		opt.addOption("S", true, "RBNB Client Name *" + DEFAULT_RBNB_CLIENT_NAME);
-		opt.addOption("v",false,"Print Version information");
+		opt.addOption("v", false, "Print Version information");
 		return opt;
 	}
 	

@@ -45,12 +45,12 @@ public class LoggerNetParser extends MetaDataParser {
 		BufferedReader cmdReader = new BufferedReader(new StringReader(cmdFromInstr));
 		
 		String channelsString = cmdReader.readLine();
-		logger.fine("channelsString: " + channelsString);
+		logger.finer("channelsString: " + channelsString);
 		String[] channelsTmp = channelsString.split(",");
 		channels = new String[channelsTmp.length];
 		
 		String unitsString = cmdReader.readLine();
-		logger.fine("unitsString: " + unitsString);
+		logger.finer("unitsString: " + unitsString);
 		String[] unitsTmp = unitsString.split(",");
 		units = new String[unitsTmp.length];
 		
@@ -102,7 +102,7 @@ public class LoggerNetParser extends MetaDataParser {
 		// time
 		retval.append(".00000");
 		String iso8601String = retval.toString();
-		logger.finer("ISO8601:" + iso8601String);
+		logger.fine("ISO8601:" + iso8601String);
 		ISOtoRbnbTime rbnbTimeConvert = new ISOtoRbnbTime(iso8601String);
 		return rbnbTimeConvert.getValue();
 	}

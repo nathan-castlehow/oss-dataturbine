@@ -56,6 +56,14 @@ public class testLoggerNetParser {
 		Assert.assertTrue(channelsSame);
 	}
 
+	/* for testing timestamps conversion...
+FINE: Campbell date string: 2007-11-13 18:30:00
+May 28, 2008 3:34:36 PM edu.ucsd.osdt.source.numeric.LoggerNetParser getRbnbTimestamp
+FINE: ISO8601:2007-11-13T18:30:00.00000
+May 28, 2008 3:34:36 PM edu.ucsd.osdt.source.numeric.LoggerNetSource processFile
+FINE: Nice date:2007-11-13 10:30:00.000 for timestamp: 1.1949786E9
+	*/
+	
 	/* This test does not work because the PutUserInfo call does not work until a successful Flush is performed, which is integration level, not unit
 	@Test public void testUnits() {
 		ChannelMap map = aParser.getCmap();
