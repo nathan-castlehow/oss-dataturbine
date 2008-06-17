@@ -26,6 +26,8 @@ public class SinkClientManager {
 	String sourcePath0 = sourceName + "/" + sourceChannel0;
 	String sourcePath1 = sourceName + "/" + sourceChannel1;
 
+	double lastTimeStamp;
+	
 	double startedAt0, endedAt0;
 
 	SysDLogger sLogger = new SysDLogger("niagara.sdsc.edu", 514);
@@ -39,7 +41,15 @@ public class SinkClientManager {
 		openRBNBConn(sink);
 	
 		ChannelMap cMap = createChannelMap(null);
+	
+
+		requestStartHelper startHelper = new requestStartHelper();
+	
+		double requestStartTime = startHelper.findStartTime(cMap);
+		// double requestStartTime = startHelper.findStartTime(cMap);
 		
+		
+		System.out.println (requestStartTime);
 		
 		sink.CloseRBNBConnection();
 		sLogger.sysDMessage(className + ": Connection to " + server+ " is closed");
@@ -104,19 +114,34 @@ public class SinkClientManager {
 		try {
 			int cMapIndex0 = cMap.Add(sourcePath0);
 			int cMapIndex1 = cMap.Add(sourcePath1);
+			
+			System.out.println("First channel map index: " + cMapIndex0);
+			System.out.println("Second channel map index: " + cMapIndex1);
+			
 		}
 		
 		catch (SAPIException e){
 			// If there is a problem parsing the channel name.
+			e.printStackTrace();
 		}
 		
 		catch (NullPointerException e) {
 			// If the channel name is null.
+			e.printStackTrace();
 		}
 		
 		catch (IllegalArgumentException e){
-			
+			e.printStackTrace();
 		}
+		
+		try {
+			sink.RequestRegistration(cMap);
+			sink.Fetch(10000, cMap);
+		} catch (SAPIException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
 		return cMap;
 	}
 	
@@ -210,6 +235,6 @@ public class SinkClientManager {
 
 	
 	
-	
 
 }
+
