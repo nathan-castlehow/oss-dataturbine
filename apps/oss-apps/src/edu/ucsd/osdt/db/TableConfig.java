@@ -1,0 +1,66 @@
+package edu.ucsd.osdt.db;
+
+/**
+ * TableConfig: represents a table definition in the config file
+ */
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class TableConfig {
+	// List of TableConfigColumn objects
+	private ArrayList columns = new ArrayList();
+
+	private String name = null;
+
+	public TableConfigColumn getTableConfigColumn( String columnName ) {
+		int idx = getIndexForName( columnName );
+
+		if( idx >= 0 )
+			return (TableConfigColumn) columns.get( idx );
+		else
+			return null;
+	}
+
+	public void putTableConfigColumn( TableConfigColumn aCol ) {
+		this.columns.add( aCol );
+	}
+
+	public void removeTableConfigColumn( String columnName ) {
+		//this.columns.remove( columnName );
+		int idx = getIndexForName( columnName );
+
+		if( idx >= 0 )
+			columns.remove( idx );
+	}
+
+	public void setName( String name ) {
+		this.name = name;
+	}
+
+	public String getName() {
+		return this.name;
+	}
+
+	/**
+	 * Returns index of item with given name
+	 */
+	private int getIndexForName( String aName ) {
+
+		for( int i=0; i < columns.size(); i++ ) {
+			TableConfigColumn aCol = (TableConfigColumn) columns.get(i);
+
+			if( ( aCol.getName() != null ) && aCol.getName().equals( aName ) ) {
+				return i;
+			}
+		}
+
+		// Didn't find a match
+		return -1;
+	}
+
+	public List getTableConfigColumnsAsList() {
+		return columns;
+	}
+}
+
