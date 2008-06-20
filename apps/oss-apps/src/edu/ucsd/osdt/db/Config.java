@@ -11,6 +11,36 @@ public class Config {
     // List of TableConfig objects 
     private ArrayList tables = new ArrayList();
 
+	 private String serverAddress = null;
+	 private String serverPort = null;
+
+	 private int sampleIntParam = -1;
+
+	 public String getServerAddress() {
+		return this.serverAddress;
+	 }
+
+	 public void setServerAddress( String serverAddress ) {
+		this.serverAddress = serverAddress;
+	 }
+
+	 public String getServerPort() {
+		return this.serverPort;
+	 }
+
+	 public void setServerPort( String serverPort ) {
+		this.serverPort = serverPort;
+	 }
+
+	 public int getSampleIntParam() {
+		return this.sampleIntParam;
+	 }
+
+	 public void setSampleIntParam( int sampleIntParam ) {
+		this.sampleIntParam = sampleIntParam;
+	 }
+
+
 	 public TableConfig getTableConfig( String tableName ) {
 		int idx = getIndexForName( tableName );
 

@@ -31,6 +31,28 @@ public class ConfigUtil {
 			Document document = DocumentHelper.createDocument();
 			Element root = document.addElement( "config" );
 
+			// Output key-value params
+			Element parElt = null;
+
+			parElt = new DefaultElement( "param" );
+			parElt.addAttribute( "name", "serverAddress" );
+			parElt.addAttribute( "value", aConfig.getServerAddress() );
+			root.add( parElt );
+
+			parElt = new DefaultElement( "param" );
+			parElt.addAttribute( "name", "serverPort" );
+			parElt.addAttribute( "value", aConfig.getServerPort() );
+			root.add( parElt );
+
+			parElt = new DefaultElement( "param" );
+			parElt.addAttribute( "name", "sampleIntParam" );
+			parElt.addAttribute( "value", Integer.toString( aConfig.getSampleIntParam() ) );
+			root.add( parElt );
+
+
+
+
+			// Output table definitions
 			List tables = aConfig.getTableConfigsAsList();
 
 			for( Iterator tableIter = tables.iterator(); tableIter.hasNext(); ) {
@@ -100,7 +122,31 @@ public class ConfigUtil {
 
 			aConfig = new Config();
 
-			// iterate through child elements of root with element name "table"
+			// Iterate through child elements of root with element name "param"
+			for( Iterator parIter = root.elementIterator( "param" ); parIter.hasNext(); ) {
+				Element aParElt = (Element) parIter.next();
+				String parName = aParElt.attributeValue( "name" );
+				String parValue = aParElt.attributeValue( "value" );
+
+				System.out.println( "Found param: name=" + parName + ", value=" + parValue );
+
+				// Set key value params
+				if( parName.equals( "serverAddress" ) ) {
+					aConfig.setServerAddress( parValue );
+				}
+				else if( parName.equals( "serverPort" ) ) {
+					aConfig.setServerPort( parValue );
+				}
+				else if( parName.equals( "sampleIntParam" ) ) {
+					aConfig.setSampleIntParam( Integer.parseInt( parValue ) );
+				}
+				else {
+					System.out.println( "Error: unrecognized param (name=" + parName + ")!" );
+				}
+
+			}
+
+			// Iterate through child elements of root with element name "table"
 			for( Iterator tableIter = root.elementIterator( "table" ); tableIter.hasNext(); ) {
 				Element aTableElt = (Element) tableIter.next();
 				String tableName = aTableElt.attributeValue( "name" );
