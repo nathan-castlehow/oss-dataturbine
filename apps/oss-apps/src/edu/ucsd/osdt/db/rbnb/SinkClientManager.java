@@ -6,6 +6,8 @@ import java.text.DecimalFormat;
 import java.util.StringTokenizer;
 import java.io.*;
 import java.util.LinkedList;
+import java.util.ArrayList;
+
 import edu.ucsd.osdt.db.log.SysDLogger;
 
 public class SinkClientManager {
@@ -26,7 +28,7 @@ public class SinkClientManager {
 	String sourcePath0 = sourceName + "/" + sourceChannel0;
 	String sourcePath1 = sourceName + "/" + sourceChannel1;
 
-	double lastTimeStamp;
+	long lastTimeStamp;
 	
 	double startedAt0, endedAt0;
 
@@ -40,22 +42,49 @@ public class SinkClientManager {
 
 		openRBNBConn(sink);
 	
-		ChannelMap cMap = createChannelMap(null);
-	
+		// map between the dt and db.
+		
 
+		
+		// hard coding the channel names
+		LinkedList <String> chNames = new LinkedList <String> ();
+		chNames.add(sourcePath0);
+		chNames.add(sourcePath1);
+		
+		// channel map is created
+		ChannelMap cMap = createChannelMap(chNames);
+	
+		
 		requestStartHelper startHelper = new requestStartHelper();
 	
-		double requestStartTime = startHelper.findStartTime(cMap);
+		//long requestStartTime = startHelper.findStartTime(cMap);
 		// double requestStartTime = startHelper.findStartTime(cMap);
+		long requestStartTime = startHelper.readLastTimeFromFile ("/Users/petershin/Documents/hi.txt");
 		
 		
 		System.out.println (requestStartTime);
+		lastTimeStamp = requestStartTime;
 		
+		double durationSeconds = 60000.0;
+		
+		System.out.println(startHelper.formatDate(lastTimeStamp));
+		
+		requestStartTime = System.currentTimeMillis();
+		double lastTimeStampDouble = requestStartTime / 1000.0;
+		
+		
+		// keep requesting
+		runQuery("absolute", cMap, lastTimeStampDouble , durationSeconds);
+				
 		sink.CloseRBNBConnection();
+		
+		System.out.println(className + ": Connection to " + server+ " is closed");
 		sLogger.sysDMessage(className + ": Connection to " + server+ " is closed");
 	} // exec
 
 
+	
+	
 	public void openRBNBConn (Sink s) {
 		try{
 			sink.OpenRBNBConnection(server,sinkName);
@@ -101,7 +130,7 @@ public class SinkClientManager {
 	}
 	
 
-	private ChannelMap createChannelMap (LinkedList channelNames)
+	private ChannelMap createChannelMap (LinkedList <String> channelNames)
 	{
 		// channel map names should come from the configuration steps
 		// 
@@ -109,31 +138,59 @@ public class SinkClientManager {
 		// been verified.
 
 		// create one channel map for two 
+		
+
 		ChannelMap cMap = new ChannelMap();
 
-		try {
+		for (int i=0; i< channelNames.size(); i++) {
+			
+			try {
+				int cMapIndex0 = cMap.Add( channelNames.get(i));
+
+				System.out.println("Second channel map index: " + cMapIndex0);
+
+			}
+
+			catch (SAPIException e){
+				// If there is a problem parsing the channel name.
+				e.printStackTrace();
+			}
+
+			catch (NullPointerException e) {
+				// If the channel name is null.
+				e.printStackTrace();
+			}
+
+			catch (IllegalArgumentException e){
+				e.printStackTrace();
+			}
+		}
+
+		
+/***	try {
 			int cMapIndex0 = cMap.Add(sourcePath0);
 			int cMapIndex1 = cMap.Add(sourcePath1);
-			
+
 			System.out.println("First channel map index: " + cMapIndex0);
 			System.out.println("Second channel map index: " + cMapIndex1);
-			
+
 		}
-		
+
 		catch (SAPIException e){
 			// If there is a problem parsing the channel name.
 			e.printStackTrace();
 		}
-		
+
 		catch (NullPointerException e) {
 			// If the channel name is null.
 			e.printStackTrace();
 		}
-		
+
 		catch (IllegalArgumentException e){
 			e.printStackTrace();
 		}
 		
+*/	
 		try {
 			sink.RequestRegistration(cMap);
 			sink.Fetch(10000, cMap);
@@ -146,30 +203,53 @@ public class SinkClientManager {
 	}
 	
 	
-	private void runQuery(String type, double time, double duration)
+	/**
+	 * @param type
+	 * @param cMap
+	 * @param time
+	 * @param duration
+	 */
+	private void runQuery(String type, ChannelMap cMap, double time, double duration)
 	{
 		
 		// for dt2db, we need absolute
 		String inputRequest = "absolute";
 
-		try{
-			// new
 
-			System.out.println("For: time = " + time + 
-					"; duration = " + duration +
-					"; request type = " + inputRequest);
-			
-			// create one channel map for two 
-			ChannelMap cMap = new ChannelMap();
-			int cMapIndex0 = cMap.Add(sourcePath0);
-			int cMapIndex1 = cMap.Add(sourcePath1);
-			
+		System.out.println("For: time = " + time + 
+				"; duration = " + duration +
+				"; request type = " + inputRequest);
+
+		// if the request did not go through, the rest of the operations
+		// are meaningless.  Therefore, the operation is done within the try
+		// catch block
+		
+		try{
+			// requesting the data and fetching them.
 			sink.Request(cMap,time,duration,type);
 			ChannelMap m = sink.Fetch(-1,cMap);
 
+			// getting the number of channels that have data in themselves.
 			int channelCount = m.NumberOfChannels();
+			
+			ArrayList arrList = new ArrayList();
+			
+			int [] channelTypes = null;
+			
 			double[] times0 = null, times1 = null;
+			double[] data0 = null;
+			double[] data1 = null;
 
+//			int channelDataTypeName = m.GetType(0);
+//			System.out.println("Channel name is " +channelDataTypeName);
+//			System.out.println("Channel name from com.rbnb is " + cMap.TYPE_FLOAT64);
+			
+			channelTypes = storeChannelTypes (m, channelCount);
+			
+			//arrList = storeChannelTimes (m, channelTypes, channelCount);
+			
+			
+			
 			if (channelCount == 0)
 			{
 				System.out.println("    --> no data returned");
@@ -191,10 +271,18 @@ public class SinkClientManager {
 			else
 			{
 				System.out.println("    --> data on both channels");
-				times0 = m.GetTimes(cMapIndex0);
-				times1 = m.GetTimes(cMapIndex1);
+				times0 = m.GetTimes(0);
+				data0 = m.GetDataAsFloat64(0);
+				arrList.add(data0);
+				
+				times1 = m.GetTimes(1);
+				data1 = m.GetDataAsFloat64(1);
+				arrList.add(data1);
 			}
 
+			double [] dataVals0 = (double[])arrList.get(0);
+			double [] dataVals1 = (double[])arrList.get(1);
+			
 			System.out.print("    Times on Channel 0: ");
 			if (times0 == null)
 				System.out.print(" channel not returned");
@@ -202,8 +290,11 @@ public class SinkClientManager {
 				System.out.print(" no data on channel");
 			else for (int i = 0; i < times0.length; i++)
 			{
+				System.out.print(times0[i] + " ");
+				
 				if (times0[i] != time)
-					System.out.print(formatValue(times0[i]) + " ");
+					System.out.print(data0[i] + " ");
+				System.out.println (dataVals0[i]);
 			}
 			System.out.println();
 
@@ -213,26 +304,109 @@ public class SinkClientManager {
 			else if (times1.length == 0)
 				System.out.print(" no data on channel");
 			else for (int i = 0; i < times1.length; i++)
+			{
 				if (times1[i] != time)
-				System.out.print(formatValue(times1[i]) + " ");
-			System.out.println();
+					System.out.print(data1[i] + " ");
+				System.out.println (dataVals1[i]);
+			}
 
 		}
-		catch(Throwable t)
-		{
-			t.printStackTrace();
-			System.out.println("Oops: bad query?");
+		
+		catch (SAPIException e) {
+			e.printStackTrace();
 		}
+		
 	} // runQuery
 	
-	private String formatValue(double d) {
-		DecimalFormat myFormatter = new DecimalFormat("##0.00");
-		String output = myFormatter.format(d);
-		String pad = "      ";
-		output = pad.substring(output.length()) + output;
-		return output;
+
+	private ArrayList storeChannelTimes(ChannelMap m, int[] channelTypes, int channelCount) {
+/*		ArrayList arrList = new ArrayList();
+
+//		com.rbnb.sapi.ChannelMap
+//		public static final int 	TYPE_BYTEARRAY 	10
+//		public static final int 	TYPE_FLOAT32 	7
+//		public static final int 	TYPE_FLOAT64 	8
+//		public static final int 	TYPE_INT16 	4
+//		public static final int 	TYPE_INT32 	5
+//		public static final int 	TYPE_INT64 	6
+//		public static final int 	TYPE_INT8 	3
+//		public static final int 	TYPE_STRING 	9
+//		public static final int 	TYPE_UNKNOWN 	0
+//		public static final int 	TYPE_USER 	11
+
+		final int tB = m.TYPE_BYTEARRAY;
+		
+		int channelTypeNum = 0;
+		for (int i=0; i<channelCount; i++) {
+			channelTypeNum = channelTypes[i];
+
+			if (channelTypeNum == m.TYPE_BYTEARRAY)
+			{
+				byte [][] resultArr = m.GetDataAsByteArray(i);
+			}
+			else if (channelTypeNum == m.TYPE_FLOAT32)
+			{
+				float[] resultArr = m.GetDataAsFloat32(i);
+			}
+			case m.TYPE_FLOAT64:
+			{
+				double[] resultArr = m.GetDataAsFloat64(i);
+				break;
+			}
+			case m.TYPE_INT16:
+			{
+				short [] resultArr = m.GetDataAsInt16(i);
+				break;
+			}
+			case m.TYPE_INT32:
+			{
+				int [] resultArr = m.GetDataAsInt32(i);
+				break;
+			}
+			case m.TYPE_INT64:
+			{
+				long [] resultArr = m.GetDataAsInt64(i);
+				break;
+			}
+			case m.TYPE_INT8:
+			{
+				byte [] resultArr = m.GetDataAsInt8(i);
+				break;
+			}
+			case m.TYPE_STRING:
+			{
+				String [] resultArr = m.GetDataAsString(i);
+				break;
+			}
+			case m.TYPE_UNKNOWN:
+			{
+				Object resultArr = m.GetDataAsArray(i);
+				break;
+			}
+			default:
+			{
+				Object resultArr = m.GetDataAsArray(i);
+				break;
+			}
+			}
+
+		}
+		*/
+		return null;
 	}
 
+	
+	
+	private int [] storeChannelTypes (ChannelMap m, int channelCount) { 
+		int [] channelTypes = new int [channelCount];
+		for (int i=0; i< channelCount; i++) {
+			channelTypes[i] = m.GetType(i);
+			System.out.println("Channel type is " + channelTypes[i]);
+		}
+		return channelTypes;
+	}		
+	
+	
 	
 	
 
