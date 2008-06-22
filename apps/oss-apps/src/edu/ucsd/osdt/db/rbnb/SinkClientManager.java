@@ -114,7 +114,7 @@ public class SinkClientManager {
 
 			System.out.println ("waiting");
 			System.out.println(System.currentTimeMillis());
-			Thread.sleep(min*1*1000);
+			Thread.sleep(min*60*1000);
 			System.out.println(System.currentTimeMillis());
 			
 			System.out.println("Done.");
@@ -308,6 +308,18 @@ public class SinkClientManager {
 		
 		catch (SAPIException e) {
 			e.printStackTrace();
+			
+			// verify whether the connection is still alive, 
+			// 
+			// if the connection is still alive, request again.
+			if (sink.VerifyConnection()) {
+				waitForMins(1);
+			}
+			else {
+				openRBNBConn (sink);
+			}
+			// if the connection is lost, restart the request session.
+			
 		}
 		
 	} // runQuery
