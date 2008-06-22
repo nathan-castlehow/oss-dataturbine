@@ -60,7 +60,8 @@ public class SinkClientManager {
 		//long requestStartTime = startHelper.findStartTime(cMap);
 		// double requestStartTime = startHelper.findStartTime(cMap);
 		long requestStartTime = startHelper.readLastTimeFromFile ("/Users/petershin/Documents/hi.txt");
-		
+
+		requestStartTime = System.currentTimeMillis();
 		
 		System.out.println (requestStartTime);
 		lastTimeStamp = requestStartTime;
@@ -232,22 +233,21 @@ public class SinkClientManager {
 			// getting the number of channels that have data in themselves.
 			int channelCount = m.NumberOfChannels();
 			
-			ArrayList arrList = new ArrayList();
+			ArrayList listOfChannelDataArrays = new ArrayList();
+
+			ArrayList <double[]> listOfChannelTimesArrays = new ArrayList <double[]> ();
 			
 			int [] channelTypes = null;
 			
 			double[] times0 = null, times1 = null;
 			double[] data0 = null;
 			double[] data1 = null;
-
-//			int channelDataTypeName = m.GetType(0);
-//			System.out.println("Channel name is " +channelDataTypeName);
-//			System.out.println("Channel name from com.rbnb is " + cMap.TYPE_FLOAT64);
 			
 			channelTypes = storeChannelTypes (m, channelCount);
 			
-			//arrList = storeChannelTimes (m, channelTypes, channelCount);
-			
+			listOfChannelDataArrays = getDataFromChannels (m, channelTypes, channelCount);
+			listOfChannelTimesArrays = getTimesFromChannels (m, channelCount);
+
 			
 			
 			if (channelCount == 0)
@@ -273,15 +273,11 @@ public class SinkClientManager {
 				System.out.println("    --> data on both channels");
 				times0 = m.GetTimes(0);
 				data0 = m.GetDataAsFloat64(0);
-				arrList.add(data0);
 				
 				times1 = m.GetTimes(1);
 				data1 = m.GetDataAsFloat64(1);
-				arrList.add(data1);
 			}
 
-			double [] dataVals0 = (double[])arrList.get(0);
-			double [] dataVals1 = (double[])arrList.get(1);
 			
 			System.out.print("    Times on Channel 0: ");
 			if (times0 == null)
@@ -294,7 +290,6 @@ public class SinkClientManager {
 				
 				if (times0[i] != time)
 					System.out.print(data0[i] + " ");
-				System.out.println (dataVals0[i]);
 			}
 			System.out.println();
 
@@ -307,7 +302,6 @@ public class SinkClientManager {
 			{
 				if (times1[i] != time)
 					System.out.print(data1[i] + " ");
-				System.out.println (dataVals1[i]);
 			}
 
 		}
@@ -319,8 +313,16 @@ public class SinkClientManager {
 	} // runQuery
 	
 
-	private ArrayList storeChannelTimes(ChannelMap m, int[] channelTypes, int channelCount) {
-/*		ArrayList arrList = new ArrayList();
+	private ArrayList <double []> getTimesFromChannels(ChannelMap m, int channelCount) {
+		ArrayList <double[]> arrList = new ArrayList<double[]>();
+		for (int i=0; i<channelCount; i++) {
+			arrList.add(m.GetTimes(i));
+		}
+		return arrList;
+	}
+
+	private ArrayList getDataFromChannels(ChannelMap m, int[] channelTypes, int channelCount) {
+		ArrayList arrList = new ArrayList();
 
 //		com.rbnb.sapi.ChannelMap
 //		public static final int 	TYPE_BYTEARRAY 	10
@@ -334,65 +336,50 @@ public class SinkClientManager {
 //		public static final int 	TYPE_UNKNOWN 	0
 //		public static final int 	TYPE_USER 	11
 
-		final int tB = m.TYPE_BYTEARRAY;
 		
 		int channelTypeNum = 0;
 		for (int i=0; i<channelCount; i++) {
 			channelTypeNum = channelTypes[i];
 
-			if (channelTypeNum == m.TYPE_BYTEARRAY)
+			if (channelTypeNum == ChannelMap.TYPE_BYTEARRAY)
 			{
 				byte [][] resultArr = m.GetDataAsByteArray(i);
 			}
-			else if (channelTypeNum == m.TYPE_FLOAT32)
+			else if (channelTypeNum == ChannelMap.TYPE_FLOAT32)
 			{
 				float[] resultArr = m.GetDataAsFloat32(i);
 			}
-			case m.TYPE_FLOAT64:
+			else if (channelTypeNum == ChannelMap.TYPE_FLOAT64)
 			{
 				double[] resultArr = m.GetDataAsFloat64(i);
-				break;
 			}
-			case m.TYPE_INT16:
+			else if (channelTypeNum == ChannelMap.TYPE_INT16)
 			{
 				short [] resultArr = m.GetDataAsInt16(i);
-				break;
 			}
-			case m.TYPE_INT32:
+			else if (channelTypeNum == ChannelMap.TYPE_INT32)
 			{
 				int [] resultArr = m.GetDataAsInt32(i);
-				break;
 			}
-			case m.TYPE_INT64:
+			else if (channelTypeNum == ChannelMap.TYPE_INT64)
 			{
 				long [] resultArr = m.GetDataAsInt64(i);
-				break;
 			}
-			case m.TYPE_INT8:
+			else if (channelTypeNum == ChannelMap.TYPE_INT8)
 			{
 				byte [] resultArr = m.GetDataAsInt8(i);
-				break;
 			}
-			case m.TYPE_STRING:
+			else if (channelTypeNum == ChannelMap.TYPE_STRING)
 			{
 				String [] resultArr = m.GetDataAsString(i);
-				break;
 			}
-			case m.TYPE_UNKNOWN:
+			else
 			{
 				Object resultArr = m.GetDataAsArray(i);
-				break;
 			}
-			default:
-			{
-				Object resultArr = m.GetDataAsArray(i);
-				break;
-			}
-			}
-
+			arrList.add(i);
 		}
-		*/
-		return null;
+		return arrList;
 	}
 
 	
