@@ -17,10 +17,16 @@ import java.util.Iterator;
 import java.util.List;
 import java.io.FileWriter;
 import java.io.File;
+import java.util.LinkedList;
+import java.util.HashMap;
 
+import edu.ucsd.osdt.db.dt2dbMap;
 
 public class ConfigUtil {
 
+
+	LinkedList <String> chNames = new LinkedList<String> ();
+	
 	/**
 	 * Write the given Config object to file; 
 	 */
@@ -36,12 +42,12 @@ public class ConfigUtil {
 
 			parElt = new DefaultElement( "param" );
 			parElt.addAttribute( "name", "serverAddress" );
-			parElt.addAttribute( "value", aConfig.getServerAddress() );
+			parElt.addAttribute( "value", aConfig.getRbnbServerAddress() );
 			root.add( parElt );
 
 			parElt = new DefaultElement( "param" );
 			parElt.addAttribute( "name", "serverPort" );
-			parElt.addAttribute( "value", aConfig.getServerPort() );
+			parElt.addAttribute( "value", aConfig.getRbnbServerPort() );
 			root.add( parElt );
 
 			parElt = new DefaultElement( "param" );
@@ -72,12 +78,16 @@ public class ConfigUtil {
 					if( aCol.getChannelMapping() != null ) 
 						colElt.addAttribute( "channelMapping", aCol.getChannelMapping() );
 
-					if( aCol.getDataValue() != null )
-						colElt.addAttribute( "dataValue", aCol.getDataValue() );
-
-					if( aCol.getType() != null )
-						colElt.addAttribute( "type", aCol.getType() );
-
+					
+					// TODO  This needs iteration later.
+					if( aCol.getDataValue() != null ) {
+						colElt.addAttribute( "dataValue", aCol.getDataValue().getFirst() );
+					}
+					
+					if( aCol.getType() != null ) {
+						colElt.addAttribute( "type", aCol.getType().getFirst() );
+					}
+					
 					tabElt.add( colElt );
 				}
 
@@ -131,14 +141,59 @@ public class ConfigUtil {
 				System.out.println( "Found param: name=" + parName + ", value=" + parValue );
 
 				// Set key value params
-				if( parName.equals( "serverAddress" ) ) {
-					aConfig.setServerAddress( parValue );
+				if( parName.equals( "rbnbServerAddress" ) ) {
+					aConfig.setRbnbServerAddress( parValue );
 				}
-				else if( parName.equals( "serverPort" ) ) {
-					aConfig.setServerPort( parValue );
+				else if( parName.equals( "rbnbServerPort" ) ) {
+					aConfig.setRbnbServerPort( parValue );
 				}
 				else if( parName.equals( "sampleIntParam" ) ) {
 					aConfig.setSampleIntParam( Integer.parseInt( parValue ) );
+				}
+				
+				// key values for db
+				else if ( parName.equals("dbServerName") ) {
+					aConfig.setDbServerName(parValue);
+				}
+				else if ( parName.equals("jdbcDriverName")) {
+					aConfig.setJdbcDriverName(parValue);
+				}
+				else if ( parName.equals("dbName")) {
+					aConfig.setDbName(parValue);
+				}
+				else if (parName.equals("dbUserName")) {
+					aConfig.setDbUserName(parValue);
+				}
+				else if ( parName.equals("dbPassword")) {
+					aConfig.setDbPassword(parValue);
+				}
+								
+				else if (parName.equals("sysLoggerServerName")){
+					aConfig.setSysLogServerAddress(parValue);
+				}
+				
+				// key value for Sink Client Manger program
+				else if ( parName.equals("startTimeFilePath")) {
+					aConfig.setStartTimeFilePath(parValue);
+				}
+				else if (parName.equals("durationSeconds")) {
+					aConfig.setDurationSeconds(Double.parseDouble(parValue));
+				}
+				else if (parName.equals("stopAtError")) {
+					if (parValue.equals("NO") ){
+						aConfig.setStopAtError(false);
+					}
+					else
+						aConfig.setStopAtError(true);
+				}
+				else if (parName.equals("continueFlagFile")) {
+					aConfig.setContinueFlagFile(parValue);
+				}
+				else if (parName.equals("emailContact")) {
+					aConfig.setEmailContact(parValue);
+				}
+				else if (parName.equals("dataModel")) {
+					aConfig.setDataModel(parValue);
 				}
 				else {
 					System.out.println( "Error: unrecognized param (name=" + parName + ")!" );
@@ -146,6 +201,8 @@ public class ConfigUtil {
 
 			}
 
+			HashMap <String, dt2dbMap> mapper = new HashMap <String, dt2dbMap>();
+			LinkedList <String> chNames = new LinkedList<String> ();
 			// Iterate through child elements of root with element name "table"
 			for( Iterator tableIter = root.elementIterator( "table" ); tableIter.hasNext(); ) {
 				Element aTableElt = (Element) tableIter.next();
@@ -155,6 +212,7 @@ public class ConfigUtil {
 				TableConfig aTable = new TableConfig();
 				aTable.setName( tableName );
 
+				
 				// Iterate through child elements of current table with element name "column"
 				for( Iterator colIter = aTableElt.elementIterator( "column" ); colIter.hasNext(); ) {
 					Element aColElt = (Element) colIter.next();
@@ -167,6 +225,9 @@ public class ConfigUtil {
 					if( aColElt.attributeValue( "channelMapping" ) != null ) {
 						aCol.setChannelMapping( aColElt.attributeValue( "channelMapping" ) );
 						System.out.print( "... has channelMapping: " + aCol.getChannelMapping() );						
+						chNames.add(aCol.getChannelMapping());
+						dt2dbMap ddm =new dt2dbMap (aCol.getChannelMapping(), tableName, colName); 
+						mapper.put(aCol.getChannelMapping(), ddm);
 					}
 
 					if( aColElt.attributeValue( "dataValue" ) != null ) {
@@ -181,26 +242,6 @@ public class ConfigUtil {
 
 					System.out.println();
 
-//					Casting the value...
-					if( aCol.getDataValue() != null ) {
-						System.out.println( "Test casting the data value for predefined values..." );	
-						String type = aCol.getType();
-						System.out.println( "Type: " + type );	 
-
-						if( type.equals( TableConfigColumn.TYPE_STRING ) ) {
-							System.out.println( "Value: " + aCol.getDataValue() );		
-						}
-						else if( type.equals( TableConfigColumn.TYPE_INT ) ) {
-							System.out.println( "Value: " + Integer.parseInt( aCol.getDataValue() ) );		
-						}
-						else if( type.equals( TableConfigColumn.TYPE_DOUBLE ) ) {
-							System.out.println( "Value: " + Double.parseDouble( aCol.getDataValue() ) );		
-						}
-						else {
-							System.out.println( "Unknown type!" );
-						}
-					}
-
 
 					aTable.putTableConfigColumn( aCol );
 
@@ -209,8 +250,46 @@ public class ConfigUtil {
 				aConfig.putTableConfig( aTable );
 			}
 
+			
 
+			
+			for (Iterator mapItr = root.elementIterator("mapping"); mapItr.hasNext();) {
+				Element aMapElt = (Element) mapItr.next();
+				String tableName = aMapElt.attributeValue( "tableName" );
+				System.out.println( "Found table; name = " + tableName );
+				
+				String colName = aMapElt.attributeValue( "colName" );
+				System.out.println( "Found column; name = " + colName );
+				
+				String rbnbChannel = aMapElt.attributeValue( "rbnbChannel" );
+				System.out.println( "Found table; name = " + rbnbChannel );
+				
+				chNames.add(rbnbChannel);
+				dt2dbMap ddm = new dt2dbMap (rbnbChannel, tableName, colName);
+				
+				// Iterate through child elements of current table with element name "column"
+				for( Iterator colIter = aMapElt.elementIterator( "value" ); colIter.hasNext(); ) {
+					Element aColElt = (Element) colIter.next();
+					String valueName = aColElt.attributeValue( "valueName" );
+					System.out.print( "Found value; valueName = " + valueName );
+
+					String value = aColElt.attributeValue( "value" );
+					System.out.print( "Found value; valueName = " + value);
+
+					String type = aColElt.attributeValue( "type" );
+					System.out.print( "Found value; valueName = " + type);
+
+					System.out.println();
+
+					ddm.addValue(valueName, value, type);
+					mapper.put(rbnbChannel, ddm);
+				}
+			}
+			aConfig.setDt2dbMap(mapper);
+			aConfig.setChNames(chNames);
 		}
+				
+
 		catch( Exception e ) {
 			System.out.println( "Error: caught exception while reading config file!" );
 			e.printStackTrace();
@@ -218,15 +297,19 @@ public class ConfigUtil {
 
 		return aConfig;
 	}
+	
+	public LinkedList<String> getChNames() {
+		return this.chNames;
+	}
 
 	public static void main( String[] args ) {
 		String inputFileName =  "/Users/petershin/Downloads/config-parser/config.xml";
 		//String inputFileName =  "./config2.xml";
 		//String inputFileName =  "./config3.xml";
 		String outputFileName =  "/Users/petershin/Downloads/config-parser/outputConfig.xml";
-
+		
 		Config aConfig = ConfigUtil.readConfig( inputFileName );
-
+		
 		System.out.println();
 
 		ConfigUtil.writeConfig( aConfig, outputFileName );

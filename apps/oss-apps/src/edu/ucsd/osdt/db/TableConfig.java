@@ -6,6 +6,7 @@ package edu.ucsd.osdt.db;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.LinkedList;
 
 public class TableConfig {
 	 // List of TableConfigColumn objects
@@ -59,6 +60,17 @@ public class TableConfig {
 		 return -1;
 	 }
 	 
+	 public LinkedList <String> getChannelNames () {
+		 
+		 LinkedList <String> chNames = new LinkedList<String>();
+		 
+		 for( int i=0; i < columns.size(); i++ ) {
+				TableConfigColumn aCol = (TableConfigColumn) columns.get(i);
+				chNames.add(aCol.getChannelMapping());
+			 }
+		 return chNames;
+	 }
+
 	 public List getTableConfigColumnsAsList() {
 		return columns;
 	 }
