@@ -7,8 +7,12 @@ import java.util.StringTokenizer;
 import java.io.*;
 import java.util.LinkedList;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import edu.ucsd.osdt.db.log.SysDLogger;
+import edu.ucsd.osdt.db.Config;
+import edu.ucsd.osdt.db.ConfigUtil;
+import edu.ucsd.osdt.db.dt2dbMap;
 
 public class SinkClientManager {
 
@@ -18,25 +22,74 @@ public class SinkClientManager {
 	// local variables that need to be configured from the other parts later
 	//String server = "niagara.sdsc.edu:3333";
 
-	String server = "niagara.sdsc.edu:3333";
-
+	String server = "niagara-dev.sdsc.edu:3333";
+	//String sinkName = "FakeDAQ";
+	
 	// these should be specified elsewhere
-	String sourceName = "FakeDAQ";
-	String sinkName = "FakeDAQ";
-	String sourceChannel0 = "0";
-	String sourceChannel1 = "1";
-	String sourcePath0 = sourceName + "/" + sourceChannel0;
-	String sourcePath1 = sourceName + "/" + sourceChannel1;
 
 	long lastTimeStamp;
 	
-	double startedAt0, endedAt0;
+	SysDLogger sLogger = null;
+	
+	double durationSeconds = 20.0;
+	
+	long requestStartTimeMilli = System.currentTimeMillis();
+	double requestStartTimeDouble = requestStartTimeMilli / 1000.0;
+	double lastTimeStampDouble = requestStartTimeDouble - durationSeconds;
+	
+	Config cfg = null;
+	
+	LinkedList <String>chNames = new LinkedList <String> ();
+	long extraFetchTime = 10000L;
+	ChannelMap cMap1 = null;
+	String dataModel = "RowModel";
+	HashMap <String, dt2dbMap> mapper = null;
+	
+	public SinkClientManager () {
+		String sourceName = "FakeDAQ";
+		
+		String sourceChannel0 = "0";
+		String sourceChannel1 = "1";
+		String sourcePath0 = sourceName + "/" + sourceChannel0;
+		String sourcePath1 = sourceName + "/" + sourceChannel1;
 
-	SysDLogger sLogger = new SysDLogger("niagara.sdsc.edu", 514);
+		// hard coding the channel names
+
+		this.chNames.add(sourcePath0);
+		this.chNames.add(sourcePath1);
+	
+		System.out.println(">>" + sourcePath0 + "<<");
+		sLogger = new SysDLogger("niagara.sdsc.edu", 514);
+		
+	}
+	
+	public void setConfig (Config cfg) {
+		this.server = cfg.getRbnbServerAddress()+ ":" + cfg.getRbnbServerPort();
+		System.out.println("The rbnb server name is:" + "<"+this.server+">");
+
+		String sysServer = cfg.getSysLogServerAddress();
+		System.out.println("The sysLog server name is:" + "<"+sysServer+">");
+
+		this.sLogger = new SysDLogger(sysServer, 514);
+		
+		this.durationSeconds = cfg.getDurationSeconds();
+		System.out.println ("Duration seconds from cfg = "+ this.durationSeconds );
+		
+		LinkedList <String> nList = cfg.getChNames();
+		for (int i=0; i< nList.size(); i++) {
+			this.chNames.add( nList.get(i) );
+			System.out.println("Channel path is: >>" + chNames.get(i)+"<<");
+		}
+	
+		this.dataModel = cfg.getDataModel();
+		this.mapper = cfg.getDt2dbMap();
+		
+	}
+	
 	
 	public static void main(String[] args){(new SinkClientManager()).exec();}
 
-	private void exec() {
+	public void exec() {
 		
 		sink = new Sink();
 
@@ -44,43 +97,43 @@ public class SinkClientManager {
 	
 		// map between the dt and db.
 		
-
-		
-		// hard coding the channel names
-		LinkedList <String> chNames = new LinkedList <String> ();
-		chNames.add(sourcePath0);
-		chNames.add(sourcePath1);
 		
 		// channel map is created
-		ChannelMap cMap = createChannelMap(chNames);
-	
+		cMap1 = createChannelMap(this.chNames);
+		System.out.println ("Channel Map is created");
+		
+		String [] list = cMap1.GetChannelList();
+		for (int ii=0; ii<list.length; ++ii) {
+			list[ii]=cMap1.GetName(ii);
+			System.out.println ("Channel Name in exec() is " + list[ii]);
+		}
+
 		
 		requestStartHelper startHelper = new requestStartHelper();
 	
 		//long requestStartTime = startHelper.findStartTime(cMap);
 		// double requestStartTime = startHelper.findStartTime(cMap);
-		long requestStartTime = startHelper.readLastTimeFromFile ("/Users/petershin/Documents/hi.txt");
+		//long requestStartTime = startHelper.readLastTimeFromFile ("/Users/petershin/Documents/hi.txt");
 
-		requestStartTime = System.currentTimeMillis();
+		//requestStartTime = System.currentTimeMillis();
+			
 		
-		System.out.println (requestStartTime);
-		lastTimeStamp = requestStartTime;
-		
-		double durationSeconds = 60000.0;
-		
-		System.out.println(startHelper.formatDate(lastTimeStamp));
-		
-		requestStartTime = System.currentTimeMillis();
-		double lastTimeStampDouble = requestStartTime / 1000.0;
-		
-		
+		System.out.println("last time stamp is " + startHelper.formatDate((long) (lastTimeStampDouble * 1000.0)));
+		System.out.println("current time is "+ startHelper.formatDate(System.currentTimeMillis()));
+
 		// keep requesting
-		runQuery("absolute", cMap, lastTimeStampDouble , durationSeconds);
-				
-		sink.CloseRBNBConnection();
+		runQuery("absolute", cMap1, lastTimeStampDouble , durationSeconds);
+		System.out.println ("Running a new query");
+		
+		this.sink.CloseRBNBConnection();
 		
 		System.out.println(className + ": Connection to " + server+ " is closed");
-		sLogger.sysDMessage(className + ": Connection to " + server+ " is closed");
+		//sLogger.sysDMessage(className + ": Connection to " + server+ " is closed");
+		
+		lastTimeStampDouble = lastTimeStampDouble + durationSeconds;
+		exec();
+		
+		
 	} // exec
 
 
@@ -88,8 +141,10 @@ public class SinkClientManager {
 	
 	public void openRBNBConn (Sink s) {
 		try{
-			sink.OpenRBNBConnection(server,sinkName);
-			System.out.println("Connected");
+			this.sink = new Sink();
+			this.sink.OpenRBNBConnection(server, className);
+			System.out.println(className + ": Connection to " + server+ " is opened");
+
 			sLogger.sysDMessage(className + ": Connection to " + server+ " is opened");
 
 		}
@@ -102,7 +157,6 @@ public class SinkClientManager {
 
 			sLogger.sysDMessage(className + ": Waiting to connect to " + server);
 			waitForMins (1);
-			
 			openRBNBConn(s);
 		}
 	
@@ -112,7 +166,7 @@ public class SinkClientManager {
 	public void waitForMins(int min) {
 		try{
 
-			System.out.println ("waiting");
+			System.out.println ("waiting for " + min + " min");
 			System.out.println(System.currentTimeMillis());
 			Thread.sleep(min*60*1000);
 			System.out.println(System.currentTimeMillis());
@@ -131,7 +185,7 @@ public class SinkClientManager {
 	}
 	
 
-	private ChannelMap createChannelMap (LinkedList <String> channelNames)
+	public ChannelMap createChannelMap (LinkedList <String> channelNames)
 	{
 		// channel map names should come from the configuration steps
 		// 
@@ -148,7 +202,7 @@ public class SinkClientManager {
 			try {
 				int cMapIndex0 = cMap.Add( channelNames.get(i));
 
-				System.out.println("Second channel map index: " + cMapIndex0);
+				System.out.println("channel map index: " + cMapIndex0);
 
 			}
 
@@ -167,34 +221,16 @@ public class SinkClientManager {
 			}
 		}
 
-		
-/***	try {
-			int cMapIndex0 = cMap.Add(sourcePath0);
-			int cMapIndex1 = cMap.Add(sourcePath1);
-
-			System.out.println("First channel map index: " + cMapIndex0);
-			System.out.println("Second channel map index: " + cMapIndex1);
-
-		}
-
-		catch (SAPIException e){
-			// If there is a problem parsing the channel name.
-			e.printStackTrace();
-		}
-
-		catch (NullPointerException e) {
-			// If the channel name is null.
-			e.printStackTrace();
-		}
-
-		catch (IllegalArgumentException e){
-			e.printStackTrace();
-		}
-		
-*/	
 		try {
-			sink.RequestRegistration(cMap);
-			sink.Fetch(10000, cMap);
+			this.sink.RequestRegistration(cMap);
+			this.sink.Fetch(-1, cMap);
+			
+			String [] list = cMap.GetChannelList();
+			for (int ii=0; ii<list.length; ++ii) {
+				list[ii]=cMap.GetName(ii);
+				System.out.println ("Channel Name in createChannelMap is " + list[ii]);
+			}
+
 		} catch (SAPIException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -210,25 +246,36 @@ public class SinkClientManager {
 	 * @param time
 	 * @param duration
 	 */
-	private void runQuery(String type, ChannelMap cMap, double time, double duration)
+	public void runQuery(String type, ChannelMap cMap, double time, double duration)
 	{
 		
 		// for dt2db, we need absolute
-		String inputRequest = "absolute";
 
 
 		System.out.println("For: time = " + time + 
 				"; duration = " + duration +
-				"; request type = " + inputRequest);
+				"; request type = " + type);
 
 		// if the request did not go through, the rest of the operations
 		// are meaningless.  Therefore, the operation is done within the try
 		// catch block
 		
 		try{
+			
+			if (this.sink.VerifyConnection()) {
+				System.out.println ("Connection is verified");
+			}
+			
+			String [] list = cMap.GetChannelList();
+			for (int ii=0; ii<list.length; ++ii) {
+				list[ii]=cMap.GetName(ii);
+				System.out.println ("Channel Name in runQuery is " + list[ii]);
+			}
+
+			
 			// requesting the data and fetching them.
-			sink.Request(cMap,time,duration,type);
-			ChannelMap m = sink.Fetch(-1,cMap);
+			this.sink.Subscribe(cMap,time,duration,type);
+			ChannelMap m = this.sink.Fetch( (long) (duration + this.extraFetchTime) ,cMap);
 
 			// getting the number of channels that have data in themselves.
 			int channelCount = m.NumberOfChannels();
@@ -248,8 +295,10 @@ public class SinkClientManager {
 			listOfChannelDataArrays = getDataFromChannels (m, channelTypes, channelCount);
 			listOfChannelTimesArrays = getTimesFromChannels (m, channelCount);
 
+			LinkedList queries = generateQueries (m, channelCount, listOfChannelDataArrays, listOfChannelTimesArrays);
 			
 			
+/**			
 			if (channelCount == 0)
 			{
 				System.out.println("    --> no data returned");
@@ -303,20 +352,24 @@ public class SinkClientManager {
 				if (times1[i] != time)
 					System.out.print(data1[i] + " ");
 			}
+*/			
+			
 
 		}
 		
 		catch (SAPIException e) {
 			e.printStackTrace();
 			
+			System.out.println("Request failed");
 			// verify whether the connection is still alive, 
 			// 
 			// if the connection is still alive, request again.
-			if (sink.VerifyConnection()) {
+			if (this.sink.VerifyConnection()) {
 				waitForMins(1);
+				runQuery(type, cMap, time, duration);
 			}
 			else {
-				openRBNBConn (sink);
+				openRBNBConn (this.sink);
 			}
 			// if the connection is lost, restart the request session.
 			
@@ -325,6 +378,92 @@ public class SinkClientManager {
 	} // runQuery
 	
 
+	private LinkedList <String> generateQueries(ChannelMap m, int chCount, ArrayList listOfChannelDataArrays,
+			ArrayList<double[]> listOfChannelTimesArrays) {
+		LinkedList <String> queries =null;
+		if (this.dataModel.equals("RowModel")) {
+			queries = generateRowModelQueries (m, chCount, listOfChannelDataArrays, listOfChannelTimesArrays);
+		}
+		else {
+			queries = gerateEAVModelQueries (m, chCount, listOfChannelDataArrays, listOfChannelTimesArrays);
+		}
+		return null;
+	}
+
+
+	
+	
+	
+	private LinkedList<String> gerateEAVModelQueries(
+			ChannelMap m,
+			int chCount,
+			ArrayList listOfChannelDataArrays,
+			ArrayList<double[]> listOfChannelTimesArrays) {
+		
+		LinkedList <String> queries = new LinkedList <String> ();
+
+		boolean done = false;
+		
+		LinkedList <Integer> sameTimeInd = null;
+		
+		int dataChNum = listOfChannelDataArrays.size();
+		int timeChNum = listOfChannelTimesArrays.size();
+		
+		int[] timesCurrIndex = new int[dataChNum];
+		int[] timesMaxIndex = new int [dataChNum];
+		
+		for (int i=0; i < dataChNum; i++) {
+			timesCurrIndex[i] = 0;
+			timesMaxIndex[i] = listOfChannelTimesArrays.get(i).length;
+		}
+		
+		while (done) {
+			// find the min time
+			double minTime = Double.MAX_VALUE;
+			double tempTime = 0.0;
+			
+			for (int i=0; i< timeChNum; i++) {
+				tempTime = listOfChannelTimesArrays.get(i) [timesCurrIndex[i]];
+				if (tempTime < minTime) {
+					minTime = tempTime;
+				}
+			}
+			
+			// find all the channels with the min time
+			sameTimeInd = new LinkedList <Integer>();
+			for (int i=0; i< timeChNum; i++) {
+				tempTime = listOfChannelTimesArrays.get(i) [timesCurrIndex[i]];
+				if (minTime == tempTime) {
+					sameTimeInd.add(new Integer(i));
+				}
+			}
+			
+			LinkedList <String> colVals = new LinkedList <String>();
+			LinkedList <String> colNames = new LinkedList <String>();
+			
+			// generate queries
+			// very tricky!!!
+			// cast carefully..
+			for (int i=0; i< sameTimeInd.size(); i++) {
+				
+				int idx = sameTimeInd.get(i);
+				listOfChannelDataArrays.get(timesCurrIndex[idx]);
+				
+			}
+		}
+		return null;
+	}
+
+	private LinkedList<String> generateRowModelQueries(
+			ChannelMap m,
+			int chCount,
+			ArrayList listOfChannelDataArrays,
+			ArrayList<double[]> listOfChannelTimesArrays) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	
 	private ArrayList <double []> getTimesFromChannels(ChannelMap m, int channelCount) {
 		ArrayList <double[]> arrList = new ArrayList<double[]>();
 		for (int i=0; i<channelCount; i++) {
@@ -336,19 +475,7 @@ public class SinkClientManager {
 	private ArrayList getDataFromChannels(ChannelMap m, int[] channelTypes, int channelCount) {
 		ArrayList arrList = new ArrayList();
 
-//		com.rbnb.sapi.ChannelMap
-//		public static final int 	TYPE_BYTEARRAY 	10
-//		public static final int 	TYPE_FLOAT32 	7
-//		public static final int 	TYPE_FLOAT64 	8
-//		public static final int 	TYPE_INT16 	4
-//		public static final int 	TYPE_INT32 	5
-//		public static final int 	TYPE_INT64 	6
-//		public static final int 	TYPE_INT8 	3
-//		public static final int 	TYPE_STRING 	9
-//		public static final int 	TYPE_UNKNOWN 	0
-//		public static final int 	TYPE_USER 	11
-
-		
+	
 		int channelTypeNum = 0;
 		for (int i=0; i<channelCount; i++) {
 			channelTypeNum = channelTypes[i];
