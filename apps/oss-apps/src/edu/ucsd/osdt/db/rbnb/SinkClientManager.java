@@ -295,7 +295,7 @@ public class SinkClientManager {
 			listOfChannelDataArrays = getDataFromChannels (m, channelTypes, channelCount);
 			listOfChannelTimesArrays = getTimesFromChannels (m, channelCount);
 
-			LinkedList queries = generateQueries (m, channelCount, listOfChannelDataArrays, listOfChannelTimesArrays);
+			LinkedList queries = generateQueries (m, channelTypes, channelCount, listOfChannelDataArrays, listOfChannelTimesArrays);
 			
 			
 /**			
@@ -378,14 +378,14 @@ public class SinkClientManager {
 	} // runQuery
 	
 
-	private LinkedList <String> generateQueries(ChannelMap m, int chCount, ArrayList listOfChannelDataArrays,
+	private LinkedList <String> generateQueries(ChannelMap m, int[] channelTypes, int chCount, ArrayList listOfChannelDataArrays,
 			ArrayList<double[]> listOfChannelTimesArrays) {
 		LinkedList <String> queries =null;
 		if (this.dataModel.equals("RowModel")) {
-			queries = generateRowModelQueries (m, chCount, listOfChannelDataArrays, listOfChannelTimesArrays);
+			queries = generateRowModelQueries (m, channelTypes, chCount, listOfChannelDataArrays, listOfChannelTimesArrays);
 		}
 		else {
-			queries = gerateEAVModelQueries (m, chCount, listOfChannelDataArrays, listOfChannelTimesArrays);
+			queries = gerateEAVModelQueries (m, channelTypes, chCount, listOfChannelDataArrays, listOfChannelTimesArrays);
 		}
 		return null;
 	}
@@ -396,6 +396,7 @@ public class SinkClientManager {
 	
 	private LinkedList<String> gerateEAVModelQueries(
 			ChannelMap m,
+			int[] chTypes,
 			int chCount,
 			ArrayList listOfChannelDataArrays,
 			ArrayList<double[]> listOfChannelTimesArrays) {
@@ -416,10 +417,11 @@ public class SinkClientManager {
 			timesCurrIndex[i] = 0;
 			timesMaxIndex[i] = listOfChannelTimesArrays.get(i).length;
 		}
-		
+
+		double minTime = this.lastTimeStampDouble;
+
 		while (done) {
 			// find the min time
-			double minTime = Double.MAX_VALUE;
 			double tempTime = 0.0;
 			
 			for (int i=0; i< timeChNum; i++) {
@@ -429,33 +431,102 @@ public class SinkClientManager {
 				}
 			}
 			
-			// find all the channels with the min time
-			sameTimeInd = new LinkedList <Integer>();
-			for (int i=0; i< timeChNum; i++) {
-				tempTime = listOfChannelTimesArrays.get(i) [timesCurrIndex[i]];
-				if (minTime == tempTime) {
-					sameTimeInd.add(new Integer(i));
-				}
+			if (minTime == this.lastTimeStampDouble) {
+				// we exclude the starting point values in order to avoid
+				// redundant data.
+				// Because rbnb's request/subcribe methods have inclusive start/
+				// duration time, we need to manually check this case.
 			}
-			
-			LinkedList <String> colVals = new LinkedList <String>();
-			LinkedList <String> colNames = new LinkedList <String>();
-			
-			// generate queries
-			// very tricky!!!
-			// cast carefully..
-			for (int i=0; i< sameTimeInd.size(); i++) {
-				
-				int idx = sameTimeInd.get(i);
-				listOfChannelDataArrays.get(timesCurrIndex[idx]);
-				
+
+			else {
+				// find all the channels with the same min time
+				sameTimeInd = new LinkedList <Integer>();
+				for (int i=0; i< timeChNum; i++) {
+					tempTime = listOfChannelTimesArrays.get(i) [timesCurrIndex[i]];
+					if (minTime == tempTime) {
+						sameTimeInd.add(new Integer(i));
+					}
+				}
+
+				LinkedList <String> colVals = new LinkedList <String>();
+				LinkedList <String> colNames = new LinkedList <String>();
+
+				// generate one query with all the same timestamps
+				// very tricky!!!
+				// cast carefully..
+				for (int i=0; i< sameTimeInd.size(); i++) {
+
+					// idx contains the channel number.
+					int chIdx = sameTimeInd.get(i);
+
+					// this gives the Channel array with time
+					double [] chTime1 = listOfChannelTimesArrays.get(chIdx);
+
+					// prepare to access this channel using the current index
+					int currChIndex = timesCurrIndex[chIdx];
+					double corrTime = chTime1[currChIndex];
+					int chDataTypeInfo = chTypes[currChIndex];
+
+					// prepare the statement for the data part
+					// 
+					// we will not deal with binary objects yet.
+					// for the binary objects 
+					String dataPart = prepareDataStatement (currChIndex, chDataTypeInfo, chIdx, listOfChannelDataArrays);
+
+				}
 			}
 		}
 		return null;
 	}
 
+	private String prepareDataStatement(
+			int currChIndex, 
+			int chDataTypeInfo,
+			int chIdx, 
+			ArrayList listOfChannelDataArrays) {
+		
+		String resultStr;
+		
+		if (chDataTypeInfo == ChannelMap.TYPE_FLOAT32) {
+			// float
+			float[] dataArray = (float []) listOfChannelDataArrays.get(chIdx);
+			float dataPoint = dataArray [currChIndex];
+			resultStr = Float.toString(dataPoint);
+		}
+		else if (chDataTypeInfo == ChannelMap.TYPE_FLOAT64) {
+			// double
+			double[] dataArray = (double []) listOfChannelDataArrays.get(chIdx);
+			double dataPoint = dataArray [currChIndex];
+			resultStr = Double.toString(dataPoint);
+		}
+		else if (chDataTypeInfo== ChannelMap.TYPE_INT32) {
+			// int
+			int[] dataArray = (int []) listOfChannelDataArrays.get(chIdx);
+			int dataPoint = dataArray [currChIndex];
+			resultStr = Integer.toString(dataPoint);
+		}
+		else if (chDataTypeInfo == ChannelMap.TYPE_INT64 ) {
+			// long
+			long[] dataArray = (long []) listOfChannelDataArrays.get(chIdx);
+			long dataPoint = dataArray [currChIndex];
+			resultStr = Long.toString(dataPoint);
+		}
+		else if (chDataTypeInfo == ChannelMap.TYPE_INT8) {
+			// short
+			short[] dataArray = (short []) listOfChannelDataArrays.get(chIdx);
+			short dataPoint = dataArray [currChIndex];
+			resultStr = Short.toString(dataPoint);
+		}
+		else {
+			resultStr = "unknown type";
+		}
+		return resultStr;
+		
+	}
+
 	private LinkedList<String> generateRowModelQueries(
 			ChannelMap m,
+			int [] chTypes,
 			int chCount,
 			ArrayList listOfChannelDataArrays,
 			ArrayList<double[]> listOfChannelTimesArrays) {
