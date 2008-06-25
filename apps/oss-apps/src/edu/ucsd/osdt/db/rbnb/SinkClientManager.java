@@ -472,7 +472,7 @@ public class SinkClientManager {
 					// we will not deal with binary objects yet.
 					// for the binary objects 
 					String dataPart = prepareDataStatement (currChIndex, chDataTypeInfo, chIdx, listOfChannelDataArrays);
-
+					
 				}
 			}
 		}
