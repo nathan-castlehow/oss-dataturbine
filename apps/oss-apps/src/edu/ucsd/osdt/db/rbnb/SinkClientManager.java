@@ -170,10 +170,10 @@ public class SinkClientManager {
 			System.out.println(System.currentTimeMillis());
 			Thread.sleep(min*60*1000);
 			System.out.println(System.currentTimeMillis());
-			
+
 			System.out.println("Done.");
 
-		
+
 		}
 
 		catch(InterruptedException e)
@@ -281,8 +281,8 @@ public class SinkClientManager {
 			int channelCount = m.NumberOfChannels();
 			
 			ArrayList listOfChannelDataArrays = new ArrayList();
-
 			ArrayList <double[]> listOfChannelTimesArrays = new ArrayList <double[]> ();
+			
 			
 			int [] channelTypes = null;
 			
@@ -294,65 +294,10 @@ public class SinkClientManager {
 			
 			listOfChannelDataArrays = getDataFromChannels (m, channelTypes, channelCount);
 			listOfChannelTimesArrays = getTimesFromChannels (m, channelCount);
+		
+			System.out.println("size of the mapper:  " +this.mapper.size());
 
 			LinkedList queries = generateQueries (m, channelTypes, channelCount, listOfChannelDataArrays, listOfChannelTimesArrays);
-			
-			
-/**			
-			if (channelCount == 0)
-			{
-				System.out.println("    --> no data returned");
-				return;
-			}
-			else if (channelCount == 1)
-			{
-				String name = m.GetChannelList()[0];
-				System.out.println("    --> data on only one channel (" + name + ")");
-				if (name.equals(sourcePath0))
-				{
-					times0 = m.GetTimes(0);
-				}
-				else
-				{
-					times1 = m.GetTimes(0);
-				}
-			}
-			else
-			{
-				System.out.println("    --> data on both channels");
-				times0 = m.GetTimes(0);
-				data0 = m.GetDataAsFloat64(0);
-				
-				times1 = m.GetTimes(1);
-				data1 = m.GetDataAsFloat64(1);
-			}
-
-			
-			System.out.print("    Times on Channel 0: ");
-			if (times0 == null)
-				System.out.print(" channel not returned");
-			else if (times0.length == 0)
-				System.out.print(" no data on channel");
-			else for (int i = 0; i < times0.length; i++)
-			{
-				System.out.print(times0[i] + " ");
-				
-				if (times0[i] != time)
-					System.out.print(data0[i] + " ");
-			}
-			System.out.println();
-
-			System.out.print("    Times on Channel 1: ");
-			if (times1 == null)
-				System.out.print(" channel not returned");
-			else if (times1.length == 0)
-				System.out.print(" no data on channel");
-			else for (int i = 0; i < times1.length; i++)
-			{
-				if (times1[i] != time)
-					System.out.print(data1[i] + " ");
-			}
-*/			
 			
 
 		}
@@ -378,6 +323,42 @@ public class SinkClientManager {
 	} // runQuery
 	
 
+	
+	private LinkedList<String> getColNames(ChannelMap m, int channelCount) {
+		LinkedList <String> mappedColNames = new LinkedList <String> ();
+		
+		for (int i=0; i <channelCount; i++) {
+			String tempName = m.GetName(i);
+			dt2dbMap tempDdm = this.mapper.get(tempName);
+			mappedColNames.add(tempDdm.getColName());
+		}
+		
+		return mappedColNames;
+	}
+
+	private LinkedList<String> getTblNames(ChannelMap m, int channelCount) {
+		LinkedList <String> mappedTblNames = new LinkedList <String> ();
+		
+		
+		for (int i=0; i <channelCount; i++) {
+			String tempName = m.GetName(i);
+			dt2dbMap tempDdm = this.mapper.get(tempName);
+			mappedTblNames.add(tempDdm.getTableName());
+		}
+		
+		return mappedTblNames;
+	}
+
+	private LinkedList<String> getFetchedChNames(ChannelMap m, int channelCount) {
+		
+		LinkedList <String> fetchedChNames = new LinkedList <String> ();
+		for (int i=0; i<channelCount; i++) {
+			fetchedChNames.add(m.GetName(i));
+		}
+		return fetchedChNames;
+	}
+
+	
 	private LinkedList <String> generateQueries(ChannelMap m, int[] channelTypes, int chCount, ArrayList listOfChannelDataArrays,
 			ArrayList<double[]> listOfChannelTimesArrays) {
 		LinkedList <String> queries =null;
@@ -400,8 +381,36 @@ public class SinkClientManager {
 			int chCount,
 			ArrayList listOfChannelDataArrays,
 			ArrayList<double[]> listOfChannelTimesArrays) {
-		
+
 		LinkedList <String> queries = new LinkedList <String> ();
+		LinkedList <String> fetchedChNames = new LinkedList <String> ();
+		LinkedList <String> mappedTblNames = new LinkedList <String> ();
+		LinkedList <String> mappedColNames = new LinkedList <String> ();
+
+		fetchedChNames = getFetchedChNames (m, chCount);
+		mappedTblNames = getTblNames (m, chCount);
+		mappedColNames = getColNames (m, chCount);
+		
+		return null;
+	}
+
+	
+	private LinkedList<String> generateRowModelQueries(
+			ChannelMap m,
+			int [] chTypes,
+			int chCount,
+			ArrayList listOfChannelDataArrays,
+			ArrayList<double[]> listOfChannelTimesArrays) {
+
+		LinkedList <String> queries = new LinkedList <String> ();
+		LinkedList <String> fetchedChNames = new LinkedList <String> ();
+		LinkedList <String> mappedTblNames = new LinkedList <String> ();
+		LinkedList <String> mappedColNames = new LinkedList <String> ();
+
+		fetchedChNames = getFetchedChNames (m, chCount);
+		mappedTblNames = getTblNames (m, chCount);
+		mappedColNames = getColNames (m, chCount);
+		
 
 		boolean done = false;
 		
@@ -434,7 +443,7 @@ public class SinkClientManager {
 			if (minTime == this.lastTimeStampDouble) {
 				// we exclude the starting point values in order to avoid
 				// redundant data.
-				// Because rbnb's request/subcribe methods have inclusive start/
+				// Because rbnb's request/subscribe methods have inclusive start/
 				// duration time, we need to manually check this case.
 			}
 
@@ -450,7 +459,8 @@ public class SinkClientManager {
 
 				LinkedList <String> colVals = new LinkedList <String>();
 				LinkedList <String> colNames = new LinkedList <String>();
-
+				LinkedList <String> tblNames = new LinkedList <String>();
+				
 				// generate one query with all the same timestamps
 				// very tricky!!!
 				// cast carefully..
@@ -472,13 +482,17 @@ public class SinkClientManager {
 					// we will not deal with binary objects yet.
 					// for the binary objects 
 					String dataPart = prepareDataStatement (currChIndex, chDataTypeInfo, chIdx, listOfChannelDataArrays);
-					
+					colVals.add(dataPart);
+					colNames.add(mappedColNames.get(chIdx));
+					tblNames.add(mappedTblNames.get(chIdx));
 				}
+				
 			}
 		}
 		return null;
 	}
 
+	
 	private String prepareDataStatement(
 			int currChIndex, 
 			int chDataTypeInfo,
@@ -524,15 +538,6 @@ public class SinkClientManager {
 		
 	}
 
-	private LinkedList<String> generateRowModelQueries(
-			ChannelMap m,
-			int [] chTypes,
-			int chCount,
-			ArrayList listOfChannelDataArrays,
-			ArrayList<double[]> listOfChannelTimesArrays) {
-		// TODO Auto-generated method stub
-		return null;
-	}
 
 	
 	private ArrayList <double []> getTimesFromChannels(ChannelMap m, int channelCount) {
