@@ -27,5 +27,11 @@ public class dt2dbMap {
 		this.typeList.add(t);
 	}
 	
+	public String getTableName () {
+		return this.tableName;
+	}
 	
+	public String getColName() {
+		return this.colName;
+	}
 }
