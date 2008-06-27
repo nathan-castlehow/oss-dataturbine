@@ -224,10 +224,21 @@ public class ConfigUtil {
 
 					if( aColElt.attributeValue( "channelMapping" ) != null ) {
 						aCol.setChannelMapping( aColElt.attributeValue( "channelMapping" ) );
-						System.out.print( "... has channelMapping: " + aCol.getChannelMapping() );						
-						chNames.add(aCol.getChannelMapping());
-						dt2dbMap ddm =new dt2dbMap (aCol.getChannelMapping(), tableName, colName); 
-						mapper.put(aCol.getChannelMapping(), ddm);
+						System.out.print( "... has channelMapping: " + aCol.getChannelMapping() );
+						
+						// if it's time stamp, treat it differently.
+						if (aCol.getChannelMapping().equals("TimeStamp")) {
+							aConfig.setTimeStampColName(aCol.getName());
+						}
+						else if (aCol.getChannelMapping().equals("UTCTimeStamp")) {
+							aConfig.setUTCTimeStampColName(aCol.getName());
+						} 
+						
+						else {
+							chNames.add(aCol.getChannelMapping());
+							dt2dbMap ddm =new dt2dbMap (aCol.getChannelMapping(), tableName, colName); 
+							mapper.put(aCol.getChannelMapping(), ddm);
+						}
 					}
 
 					if( aColElt.attributeValue( "dataValue" ) != null ) {
@@ -236,8 +247,14 @@ public class ConfigUtil {
 					}
 
 					if( aColElt.attributeValue( "type" ) != null ) {
-						aCol.setType( aColElt.attributeValue( "type" ) );
-						System.out.print( "... has type: " + aCol.getType() );						
+						
+						if (aCol.getChannelMapping().equals("UTCTimeStamp")) {
+							aConfig.setUTCOffset(aColElt.attributeValue( "type" ));
+						}
+						else {
+							aCol.setType( aColElt.attributeValue( "type" ) );
+							System.out.print( "... has type: " + aCol.getType() );
+						}
 					}
 
 					System.out.println();

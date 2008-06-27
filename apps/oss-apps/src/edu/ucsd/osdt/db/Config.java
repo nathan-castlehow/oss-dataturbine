@@ -28,8 +28,44 @@ public class Config {
 	public HashMap getDt2dbMap () {
 		return this.mapper;
 	}
-	// these should be specified elsewhere
-
+	
+	
+	String timeStampColName = "";
+	String UTCTimeStampColName = "";
+	int UTCOffset = -8;
+	
+	public void setTimeStampColName(String colName) {
+		this.timeStampColName = colName;
+	}
+	
+	public String getTimeStampColName() {
+		return this.timeStampColName;
+	}
+	
+	public void setUTCTimeStampColName(String cN) {
+		this.UTCTimeStampColName = cN;
+	}
+	
+	public String getUTCTimeStampColName() {
+		return this.UTCTimeStampColName;
+	}
+	
+	public void setUTCOffset (String offset) {
+		try {
+			this.UTCOffset = Integer.parseInt(offset);
+		}
+		catch (NumberFormatException e1) {
+			e1.printStackTrace();
+		}
+		
+	}
+	
+	public int getUTCOffset (){
+		return this.UTCOffset;
+	}
+	
+	
+	
 	LinkedList <String> rbnbChannelPaths = null;
 	LinkedList <String> dbColPaths = null;
 	LinkedList <LinkedList> dbExtraInfos = null;
