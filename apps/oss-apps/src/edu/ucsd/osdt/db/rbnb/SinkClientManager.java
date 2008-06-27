@@ -13,6 +13,7 @@ import edu.ucsd.osdt.db.log.SysDLogger;
 import edu.ucsd.osdt.db.Config;
 import edu.ucsd.osdt.db.ConfigUtil;
 import edu.ucsd.osdt.db.dt2dbMap;
+import edu.ucsd.osdt.db.DbOperator;
 
 public class SinkClientManager {
 
@@ -105,7 +106,7 @@ public class SinkClientManager {
 		String [] list = cMap1.GetChannelList();
 		for (int ii=0; ii<list.length; ++ii) {
 			list[ii]=cMap1.GetName(ii);
-			System.out.println ("Channel Name in exec() is " + list[ii]);
+			//System.out.println ("Channel Name in exec() is " + list[ii]);
 		}
 
 		
@@ -202,7 +203,7 @@ public class SinkClientManager {
 			try {
 				int cMapIndex0 = cMap.Add( channelNames.get(i));
 
-				System.out.println("channel map index: " + cMapIndex0);
+				//System.out.println("channel map index: " + cMapIndex0);
 
 			}
 
@@ -228,7 +229,7 @@ public class SinkClientManager {
 			String [] list = cMap.GetChannelList();
 			for (int ii=0; ii<list.length; ++ii) {
 				list[ii]=cMap.GetName(ii);
-				System.out.println ("Channel Name in createChannelMap is " + list[ii]);
+				//System.out.println ("Channel Name in createChannelMap is " + list[ii]);
 			}
 
 		} catch (SAPIException e) {
@@ -269,7 +270,7 @@ public class SinkClientManager {
 			String [] list = cMap.GetChannelList();
 			for (int ii=0; ii<list.length; ++ii) {
 				list[ii]=cMap.GetName(ii);
-				System.out.println ("Channel Name in runQuery is " + list[ii]);
+				//System.out.println ("Channel Name in runQuery is " + list[ii]);
 			}
 
 			
@@ -295,11 +296,13 @@ public class SinkClientManager {
 			listOfChannelDataArrays = getDataFromChannels (m, channelTypes, channelCount);
 			listOfChannelTimesArrays = getTimesFromChannels (m, channelCount);
 		
-			System.out.println("size of the mapper:  " +this.mapper.size());
-
+			System.out.println("size of the list of data channels: " + listOfChannelDataArrays.size());
+			
+			//System.out.println("size of the mapper:  " + this.mapper.size());
+			
 			LinkedList queries = generateQueries (m, channelTypes, channelCount, listOfChannelDataArrays, listOfChannelTimesArrays);
 			
-
+			System.out.println(queries.get(0));
 		}
 		
 		catch (SAPIException e) {
@@ -486,6 +489,12 @@ public class SinkClientManager {
 					colNames.add(mappedColNames.get(chIdx));
 					tblNames.add(mappedTblNames.get(chIdx));
 				}
+				
+				// generate a query with all the column names, table names, data values
+				DbOperator dbop = new DbOperator();
+				dbop.setConfig(this.cfg);
+				dbop.GenerateRowModelInsertQueries(tblNames, colNames, colVals, minTime);
+				
 				
 			}
 		}
