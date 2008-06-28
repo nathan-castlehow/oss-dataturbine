@@ -2,12 +2,17 @@ package edu.ucsd.osdt.db.rbnb;
 
 import com.rbnb.sapi.*;
 
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.text.DecimalFormat;
 import java.util.StringTokenizer;
 import java.io.*;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Arrays;
+import java.util.List;
 
 import edu.ucsd.osdt.db.log.SysDLogger;
 import edu.ucsd.osdt.db.Config;
@@ -46,23 +51,6 @@ public class SinkClientManager {
 	String dataModel = "RowModel";
 	HashMap <String, dt2dbMap> mapper = null;
 	
-	public SinkClientManager () {
-		String sourceName = "FakeDAQ";
-		
-		String sourceChannel0 = "0";
-		String sourceChannel1 = "1";
-		String sourcePath0 = sourceName + "/" + sourceChannel0;
-		String sourcePath1 = sourceName + "/" + sourceChannel1;
-
-		// hard coding the channel names
-
-		this.chNames.add(sourcePath0);
-		this.chNames.add(sourcePath1);
-	
-		System.out.println(">>" + sourcePath0 + "<<");
-		sLogger = new SysDLogger("niagara.sdsc.edu", 514);
-		
-	}
 	
 	public void setConfig (Config cfg) {
 		this.server = cfg.getRbnbServerAddress()+ ":" + cfg.getRbnbServerPort();
@@ -77,6 +65,7 @@ public class SinkClientManager {
 		System.out.println ("Duration seconds from cfg = "+ this.durationSeconds );
 		
 		LinkedList <String> nList = cfg.getChNames();
+		
 		for (int i=0; i< nList.size(); i++) {
 			this.chNames.add( nList.get(i) );
 			System.out.println("Channel path is: >>" + chNames.get(i)+"<<");
@@ -84,6 +73,7 @@ public class SinkClientManager {
 	
 		this.dataModel = cfg.getDataModel();
 		this.mapper = cfg.getDt2dbMap();
+		this.cfg = cfg;
 		
 	}
 	
@@ -98,6 +88,24 @@ public class SinkClientManager {
 	
 		// map between the dt and db.
 		
+		System.out.println ("# of channel names are " + this.chNames.size());
+		try {
+			Thread.sleep (1000L);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	
+		
+		for (int i=0; i< this.chNames.size();i++) {
+			System.out.println("channel names are: " +chNames.get(i) );
+			try {
+				Thread.sleep (1000L);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
 		
 		// channel map is created
 		cMap1 = createChannelMap(this.chNames);
@@ -276,33 +284,32 @@ public class SinkClientManager {
 			
 			// requesting the data and fetching them.
 			this.sink.Subscribe(cMap,time,duration,type);
-			ChannelMap m = this.sink.Fetch( (long) (duration + this.extraFetchTime) ,cMap);
+			ChannelMap m = this.sink.Fetch( (long) (duration*1000 + this.extraFetchTime) ,cMap);
 
 			// getting the number of channels that have data in themselves.
 			int channelCount = m.NumberOfChannels();
 			
-			ArrayList listOfChannelDataArrays = new ArrayList();
-			ArrayList <double[]> listOfChannelTimesArrays = new ArrayList <double[]> ();
+			LinkedList <LinkedList> listOfChannelDataLists = new LinkedList <LinkedList>();
+			LinkedList <LinkedList> listOfChannelTimesLists = new LinkedList <LinkedList> ();
 			
 			
 			int [] channelTypes = null;
 			
-			double[] times0 = null, times1 = null;
-			double[] data0 = null;
-			double[] data1 = null;
-			
 			channelTypes = storeChannelTypes (m, channelCount);
 			
-			listOfChannelDataArrays = getDataFromChannels (m, channelTypes, channelCount);
-			listOfChannelTimesArrays = getTimesFromChannels (m, channelCount);
-		
-			System.out.println("size of the list of data channels: " + listOfChannelDataArrays.size());
+			listOfChannelDataLists = getDataFromChannels (m, channelTypes, channelCount);
+			listOfChannelTimesLists = getTimesFromChannels (m, channelCount);
+			
+			//System.out.println("size of the list of data channels: " + listOfChannelDataLists.size());
+
+			//System.out.println("the channel type for the first channel is "+ channelTypes[0]);
+			//System.out.println("the first value of data channels: " + ( listOfChannelDataLists.get(0).get(0)));
 			
 			//System.out.println("size of the mapper:  " + this.mapper.size());
 			
-			LinkedList queries = generateQueries (m, channelTypes, channelCount, listOfChannelDataArrays, listOfChannelTimesArrays);
+			LinkedList queries = generateQueries (m, channelTypes, channelCount, listOfChannelDataLists, listOfChannelTimesLists);
 			
-			System.out.println(queries.get(0));
+			//System.out.println(queries.get(0));
 		}
 		
 		catch (SAPIException e) {
@@ -362,14 +369,14 @@ public class SinkClientManager {
 	}
 
 	
-	private LinkedList <String> generateQueries(ChannelMap m, int[] channelTypes, int chCount, ArrayList listOfChannelDataArrays,
-			ArrayList<double[]> listOfChannelTimesArrays) {
+	private LinkedList <String> generateQueries(ChannelMap m, int[] channelTypes, int chCount, LinkedList <LinkedList> listOfChannelDataLists,
+			LinkedList <LinkedList> listOfChannelTimesLists) {
 		LinkedList <String> queries =null;
 		if (this.dataModel.equals("RowModel")) {
-			queries = generateRowModelQueries (m, channelTypes, chCount, listOfChannelDataArrays, listOfChannelTimesArrays);
+			queries = generateRowModelQueries (m, channelTypes, chCount, listOfChannelDataLists, listOfChannelTimesLists);
 		}
 		else {
-			queries = gerateEAVModelQueries (m, channelTypes, chCount, listOfChannelDataArrays, listOfChannelTimesArrays);
+			queries = gerateEAVModelQueries (m, channelTypes, chCount, listOfChannelDataLists, listOfChannelTimesLists);
 		}
 		return null;
 	}
@@ -382,8 +389,8 @@ public class SinkClientManager {
 			ChannelMap m,
 			int[] chTypes,
 			int chCount,
-			ArrayList listOfChannelDataArrays,
-			ArrayList<double[]> listOfChannelTimesArrays) {
+			LinkedList <LinkedList> listOfChannelDataArrays,
+			LinkedList <LinkedList> listOfChannelTimesArrays) {
 
 		LinkedList <String> queries = new LinkedList <String> ();
 		LinkedList <String> fetchedChNames = new LinkedList <String> ();
@@ -402,9 +409,11 @@ public class SinkClientManager {
 			ChannelMap m,
 			int [] chTypes,
 			int chCount,
-			ArrayList listOfChannelDataArrays,
-			ArrayList<double[]> listOfChannelTimesArrays) {
+			LinkedList <LinkedList> listOfChannelDataLists,
+			LinkedList <LinkedList> listOfChannelTimesLists) {
 
+		//System.out.println ("execusting generateRowModelQueries");
+		
 		LinkedList <String> queries = new LinkedList <String> ();
 		LinkedList <String> fetchedChNames = new LinkedList <String> ();
 		LinkedList <String> mappedTblNames = new LinkedList <String> ();
@@ -419,27 +428,69 @@ public class SinkClientManager {
 		
 		LinkedList <Integer> sameTimeInd = null;
 		
-		int dataChNum = listOfChannelDataArrays.size();
-		int timeChNum = listOfChannelTimesArrays.size();
+		int dataChNum = listOfChannelDataLists.size();
+		int timeChNum = listOfChannelTimesLists.size();
 		
 		int[] timesCurrIndex = new int[dataChNum];
 		int[] timesMaxIndex = new int [dataChNum];
 		
 		for (int i=0; i < dataChNum; i++) {
 			timesCurrIndex[i] = 0;
-			timesMaxIndex[i] = listOfChannelTimesArrays.get(i).length;
+			timesMaxIndex[i] = (listOfChannelTimesLists.get(i)).size();
+			
+			System.out.println ("channel index ("+ i+") has "+timesMaxIndex[i] + " elements");
 		}
 
-		double minTime = this.lastTimeStampDouble;
+		if (listOfChannelTimesLists.size() == 0) {
+			return null;
+		}
+		
+		DbOperator dbop = new DbOperator();
+		dbop.setConfig(this.cfg);
+		
+		// find the min time index.
+		Double minTimeDouble = (Double) listOfChannelTimesLists.get(0).get(0);
+		double minTime = minTimeDouble.doubleValue();
+		double tempTime = minTime;
 
-		while (done) {
-			// find the min time
-			double tempTime = 0.0;
+		Double tempTimeDouble = new Double(0.0);
+		
+		for (int i=0; i< chCount; i++) {
+			tempTimeDouble = (Double) listOfChannelTimesLists.get(i).get(0);
+			tempTime = tempTimeDouble.doubleValue();
 			
-			for (int i=0; i< timeChNum; i++) {
-				tempTime = listOfChannelTimesArrays.get(i) [timesCurrIndex[i]];
-				if (tempTime < minTime) {
-					minTime = tempTime;
+			if (tempTime < minTime) {
+				minTime = tempTime;
+			}
+		}
+		//System.out.println ("min time is " + minTime);
+		
+		
+		while (!done) {
+
+			// find the starting point
+			for (int i=0; i<chCount; i++) {
+				
+				if (timesCurrIndex[i] < timesMaxIndex[i]) {
+					minTimeDouble = (Double) listOfChannelTimesLists.get(i).get(timesCurrIndex[i]);
+					minTime = minTimeDouble.doubleValue();
+				}
+			}
+				
+			// find the min time among channels
+			for (int i=0; i< chCount; i++) {
+				
+				int currIndex = timesCurrIndex[i];
+				int maxIndex = timesMaxIndex[i];
+
+				if (currIndex < maxIndex) {
+					tempTimeDouble = (Double) listOfChannelTimesLists.get(i).get(currIndex);
+					tempTime = tempTimeDouble.doubleValue();
+
+					if (tempTime <= minTime) {
+						minTime = tempTime;
+						System.out.println ("min time is " + minTime);
+					}
 				}
 			}
 			
@@ -451,15 +502,31 @@ public class SinkClientManager {
 			}
 
 			else {
+				
 				// find all the channels with the same min time
 				sameTimeInd = new LinkedList <Integer>();
-				for (int i=0; i< timeChNum; i++) {
-					tempTime = listOfChannelTimesArrays.get(i) [timesCurrIndex[i]];
-					if (minTime == tempTime) {
-						sameTimeInd.add(new Integer(i));
+				
+				for (int i=0; i< chCount; i++) {
+					
+					int currIndex = timesCurrIndex[i];
+					int maxIndex = timesMaxIndex[i];
+
+					if (currIndex < maxIndex) {
+
+						currIndex = timesCurrIndex[i];
+						//System.out.println (">>>current index of the channel: " + currIndex);
+						tempTimeDouble = (Double) listOfChannelTimesLists.get(i).get(currIndex);
+						tempTime = tempTimeDouble.doubleValue();
+
+						if (minTime == tempTime) {
+							sameTimeInd.add(new Integer(i));
+						}
 					}
 				}
-
+				
+				System.out.println ("number of channels with the same time: " + sameTimeInd.size());
+				
+				
 				LinkedList <String> colVals = new LinkedList <String>();
 				LinkedList <String> colNames = new LinkedList <String>();
 				LinkedList <String> tblNames = new LinkedList <String>();
@@ -470,34 +537,54 @@ public class SinkClientManager {
 				for (int i=0; i< sameTimeInd.size(); i++) {
 
 					// idx contains the channel number.
-					int chIdx = sameTimeInd.get(i);
-
+					Integer chIdxInt = (Integer) sameTimeInd.get(i);
+					int chIdx = chIdxInt.intValue();
+					
 					// this gives the Channel array with time
-					double [] chTime1 = listOfChannelTimesArrays.get(chIdx);
+					LinkedList <Double> chTime1 = listOfChannelTimesLists.get(chIdx);
 
 					// prepare to access this channel using the current index
 					int currChIndex = timesCurrIndex[chIdx];
-					double corrTime = chTime1[currChIndex];
-					int chDataTypeInfo = chTypes[currChIndex];
+					Double corrTimeDouble = (Double) chTime1.get(currChIndex);
+					double corrTime = corrTimeDouble.doubleValue();
+					int chDataTypeInfo = chTypes[chIdx];
 
 					// prepare the statement for the data part
 					// 
 					// we will not deal with binary objects yet.
 					// for the binary objects 
-					String dataPart = prepareDataStatement (currChIndex, chDataTypeInfo, chIdx, listOfChannelDataArrays);
+					String dataPart = prepareDataStatement (currChIndex, chDataTypeInfo, chIdx, listOfChannelDataLists);
 					colVals.add(dataPart);
 					colNames.add(mappedColNames.get(chIdx));
 					tblNames.add(mappedTblNames.get(chIdx));
+					
+					// advance the index
+					timesCurrIndex[chIdx] = timesCurrIndex[chIdx] +1; 
+					
+					System.out.println ("For the same timed data points in channel #" + chIdx + " has the current idx " + timesCurrIndex[chIdx]);
 				}
 				
 				// generate a query with all the column names, table names, data values
-				DbOperator dbop = new DbOperator();
-				dbop.setConfig(this.cfg);
-				dbop.GenerateRowModelInsertQueries(tblNames, colNames, colVals, minTime);
+
+				queries.addAll(dbop.GenerateRowModelInsertQueries(tblNames, colNames, colVals, minTime));
 				
-				
-			}
+				boolean allDone = true;
+				for (int i=0; i< chCount; i++) {
+					if (timesCurrIndex[i] < timesMaxIndex[i]) {
+						allDone = false;
+					}
+					
+					System.out.println ("Advancing the curr index in channel " + timesCurrIndex[i] + " where the max ind is " + timesMaxIndex[i]);
+
+				}
+				done = allDone;
+			
+			} //while
+			
+			
 		}
+		dbop.ExecuteQueries( queries);
+		
 		return null;
 	}
 
@@ -506,39 +593,41 @@ public class SinkClientManager {
 			int currChIndex, 
 			int chDataTypeInfo,
 			int chIdx, 
-			ArrayList listOfChannelDataArrays) {
+			LinkedList <LinkedList> listOfChannelDataLists) {
 		
 		String resultStr;
 		
 		if (chDataTypeInfo == ChannelMap.TYPE_FLOAT32) {
 			// float
-			float[] dataArray = (float []) listOfChannelDataArrays.get(chIdx);
-			float dataPoint = dataArray [currChIndex];
-			resultStr = Float.toString(dataPoint);
+			LinkedList <Float> dataList = (LinkedList <Float>) listOfChannelDataLists.get(chIdx);
+			Float dataPointFloat = (Float) dataList.get(currChIndex);
+			resultStr = dataPointFloat.toString();
 		}
 		else if (chDataTypeInfo == ChannelMap.TYPE_FLOAT64) {
 			// double
-			double[] dataArray = (double []) listOfChannelDataArrays.get(chIdx);
-			double dataPoint = dataArray [currChIndex];
-			resultStr = Double.toString(dataPoint);
+			LinkedList <Double> dataList = (LinkedList <Double>) listOfChannelDataLists.get(chIdx);
+			Double dataPointFloat = (Double) dataList.get(currChIndex);
+			resultStr = dataPointFloat.toString();
 		}
 		else if (chDataTypeInfo== ChannelMap.TYPE_INT32) {
 			// int
-			int[] dataArray = (int []) listOfChannelDataArrays.get(chIdx);
-			int dataPoint = dataArray [currChIndex];
-			resultStr = Integer.toString(dataPoint);
+			LinkedList <Integer> dataList = (LinkedList <Integer>) listOfChannelDataLists.get(chIdx);
+			Integer dataPointFloat = (Integer) dataList.get(currChIndex);
+			resultStr = dataPointFloat.toString();
 		}
 		else if (chDataTypeInfo == ChannelMap.TYPE_INT64 ) {
 			// long
-			long[] dataArray = (long []) listOfChannelDataArrays.get(chIdx);
-			long dataPoint = dataArray [currChIndex];
-			resultStr = Long.toString(dataPoint);
+			LinkedList <Long> dataList = (LinkedList <Long>) listOfChannelDataLists.get(chIdx);
+			Long dataPointFloat = (Long) dataList.get(currChIndex);
+			resultStr = dataPointFloat.toString();
 		}
+
 		else if (chDataTypeInfo == ChannelMap.TYPE_INT8) {
 			// short
-			short[] dataArray = (short []) listOfChannelDataArrays.get(chIdx);
-			short dataPoint = dataArray [currChIndex];
-			resultStr = Short.toString(dataPoint);
+		
+			LinkedList <Byte> dataList = (LinkedList <Byte>) listOfChannelDataLists.get(chIdx);
+			Byte dataPointFloat = (Byte) dataList.get(currChIndex);
+			resultStr = dataPointFloat.toString();
 		}
 		else {
 			resultStr = "unknown type";
@@ -549,19 +638,34 @@ public class SinkClientManager {
 
 
 	
-	private ArrayList <double []> getTimesFromChannels(ChannelMap m, int channelCount) {
-		ArrayList <double[]> arrList = new ArrayList<double[]>();
+	private LinkedList <LinkedList> getTimesFromChannels(ChannelMap m, int channelCount) {
+		LinkedList <LinkedList> allChannels = new LinkedList <LinkedList> ();
+		LinkedList <Double> timeInCh = new LinkedList <Double> ();
+		
 		for (int i=0; i<channelCount; i++) {
-			arrList.add(m.GetTimes(i));
+			double [] timeStampsInCh = m.GetTimes(i);
+			
+			for (int j=0; j<timeStampsInCh.length; j++) {
+				timeInCh.add(new Double(timeStampsInCh[j]));
+			}
+			
+			allChannels.add(timeInCh);
+			timeInCh = new LinkedList <Double>();
+			
 		}
-		return arrList;
+		return allChannels;
 	}
 
-	private ArrayList getDataFromChannels(ChannelMap m, int[] channelTypes, int channelCount) {
-		ArrayList arrList = new ArrayList();
-
+	private LinkedList <LinkedList> getDataFromChannels(ChannelMap m, int[] channelTypes, int channelCount) {
+		
+		LinkedList <LinkedList> allChannels = new LinkedList <LinkedList> ();
+		LinkedList dataInCh = new LinkedList ();
 	
+		channelCount = m.GetChannelList().length;
+		System.out.println ("Data channel length is " + channelCount);
+		
 		int channelTypeNum = 0;
+		
 		for (int i=0; i<channelCount; i++) {
 			channelTypeNum = channelTypes[i];
 
@@ -572,38 +676,98 @@ public class SinkClientManager {
 			else if (channelTypeNum == ChannelMap.TYPE_FLOAT32)
 			{
 				float[] resultArr = m.GetDataAsFloat32(i);
+				
+				for (int j=0; j<resultArr.length; j++) {
+					dataInCh.add(new Float(resultArr[j]));
+				}
+				
+				allChannels.add(dataInCh);
 			}
 			else if (channelTypeNum == ChannelMap.TYPE_FLOAT64)
 			{
 				double[] resultArr = m.GetDataAsFloat64(i);
+
+				for (int j=0; j<resultArr.length; j++) {
+					dataInCh.add(new Double(resultArr[j]));
+				}
+				
+				allChannels.add(dataInCh);
+
 			}
 			else if (channelTypeNum == ChannelMap.TYPE_INT16)
 			{
 				short [] resultArr = m.GetDataAsInt16(i);
+				
+				for (int j=0; j<resultArr.length; j++) {
+					dataInCh.add(new Short(resultArr[j]));
+				}
+				
+				allChannels.add(dataInCh);
+
 			}
 			else if (channelTypeNum == ChannelMap.TYPE_INT32)
 			{
 				int [] resultArr = m.GetDataAsInt32(i);
+
+				for (int j=0; j<resultArr.length; j++) {
+					dataInCh.add(new Integer(resultArr[j]));
+				}
+				
+				allChannels.add(dataInCh);
+
 			}
 			else if (channelTypeNum == ChannelMap.TYPE_INT64)
 			{
 				long [] resultArr = m.GetDataAsInt64(i);
+				
+				for (int j=0; j<resultArr.length; j++) {
+					dataInCh.add(new Long(resultArr[j]));
+				}
+				
+				allChannels.add(dataInCh);
+
 			}
 			else if (channelTypeNum == ChannelMap.TYPE_INT8)
 			{
 				byte [] resultArr = m.GetDataAsInt8(i);
+				
+				for (int j=0; j<resultArr.length; j++) {
+					dataInCh.add(new Byte(resultArr[j]));
+				}
+				
+				allChannels.add(dataInCh);
+
 			}
 			else if (channelTypeNum == ChannelMap.TYPE_STRING)
 			{
 				String [] resultArr = m.GetDataAsString(i);
+				
+				for (int j=0; j<resultArr.length; j++) {
+					dataInCh.add(new String(resultArr[j]));
+				}
+				
+				allChannels.add(dataInCh);
+
 			}
 			else
 			{
 				Object resultArr = m.GetDataAsArray(i);
 			}
-			arrList.add(i);
+			
+			dataInCh = new LinkedList();
 		}
-		return arrList;
+		
+		for (int i=0; i<channelCount; i++) {
+			System.out.println("Channel " + i + " has "+ allChannels.get(i).size() + "elements");
+			System.out.println("channel names are " + m.GetName(i));
+			try {
+				Thread.sleep(1000L);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		return allChannels;
 	}
 
 	
