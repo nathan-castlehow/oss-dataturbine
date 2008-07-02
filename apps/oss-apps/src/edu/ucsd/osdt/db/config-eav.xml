@@ -1,0 +1,45 @@
+<?xml version="1.0"?>
+<!--
+    Sample config file
+-->
+<config>
+	<!-- Key-Value params -->
+	<!-- rbnb params -->
+	<param name="rbnbServerAddress" value="niagara.sdsc.edu"/>
+	<param name="rbnbServerPort" value="3333"/>
+	
+	
+	<!-- DB params-->
+	<param name="dbServerName" value = "localhost" />
+	<param name="jdbcDriverName" value = "org.postgresql.Driver" />
+	<param name="dbName" value = "testDB" />
+	<param name="dbUserName" value = "postgres" />
+	<param name="dbPassword" value = "something" />
+
+
+	<!--SinkClientManger params -->
+	<param name="startTimeFilePath" value = "/Users/petershin/Documents/workspace/startTime.txt" />
+	<param name="durationSeconds" value = "10.0" />
+	
+	<param name="stopAtError" value = "NO"/>
+	<param name="continueFlagFile" value ="/Users/petershin/Documents/workspace/continue.txt" />
+	<param name="emailContact" value = "pshin@sdsc.edu" />
+	
+	<param name="sysLogServerName" value = "niagara.sdsc.edu" />
+
+	
+	<!-- Mapping params -->
+	<param name="dataModel" value="EAVModel" />
+	<mapping tableName ="[RBNB].[dbo].[DataValues]" colName ="valueID" value = "temp" rbnbChannel="/FakeDAQ/ch0" >
+	  <value valueName="siteID" value="2" type="INT" />
+	  <value valueName = "sensorID" value = "10" type= "STRING"/>
+	</mapping>
+
+	<mapping tableName ="[RBNB].[dbo].[DataValues]" colName ="valueID" value = "hum" rbnbChannel="/FakeDAQ/ch1" >
+	  <value valueName = "siteID" value="3" type = "INT"/>
+	  <value valueName = "sensorID" value = "8" type="DOUBLE" />
+	</mapping>
+
+</config>
+
+

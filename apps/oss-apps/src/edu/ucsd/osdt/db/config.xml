@@ -1,0 +1,55 @@
+<?xml version="1.0"?>
+<!--
+    Sample config file
+-->
+<config>
+	<!-- Key-Value params -->
+	<!-- rbnb params -->
+	<param name="rbnbServerAddress" value="niagara-dev.sdsc.edu"/>
+	<param name="rbnbServerPort" value="3333"/>
+	
+	<param name="sysLoggerServerName" value="niagara-dev.sdsc.edu"/>
+	
+	<!-- DB params-->
+	<param name="dbServerName" value = "localhost" />
+	<param name="jdbcDriverName" value = "org.postgresql.Driver" />
+	<param name="dbName" value = "testdb" />
+	<param name="dbUserName" value = "postgres" />
+	<param name="dbPassword" value = "something" />
+
+
+	<!--SinkClientManger params -->
+	<param name="startTimeFilePath" value = "/Users/petershin/Documents/workspace/startTime.txt" />
+	<param name="durationSeconds" value = "60.0" />
+	
+	<param name="stopAtError" value = "NO"/>
+	<param name="continueFlagFile" value ="/Users/petershin/Documents/workspace/continue.txt" />
+	<param name="emailContact" value = "pshin@sdsc.edu" />
+	
+
+	
+	<!-- Mapping params -->
+	<param name="dataModel" value="RowModel" />
+	<table name="ss.fake_daq">   
+		  <!--
+		  		Specify which channels map to which columns
+		  -->
+		  <column name="time_tag" channelMapping="TimeStamp"/>
+		  <!-- <column name="utc_time_tag" channelMapping="UTCTimeStamp" type="-8"/> -->
+		  <column name="ch0" channelMapping="FakeDAQ/0" />
+		  
+		  <column name="ch1" channelMapping="FakeDAQ/1"/>
+		  <!-- 
+		  		Hard-coded data values: for every record, these
+		  			columns will have these values
+
+	     <column name="col2" dataValue="2" type="INT"/> 
+	     <column name="col3" dataValue="someSensor" type="STRING"/> 
+	     <column name="col4" dataValue="someManufacturer" type="STRING"/> 
+	     <column name="col5" dataValue="2.37" type="DOUBLE"/> 
+		  -->	  
+
+	</table>
+</config>
+
+
