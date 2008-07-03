@@ -1,12 +1,12 @@
 /*!
  * @file SdlParser.java
  * @author Lawrence J. Miller <ljmiller@sdsc.edu>
- * @author $LastChangedBy: ljmiller.ucsd $
+ * @author $LastChangedBy$
  * @author Cyberinfrastructure Laboratory for Environmental Observing Systems (CLEOS)
  * @author San Diego Supercomputer Center (SDSC)
- * @date $LastChangedDate: 2008-04-30 15:57:47 -0700 (Wed, 30 Apr 2008) $
- * @version $LastChangedRevision: 49 $
- * @note $HeadURL: https://oss-dataturbine.googlecode.com/svn/trunk/apps/oss-apps/src/edu/ucsd/osdt/source/numeric/SeabirdSource.java $
+ * @date $LastChangedDate$
+ * @version $LastChangedRevision$
+ * @note $HeadURL$
  */
 package edu.ucsd.osdt.source.numeric;
 
