@@ -48,9 +48,15 @@ class SdlParser extends RBNBBase implements MDParserInterface {
 	private String sdlFileName = DEFAULT_SDL_FILE_NAME;
 	private String DEFAULT_LN_FILE_NAME = "loggernet.dat";
 	private String loggernetFileName = DEFAULT_LN_FILE_NAME;
+	private static Logger logger = Logger.getLogger(SdlParser.class.getName());
 	
 	public SdlParser() {
 		super(null, null);
+	}
+	
+	// accessors and mutators
+	public String getSdlFileName() {
+		return this.sdlFileName;
 	}
 	
 	// abstract methods from interface
@@ -61,33 +67,55 @@ class SdlParser extends RBNBBase implements MDParserInterface {
 	
 	
 	/////////////////////
+	/*! @brief Handler for Config.xml, the sdl output file */
 	public boolean parse(String mdFromInstr) {
 		try {
 			Document document;
 			DocumentBuilder documentBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
 			document = documentBuilder.parse(sdlFileName);			
 			XPath xp = XPathFactory.newInstance().newXPath();
-			// has data channel names
-			Node node = (Node)xp.evaluate("/Config/File/DataSeriesMapping[1]", document, XPathConstants.NODE);
-			NodeList nodeList = node.getChildNodes();
+			// has the target channels as column identifiers - <ValueColumnName>Column4</ValueColumnName>
+			Node node = (Node)xp.evaluate("/Config/File[1]", document, XPathConstants.NODE);
+			NodeList firstLevelList = node.getChildNodes();
+			logger.finer("first level # of nodes: " + firstLevelList.getLength());
 			
-			logger.info("# of nodes: " + nodeList.getLength());
 			
-			for(int i=0; i<nodeList.getLength(); i++) {
+			// check out the first level
+			for(int i=0; i<firstLevelList.getLength(); i++) {
+				Node l1Node = firstLevelList.item(i);
 				
-				Node anode = nodeList.item(i);
-				if(anode.getChildNodes().getLength() == 1) { // then there this node has a value node
-					logger.info("node #" + i + ": " + anode.getNodeName() + " has value: " + anode.getChildNodes().item(0).getNodeValue());
+				if(l1Node.getNodeName().compareTo("DataSeriesMapping") == 0) { // then there this node has children with metadata
+					logger.info("got a data series");
+					NodeList secondLevelList = l1Node.getChildNodes();
+					
+					for(int j=0; j<secondLevelList.getLength(); j++) { // check out the second level
+						Node l2Node = secondLevelList.item(j);
+						if(l2Node.getNodeName().compareTo("ValueColumnName") == 0) { // then this tells where to index in the Loggernet file for the channel name
+							
+							String columnLabel = l2Node.getChildNodes().item(0).getNodeValue();
+							logger.info("got a value column: " + columnLabel);
+							getColumnNumber(columnLabel);
+							
+						} // if
+					} // for
 				}
 			} // for
 		} catch(Exception e) {
 			logger.severe("sumpin happened: " + e.toString());
+			e.printStackTrace();
 			return false;
 		}
 		return true;
 	}
 	
-	
+	protected int getColumnNumber(String columnLabelString) {
+		// regex to get the number from "Column#"
+		Pattern pattern = Pattern.compile("Column(\\d)+", Pattern.DOTALL);
+		Matcher matcher = pattern.matcher(columnLabelString);
+		int columnNumber = Integer.parseInt(matcher.group(1));
+		logger.info("got column number: " + Integer.toString(columnNumber));
+		return columnNumber;
+	}
 	
 	
 	public double getRbnbTimestamp(String instrTimestamp) {return -1;}
@@ -96,8 +124,8 @@ class SdlParser extends RBNBBase implements MDParserInterface {
 	protected Options setOptions() {
 		Options opt = setBaseOptions(new Options()); // uses h, v, s, p, S
 
-		opt.addOption("s", true, "SDL configuration file name*" + DEFAULT_SDL_FILE_NAME);
-		opt.addOption("f", true, "Input LoggerNet file name*" + DEFAULT_LN_FILE_NAME);
+		opt.addOption("s", true, "SDL configuration file name *" + DEFAULT_SDL_FILE_NAME);
+		opt.addOption("f", true, "Input LoggerNet file name *" + DEFAULT_LN_FILE_NAME);
 
 		return opt;
 	} // setOptions()
@@ -108,8 +136,8 @@ class SdlParser extends RBNBBase implements MDParserInterface {
 	protected boolean setArgs(CommandLine cmd) throws IllegalArgumentException {
 		if (!setBaseArgs(cmd)) return false;
 
-		if(cmd.hasOption('s')) { // loggernet file name
-			String v = cmd.getOptionValue("f");
+		if(cmd.hasOption('s')) { // sdl file name
+			String v = cmd.getOptionValue("s");
 			sdlFileName = v;
 		}
 		if(cmd.hasOption('f')) { // loggernet file name
@@ -119,4 +147,15 @@ class SdlParser extends RBNBBase implements MDParserInterface {
 		return true;
 	} // setArgs()
 	
+	/**/
+	public static void main(String[] args) {
+		SdlParser sparse = new SdlParser();
+		if(! sparse.parseArgs(args)) {
+			logger.severe("Unable to process command line. Terminating.");
+			System.exit(1);
+		}
+		
+		sparse.parse(sparse.getSdlFileName());
+		
+	}
 }
