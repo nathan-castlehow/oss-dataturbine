@@ -787,8 +787,8 @@ public class SinkClientManager {
 		StringBuffer retval = new StringBuffer();
 		retval.append("$HeadURL:  $" + "\n");
 		retval.append("$LastChangedRevision:  $" + "\n");
-		retval.append("$LastChangedBy: ljmiller.ucsd $" + "\n");
-		retval.append("$LastChangedDate: 2008-05-30 10:52:56 -0700 (Fri, 30 May 2008) $");
+		retval.append("$LastChangedBy$" + "\n");
+		retval.append("$LastChangedDate$");
 		return retval.toString();
 	}
 	
