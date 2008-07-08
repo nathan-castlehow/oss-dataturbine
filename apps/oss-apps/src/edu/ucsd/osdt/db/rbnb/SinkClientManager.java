@@ -785,8 +785,8 @@ public class SinkClientManager {
 	/*! @brief version control information */
 	public String getSVNVersionString() {
 		StringBuffer retval = new StringBuffer();
-		retval.append("$HeadURL: https://oss-dataturbine.googlecode.com/svn/trunk/apps/oss-apps/src/edu/ucsd/osdt/util/RBNBBase.java $" + "\n");
-		retval.append("$LastChangedRevision: 69 $" + "\n");
+		retval.append("$HeadURL:  $" + "\n");
+		retval.append("$LastChangedRevision:  $" + "\n");
 		retval.append("$LastChangedBy: ljmiller.ucsd $" + "\n");
 		retval.append("$LastChangedDate: 2008-05-30 10:52:56 -0700 (Fri, 30 May 2008) $");
 		return retval.toString();
