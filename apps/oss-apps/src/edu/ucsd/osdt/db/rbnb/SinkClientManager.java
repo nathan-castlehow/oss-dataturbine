@@ -785,8 +785,8 @@ public class SinkClientManager {
 	/*! @brief version control information */
 	public String getSVNVersionString() {
 		StringBuffer retval = new StringBuffer();
-		retval.append("$HeadURL:  $" + "\n");
-		retval.append("$LastChangedRevision:  $" + "\n");
+		retval.append("$HeadURL: hi$" + "\n");
+		retval.append("$LastChangedRevision$" + "\n");
 		retval.append("$LastChangedBy$" + "\n");
 		retval.append("$LastChangedDate$");
 		return retval.toString();
