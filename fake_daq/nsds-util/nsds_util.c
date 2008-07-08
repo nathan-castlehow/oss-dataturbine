@@ -187,7 +187,7 @@ int tcp_socket_make(const uint16_t SRV_PORT, const int QUEUE_LENGTH, const char 
 	// Did the caller specify an IP to bind to? If not, use the wildcard
     if(HOST_NAME != NULL)
     {
-        serv_in.sin_addr.s_addr = inet_addr(HOST_NAME);
+        serv_in.sin_addr.s_addr = htonl(inet_addr(HOST_NAME));
         
         if(serv_in.sin_addr.s_addr == INADDR_NONE)
         {
