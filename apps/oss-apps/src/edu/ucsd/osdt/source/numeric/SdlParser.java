@@ -10,12 +10,17 @@
  */
 package edu.ucsd.osdt.source.numeric;
 
+import edu.ucsd.osdt.source.numeric.LoggerNetParser;
 import edu.ucsd.osdt.util.ISOtoRbnbTime;
-import com.rbnb.sapi.ChannelMap;
-import com.rbnb.sapi.SAPIException;
 import edu.ucsd.osdt.util.RBNBBase;
 import edu.ucsd.osdt.util.MDParserInterface;
+import com.rbnb.sapi.ChannelMap;
+import com.rbnb.sapi.SAPIException;
+
 //java
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.InputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -23,8 +28,7 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.util.Date;
 import java.util.Enumeration;
-import java.util.Hashtable;
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -42,22 +46,29 @@ import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
-
 class SdlParser extends RBNBBase implements MDParserInterface {
 	private String DEFAULT_SDL_FILE_NAME = "Config.xml";
 	private String sdlFileName = DEFAULT_SDL_FILE_NAME;
 	private String DEFAULT_LN_FILE_NAME = "loggernet.dat";
 	private String loggernetFileName = DEFAULT_LN_FILE_NAME;
+	private BufferedReader loggernetFileBuffer = null;
+	private LoggerNetParser loggernetParser = null;
 	private static Logger logger = Logger.getLogger(SdlParser.class.getName());
+	private ArrayList<Integer> sdlMappedColumns = null;
+	
 	
 	public SdlParser() {
 		super(null, null);
+		sdlMappedColumns = new ArrayList();
+		loggernetParser = new LoggerNetParser();
 	}
+	
 	
 	// accessors and mutators
 	public String getSdlFileName() {
 		return this.sdlFileName;
 	}
+	
 	
 	// abstract methods from interface
 	public ChannelMap getCmap() {return null;}
@@ -65,10 +76,45 @@ class SdlParser extends RBNBBase implements MDParserInterface {
 	public String[] getUnits() {return null;}
 	
 	
-	
 	/////////////////////
-	/*! @brief Handler for Config.xml, the sdl output file */
-	public boolean parse(String mdFromInstr) {
+	/*! @brief Sets up the rbnb channel map using a LoggerNetParser */
+	public ChannelMap generateCmap() throws IOException, SAPIException {
+		ChannelMap cmapRetval = new ChannelMap();
+		String[] loggernetChannels = null;
+		String[] loggernetUnits = null;
+		StringBuffer mdBuffer = new StringBuffer();
+		
+		// junk line
+		loggernetFileBuffer.readLine();
+		String fileLine1 = loggernetFileBuffer.readLine();
+		mdBuffer.append(fileLine1);
+		logger.finer("file line 1: " + fileLine1);
+		mdBuffer.append("\n");
+		
+		String fileLine2 = loggernetFileBuffer.readLine();
+		mdBuffer.append(fileLine2);
+		logger.finer("file line 2: " + fileLine2);
+		mdBuffer.append("\n");
+		// junk line
+		loggernetFileBuffer.readLine();
+		
+		loggernetParser.parse(mdBuffer.toString());
+		loggernetChannels = (String[])loggernetParser.get("channels");
+		loggernetUnits = (String[])loggernetParser.get("units");
+		
+		// add only those channels that are indexed by the sdl file; these are in sdlMappedColumns
+		Object[] sdlColumns = sdlMappedColumns.toArray();
+		for(int i=0; i<sdlColumns.length; i++) {
+			int sdlColumn = ( (Integer)(sdlColumns[i]) ).intValue();
+			logger.info("sdl column: " + sdlColumn + " maps to loggernet channel: " + loggernetChannels[sdlColumn+1]); // zero inexed
+		}
+		
+		return cmapRetval;
+	}
+	////////////////////////
+	
+	/*! @brief Handler for Config.xml, the sdl output file - does nothing with the parameter */
+	public boolean parse(String mdFromSdl) {
 		try {
 			Document document;
 			DocumentBuilder documentBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
@@ -79,13 +125,11 @@ class SdlParser extends RBNBBase implements MDParserInterface {
 			NodeList firstLevelList = node.getChildNodes();
 			logger.finer("first level # of nodes: " + firstLevelList.getLength());
 			
-			
-			// check out the first level
-			for(int i=0; i<firstLevelList.getLength(); i++) {
+			for(int i=0; i<firstLevelList.getLength(); i++) { // check out the first level
 				Node l1Node = firstLevelList.item(i);
 				
 				if(l1Node.getNodeName().compareTo("DataSeriesMapping") == 0) { // then there this node has children with metadata
-					logger.info("got a data series");
+					logger.finer("got a data series");
 					NodeList secondLevelList = l1Node.getChildNodes();
 					
 					for(int j=0; j<secondLevelList.getLength(); j++) { // check out the second level
@@ -93,13 +137,16 @@ class SdlParser extends RBNBBase implements MDParserInterface {
 						if(l2Node.getNodeName().compareTo("ValueColumnName") == 0) { // then this tells where to index in the Loggernet file for the channel name
 							
 							String columnLabel = l2Node.getChildNodes().item(0).getNodeValue();
-							logger.info("got a value column: " + columnLabel);
-							getColumnNumber(columnLabel);
+							logger.finer("got a value column: " + columnLabel);
+							sdlMappedColumns.add(new Integer(getColumnNumber(columnLabel)));
 							
 						} // if
 					} // for
-				}
+				} // if
 			} // for
+			
+			logger.finer("# of elements in arraylist: " + sdlMappedColumns.size());
+			
 		} catch(Exception e) {
 			logger.severe("sumpin happened: " + e.toString());
 			e.printStackTrace();
@@ -108,17 +155,24 @@ class SdlParser extends RBNBBase implements MDParserInterface {
 		return true;
 	}
 	
+	
 	protected int getColumnNumber(String columnLabelString) {
 		// regex to get the number from "Column#"
-		Pattern pattern = Pattern.compile("Column(\\d)+", Pattern.DOTALL);
+		Pattern pattern = Pattern.compile("Column(\\d)?", Pattern.DOTALL);
 		Matcher matcher = pattern.matcher(columnLabelString);
+		matcher.find();
 		int columnNumber = Integer.parseInt(matcher.group(1));
-		logger.info("got column number: " + Integer.toString(columnNumber));
+		logger.finer("got column number: " + Integer.toString(columnNumber));
 		return columnNumber;
 	}
 	
 	
 	public double getRbnbTimestamp(String instrTimestamp) {return -1;}
+	
+	
+	public void initFile() throws FileNotFoundException {
+		loggernetFileBuffer = new BufferedReader(new FileReader(loggernetFileName));
+	}
 	
 	
 	protected Options setOptions() {
@@ -147,6 +201,7 @@ class SdlParser extends RBNBBase implements MDParserInterface {
 		return true;
 	} // setArgs()
 	
+	
 	/**/
 	public static void main(String[] args) {
 		SdlParser sparse = new SdlParser();
@@ -155,7 +210,17 @@ class SdlParser extends RBNBBase implements MDParserInterface {
 			System.exit(1);
 		}
 		
-		sparse.parse(sparse.getSdlFileName());
+		try {
+			sparse.initFile();
+			sparse.parse(null);
+			sparse.generateCmap();
+		} catch(FileNotFoundException fne) {
+			logger.severe("couldn't find the specified loggernet file");
+		} catch(IOException ioe) {
+			logger.severe(ioe.toString());
+		} catch(SAPIException sae) {
+			logger.severe(sae.toString());
+		}
 		
 	}
-}
+} // class
