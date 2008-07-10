@@ -1,0 +1,69 @@
+{\rtf1\ansi\ansicpg1252\cocoartf949\cocoasubrtf330
+{\fonttbl\f0\froman\fcharset0 TimesNewRomanPSMT;\f1\fswiss\fcharset0 Helvetica;}
+{\colortbl;\red255\green255\blue255;}
+{\*\listtable{\list\listtemplateid1\listhybrid{\listlevel\levelnfc23\levelnfcn23\leveljc2\leveljcn2\levelfollow0\levelstartat1\levelspace360\levelindent0{\*\levelmarker \{disc\}}{\leveltext\leveltemplateid0\'02\'05.;}{\levelnumbers\'01;}}{\listname ;}\listid1}}
+{\*\listoverridetable{\listoverride\listid1\listoverridecount0\ls1}}
+\margl1440\margr1440\vieww12420\viewh17080\viewkind1
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\ql\qnatural\pardirnatural
+
+\f0\b\fs36 \cf0 Software Design of edu.sdsc.cleos.SeabirdSource
+\b0\fs28 \
+Lawrence J. Miller, University of California, San Diego\
+\
+
+\b Revision History
+\b0 \
+rev. 1.0	initial revision	3/17/2008\
+\
+
+\b Overview
+\b0 \
+	This describes the design of a software program that functions as a DataTurbine driver program to acquire data from and issue commands to control the Seabird 16plus SeaCat conductivity, temperature, and depth (CTD) profiler instrument via a serial interface and to process and inject this datastream into the DataTurbine infrastructure.\
+\
+
+\b Requirements Addressed by this Design
+\b0 \
+	Implementation of a real-time stream of data from a SeaCat onto a Dataturbine ring buffer. This program is an instrument driver that is roughly modeled after the accumulator design pattern. It serves to manage a data stream that runs from the SeaCat over serial RS232 through the RXTX serial driver and then through a DataTurbine SAPI Source instance onto the DataTurbine ring buffer.\
+	Implementation of a bi-directional interface to support command-response semantics. This design effectively proves the concept of implementing command-response over a serial link using RXTX in that it performs command-response when queries configuration and calibration metadata initially and with each data sample read via "ts". RXTX is a third-party Java library for serial parallel communication that is well known to function correctly across a wide range of platforms\
+\
+
+\b Software Prerequisites
+\b0 \
+\pard\tx220\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\li720\fi-720\ql\qnatural\pardirnatural
+\ls1\ilvl0\cf0 {\listtext	\'95	}Java JVM (JRE minimum, JDK recommended):\
+\pard\tx220\tx720\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\li720\fi-720\ql\qnatural\pardirnatural
+\ls1\ilvl0\cf0 http://java.sun.com/javase/downloads/?intcmp=1281\
+\pard\tx220\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\li720\fi-720\ql\qnatural\pardirnatural
+\ls1\ilvl0\cf0 {\listtext	\'95	}RXTX:\
+\pard\tx220\tx720\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\li720\fi-720\ql\qnatural\pardirnatural
+\ls1\ilvl0\cf0 http://rxtx.org/\
+\pard\tx220\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\li720\fi-720\ql\qnatural\pardirnatural
+\ls1\ilvl0\cf0 {\listtext	\'95	}DataTurbine:\
+\pard\tx220\tx720\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\li720\fi-720\ql\qnatural\pardirnatural
+\ls1\ilvl0\cf0 http://code.google.com/p/dataturbine/downloads/list\
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\ql\qnatural\pardirnatural
+\cf0 \
+
+\b Communication Interfaces and Protocols
+\b0 \
+	SeabirdSource communicates with the Seacat via the published SeaCat 16plus command specification over serial RS232 through the RXTX Java serial driver. It communicates with DataTurbine via the DataTurbine Simple API, com.rbnb.sapi, over tcp/ip.\
+\
+SeaCat -(RS232)-> serial port -(RXTX driver)-> SeabirdSource -(RBNB SAPI)-> DataTurbine\
+\
+
+\b Architecture
+\f1\b0\fs24 \
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\qc\pardirnatural
+\cf0 {{\NeXTGraphic Pasted Graphic 3.tiff \width8640 \height6740
+}¬}\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\qc\pardirnatural
+\cf0 \
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\ql\qnatural\pardirnatural
+
+\f0\fs28 \cf0 	This program begins its run by processing options and arguments provided by the user, initializing its communication connections to the two external entities that it serves to intermediate between, the Seacat and DataTurbine, and processing instrument metadata. Next, it enters a data acquisition loop that cycles at a configurable frequency. In each loop cycle, a line of text is read from the SeaCat and processed into data types and format that are native to DataTurbine.\
+\
+\
+
+\b Requirements to be Addressed by Further Development
+\b0 \
+	Adaptation to dynamically changing configuration by examination of "ds" configuration and mapping this to a list of active channels. Will require implementation of a dictionary of active channels and an appropriate mapping to the DataTurbine ChannelMap. This is best done in the SeabirdParser with callbacks to SeabirdSource to implement configuration changes in the ChannelMap registration dynamically.\
+	Mutual exclusion of routine data streaming and asynchronous command/response events to support a commanding protocol. Will require refactoring to support threading and associated thread safety in the existing code.}
