@@ -317,7 +317,7 @@ class SeabirdSource extends RBNBBase
 		String echoCmd = "echo=no";
 		writeToBird.write("\n\r");
 		writeToBird.flush();
-		logger.finest("Clear line:" + readFromBird.readLine());
+		//logger.finest("Clear line:" + readFromBird.readLine());
 		String lineRead = null;
 		
 		/*! @note turn off command echo from seabird
@@ -332,6 +332,10 @@ class SeabirdSource extends RBNBBase
 			writeToBird.write(cmd, 0, cmd.length());
 			writeToBird.write("\n\r");
 			writeToBird.flush();
+			
+			// let the serial latency settle
+			mySleep(3000);
+			
 			// clean up command prompts command echos from seabird
 			if( (lineRead != null) && (lineRead.compareTo("S>ts") != 0) && (lineRead.compareTo("S>") != 0)) {
 				try {
@@ -352,7 +356,7 @@ class SeabirdSource extends RBNBBase
 					logger.fine(ae.toString());
 				}
 			}
-		} while((lineRead = readFromBird.readLine()) != null);
+		} while((readFromBird.ready() && (lineRead = readFromBird.readLine()) != null));
 	}
 
 	
@@ -372,7 +376,7 @@ class SeabirdSource extends RBNBBase
 		
 		/*! @bug sometimes the seabird returns a munged string with the wrong number of tokens */
 		if(seabirdParser.getChannels().length < data.length-1) {
-			logger.fine("data[] is of unexpected length:" + seabirdParser.getChannels().length);
+			logger.fine("data[] is of unexpected length: " + Integer.toString(data.length-1) + " should be: " + seabirdParser.getChannels().length);
 			return;
 		}
 		
@@ -413,13 +417,15 @@ class SeabirdSource extends RBNBBase
 		// setup
 		try {
 			seabird.initSerialPort(seabird.seabirdPort);
-			// setup metadata
-			logger.info("Reading metadata from seabird...");
-			seabird.getParser().put("ds", seabird.getSeabirdStatus());
-			logger.finest("\"ds\" from parser:\n" + (String)seabird.getParser().get("ds"));
-			seabird.getParser().put("dcal", seabird.getSeabirdCal());
-			logger.finest("\"dcal\" from parser:\n" + (String)seabird.getParser().get("dcal"));
-			seabird.getParser().parseMetaData();
+			/* deactivated metadata query to seabird to avoid interfering with autonomous mode operation
+			 setup metadata
+			 logger.info("Reading metadata from seabird...");
+			 seabird.getParser().put("ds", seabird.getSeabirdStatus());
+		 	 logger.finest("\"ds\" from parser:\n" + (String)seabird.getParser().get("ds"));
+			 seabird.getParser().put("dcal", seabird.getSeabirdCal());
+			 logger.finest("\"dcal\" from parser:\n" + (String)seabird.getParser().get("dcal"));
+			 seabird.getParser().parseMetaData();
+			*/
 			
 			seabird.initRbnb();
 		} catch(IOException ioe) {
@@ -432,10 +438,11 @@ class SeabirdSource extends RBNBBase
 		
 		try {
 			// action
-			logger.info("Polling seabird at a period of:" + seabird.seabirdSamplePeriod + "ms...");
+			logger.info("Polling seabird at a period of: " + seabird.seabirdSamplePeriod + " ms...");
 			seabird.seabird2RbnbPolling();
 		} catch(IOException ioe) {
 			logger.severe("Unable to read serial port: " + ioe.toString());
+			ioe.printStackTrace();
 		} catch(SAPIException sae) {
 			logger.severe("Unable to post data to RBNB: " + sae.toString());
 		}
