@@ -47,7 +47,7 @@ import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
 class SdlParser extends RBNBBase implements MDParserInterface {
-	private String DEFAULT_SDL_FILE_NAME = "Config.xml";
+	private String DEFAULT_SDL_FILE_NAME = "C:\\Program Files\\CUAHSI HIS\\ODM SDL\\Config.xml";
 	private String sdlFileName = DEFAULT_SDL_FILE_NAME;
 	private String DEFAULT_LN_FILE_NAME = "loggernet.dat";
 	private String loggernetFileName = DEFAULT_LN_FILE_NAME;
@@ -106,7 +106,8 @@ class SdlParser extends RBNBBase implements MDParserInterface {
 		Object[] sdlColumns = sdlMappedColumns.toArray();
 		for(int i=0; i<sdlColumns.length; i++) {
 			int sdlColumn = ( (Integer)(sdlColumns[i]) ).intValue();
-			logger.info("sdl column: " + sdlColumn + " maps to loggernet channel: " + loggernetChannels[sdlColumn+1]); // zero inexed
+			logger.info("sdl column: " + sdlColumn + " maps to loggernet channel: " + loggernetChannels[sdlColumn+1]); // zero indexed, so add 1
+			logger.info("make cmap channel \"" + loggernetChannels[sdlColumn+1] + "\" with units: \"" + loggernetUnits[sdlColumn+1] + "\"");
 		}
 		
 		return cmapRetval;
