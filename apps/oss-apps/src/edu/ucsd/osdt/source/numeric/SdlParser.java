@@ -10,6 +10,7 @@
  */
 package edu.ucsd.osdt.source.numeric;
 
+import edu.ucsd.osdt.source.BaseSource;
 import edu.ucsd.osdt.source.numeric.LoggerNetParser;
 import edu.ucsd.osdt.util.ISOtoRbnbTime;
 import edu.ucsd.osdt.util.RBNBBase;
@@ -53,12 +54,14 @@ class SdlParser extends RBNBBase implements MDParserInterface {
 	private String loggernetFileName = DEFAULT_LN_FILE_NAME;
 	private BufferedReader loggernetFileBuffer = null;
 	private LoggerNetParser loggernetParser = null;
+	private String[] loggernetChannels = null;
+	private String[] loggernetUnits = null;
 	private static Logger logger = Logger.getLogger(SdlParser.class.getName());
 	private ArrayList<Integer> sdlMappedColumns = null;
 	
 	
 	public SdlParser() {
-		super(null, null);
+		super(new BaseSource(), null);
 		sdlMappedColumns = new ArrayList();
 		loggernetParser = new LoggerNetParser();
 	}
@@ -69,19 +72,49 @@ class SdlParser extends RBNBBase implements MDParserInterface {
 		return this.sdlFileName;
 	}
 	
+	/*! @brief Sets up the connection to an rbnb server. */
+	public void initRbnb() throws SAPIException, IOException {
+		if (0 < rbnbArchiveSize) {
+			myBaseSource = new BaseSource(rbnbCacheSize, "append", rbnbArchiveSize);
+		} else {
+			myBaseSource = new BaseSource(rbnbCacheSize, "none", 0);
+		}
+		myBaseSource.OpenRBNBConnection(serverName, rbnbClientName);
+		logger.config("Set up connection to RBNB on " + serverName +
+				" as source = " + rbnbClientName);
+		logger.config(" with RBNB Cache Size = " + rbnbCacheSize + " and RBNB Archive Size = " + rbnbArchiveSize);
+		this.cmap = generateCmap();
+		myBaseSource.Register(this.cmap);
+		myBaseSource.Flush(this.cmap);
+		logger.info("registered and flushed: " + this.cmap.toString());
+	}
+	
+	
+	/*! @brief Gracefully closes the rbnb connection. */
+	protected void closeRbnb() {
+		if(myBaseSource == null) {
+			return;
+		}
+		if (rbnbArchiveSize > 0) { // then close and keep the ring buffer
+			myBaseSource.Detach();
+		} else { // close and scrap the cache
+			myBaseSource.CloseRBNBConnection();
+		}
+		logger.config("Closed RBNB connection");
+	}
+	
 	
 	// abstract methods from interface
-	public ChannelMap getCmap() {return null;}
-	public String[] getChannels() {return null;}
-	public String[] getUnits() {return null;}
+	public ChannelMap getCmap() {return cmap;}
+	public String[] getChannels() {return loggernetChannels;}
+	public String[] getUnits() {return loggernetUnits;}
 	
 	
 	/////////////////////
-	/*! @brief Sets up the rbnb channel map using a LoggerNetParser */
+	/*! @brief Sets up the rbnb channel map using a LoggerNetParser
+	 * @note called by initRbnb() */
 	public ChannelMap generateCmap() throws IOException, SAPIException {
 		ChannelMap cmapRetval = new ChannelMap();
-		String[] loggernetChannels = null;
-		String[] loggernetUnits = null;
 		StringBuffer mdBuffer = new StringBuffer();
 		
 		// junk line
@@ -106,8 +139,11 @@ class SdlParser extends RBNBBase implements MDParserInterface {
 		Object[] sdlColumns = sdlMappedColumns.toArray();
 		for(int i=0; i<sdlColumns.length; i++) {
 			int sdlColumn = ( (Integer)(sdlColumns[i]) ).intValue();
-			logger.info("sdl column: " + sdlColumn + " maps to loggernet channel: " + loggernetChannels[sdlColumn+1]); // zero indexed, so add 1
-			logger.info("make cmap channel \"" + loggernetChannels[sdlColumn+1] + "\" with units: \"" + loggernetUnits[sdlColumn+1] + "\"");
+			logger.finer("sdl column: " + sdlColumn + " maps to loggernet channel: " + loggernetChannels[sdlColumn+1]); // zero indexed, so add 1
+			logger.finer("make cmap channel \"" + loggernetChannels[sdlColumn+1] + "\" with units: \"" + loggernetUnits[sdlColumn+1] + "\"");
+			cmapRetval.Add(loggernetChannels[sdlColumn+1]);
+			cmapRetval.PutMime(cmapRetval.GetIndex(loggernetChannels[sdlColumn+1]), "application/octet-stream");
+			cmapRetval.PutUserInfo(cmapRetval.GetIndex(loggernetChannels[sdlColumn+1]), "units=" + loggernetUnits[sdlColumn+1]);
 		}
 		
 		return cmapRetval;
@@ -157,6 +193,7 @@ class SdlParser extends RBNBBase implements MDParserInterface {
 	}
 	
 	
+	/*! @brief regex wraper to parse the column number from sdl column labels */
 	protected int getColumnNumber(String columnLabelString) {
 		// regex to get the number from "Column#"
 		Pattern pattern = Pattern.compile("Column(\\d)?", Pattern.DOTALL);
@@ -167,6 +204,19 @@ class SdlParser extends RBNBBase implements MDParserInterface {
 		return columnNumber;
 	}
 	
+	
+	/*! @brief posst some jumk data to get the chanels to show up */
+	protected void postBogus() throws SAPIException {
+		String[] cmapChannels = cmap.GetChannelList();
+		for(int i=0; i<cmapChannels.length; i++) {
+			double[] doubleArray = new double[1];
+			doubleArray[0] = (double)i;
+			cmap.PutTimeAuto("timeofday");
+			cmap.PutDataAsFloat64(i, doubleArray);
+			myBaseSource.Flush(cmap);
+			logger.info("flushed: " + doubleArray[0] + " to channel: " +  cmap.GetName(i));
+		}
+	}
 	
 	public double getRbnbTimestamp(String instrTimestamp) {return -1;}
 	
@@ -179,8 +229,10 @@ class SdlParser extends RBNBBase implements MDParserInterface {
 	protected Options setOptions() {
 		Options opt = setBaseOptions(new Options()); // uses h, v, s, p, S
 
-		opt.addOption("s", true, "SDL configuration file name *" + DEFAULT_SDL_FILE_NAME);
+		opt.addOption("d", true, "SDL configuration file name *" + DEFAULT_SDL_FILE_NAME);
 		opt.addOption("f", true, "Input LoggerNet file name *" + DEFAULT_LN_FILE_NAME);
+		opt.addOption("z",true, "DataTurbine cache size *" + DEFAULT_CACHE_SIZE);
+		opt.addOption("Z",true, "Dataturbine archive size *" + DEFAULT_ARCHIVE_SIZE);
 
 		return opt;
 	} // setOptions()
@@ -190,9 +242,35 @@ class SdlParser extends RBNBBase implements MDParserInterface {
 	 * @note required by interface RBNBBase */
 	protected boolean setArgs(CommandLine cmd) throws IllegalArgumentException {
 		if (!setBaseArgs(cmd)) return false;
-
-		if(cmd.hasOption('s')) { // sdl file name
-			String v = cmd.getOptionValue("s");
+		
+		if(cmd.hasOption('z')) {
+			String a=cmd.getOptionValue('z');
+			if(a!=null) {
+				try {
+					Integer i =  new Integer(a);
+					int value = i.intValue();
+					rbnbCacheSize = value;
+				} catch(Exception e) {
+					logger.severe("Enter a numeric value for -z option. " + a + " is not valid!");
+					return false;   
+				}
+			} // if
+		}	    
+		if (cmd.hasOption('Z')) {
+			String a=cmd.getOptionValue('Z');
+			if (a!=null) {
+				try {
+					Integer i =  new Integer(a);
+					int value = i.intValue();
+					rbnbArchiveSize = value;
+				} catch (Exception e) {
+					logger.severe("Enter a numeric value for -Z option. " + a + " is not valid!");
+					return false;   
+				} 
+			}
+		}
+		if(cmd.hasOption('d')) { // sdl file name
+			String v = cmd.getOptionValue("d");
 			sdlFileName = v;
 		}
 		if(cmd.hasOption('f')) { // loggernet file name
@@ -203,9 +281,10 @@ class SdlParser extends RBNBBase implements MDParserInterface {
 	} // setArgs()
 	
 	
-	/**/
+	/************************************************************/
 	public static void main(String[] args) {
 		SdlParser sparse = new SdlParser();
+		ChannelMap sdlCmap = null;
 		if(! sparse.parseArgs(args)) {
 			logger.severe("Unable to process command line. Terminating.");
 			System.exit(1);
@@ -214,14 +293,22 @@ class SdlParser extends RBNBBase implements MDParserInterface {
 		try {
 			sparse.initFile();
 			sparse.parse(null);
-			sparse.generateCmap();
+			sparse.initRbnb();
+			sdlCmap = sparse.getCmap();
+			logger.info(sdlCmap.toString());
+			
+			// post some bogus data
+			sparse.postBogus();
+			sparse.closeRbnb();
+			
+			
 		} catch(FileNotFoundException fne) {
 			logger.severe("couldn't find the specified loggernet file");
 		} catch(IOException ioe) {
 			logger.severe(ioe.toString());
 		} catch(SAPIException sae) {
 			logger.severe(sae.toString());
+			sae.printStackTrace();
 		}
-		
 	}
 } // class
