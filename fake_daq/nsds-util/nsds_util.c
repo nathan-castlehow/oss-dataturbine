@@ -187,6 +187,7 @@ int tcp_socket_make(const uint16_t SRV_PORT, const int QUEUE_LENGTH, const char 
 	// Did the caller specify an IP to bind to? If not, use the wildcard
     if(HOST_NAME != NULL)
     {
+        flog_usr(FLOG_NOTICE, 0, me, "Binding to %s", HOST_NAME);
         serv_in.sin_addr.s_addr = htonl(inet_addr(HOST_NAME));
         
         if(serv_in.sin_addr.s_addr == INADDR_NONE)
@@ -210,6 +211,7 @@ int tcp_socket_make(const uint16_t SRV_PORT, const int QUEUE_LENGTH, const char 
     {
         flog_usr(FLOG_ERROR, FL_ERR_SOCKET, me,
                  "Unable to bind to port %d; server already running?", SRV_PORT);            
+        perror("Errno says");
         
         close(new_socket);
 		return(no_socket);
