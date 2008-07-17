@@ -143,7 +143,9 @@ int tcp_socket_make(const uint16_t SRV_PORT, const int QUEUE_LENGTH, const char 
     int                 so_reuseaddr = 1;
     struct linger       so_linger;
 	
-    
+    // Clear struct
+	memset(&serv_in, 0x00, sizeof(serv_in));
+	
     ppe = getprotobyname("tcp");
     if(ppe == NULL)
     {
@@ -183,20 +185,21 @@ int tcp_socket_make(const uint16_t SRV_PORT, const int QUEUE_LENGTH, const char 
     // Set up servers' address
     serv_in.sin_family = AF_INET;
     serv_in.sin_port = htons(SRV_PORT);
+	serv_in.sin_len = sizeof(struct sockaddr_in);
 
 	// Did the caller specify an IP to bind to? If not, use the wildcard
     if(HOST_NAME != NULL)
     {
         flog_usr(FLOG_NOTICE, 0, me, "Binding to %s", HOST_NAME);
-        serv_in.sin_addr.s_addr = htonl(inet_addr(HOST_NAME));
-        
-        if(serv_in.sin_addr.s_addr == INADDR_NONE)
-        {
-            flog_usr(FLOG_ERROR, FL_ERR_SOCKET, me,
-                     "Invalid host string %s", HOST_NAME);
-            close(new_socket);
-            return(no_socket);
-        }
+		
+		// Convert from ASCII IP into network-order binary
+		itmp = inet_pton(AF_INET, HOST_NAME, &serv_in.sin_addr.s_addr);
+		if(itmp < 0)
+		{
+			flog_usr(FLOG_ERROR, FL_ERR_BAD_VALUE, me, "Unable to parse IP address");
+			close(new_socket);
+			return(no_socket);
+		}		
     }
     else
     {
@@ -211,7 +214,7 @@ int tcp_socket_make(const uint16_t SRV_PORT, const int QUEUE_LENGTH, const char 
     {
         flog_usr(FLOG_ERROR, FL_ERR_SOCKET, me,
                  "Unable to bind to port %d; server already running?", SRV_PORT);            
-        perror("Errno says");
+//        perror("Errno says");
         
         close(new_socket);
 		return(no_socket);
@@ -567,6 +570,7 @@ socket_wait_ret tcp_socket_wait(const int socket, const time_t timeout)
 char * tcp_peername(const int socket)
 {
     char               me[] = "tcp_peername";
+	socklen_t	       socklen;
     int                itmp, rc;
     struct sockaddr    client_info;
     struct sockaddr_in *so = (struct sockaddr_in *) &client_info;
@@ -575,8 +579,8 @@ char * tcp_peername(const int socket)
     
 	
     // Check who connected
-    itmp = sizeof(struct sockaddr);
-    rc = getpeername(socket, &client_info, &itmp);
+    socklen = sizeof(struct sockaddr);
+    rc = getpeername(socket, &client_info, &socklen);
     if((rc != 0) || (itmp < 0))
     {
 		flog_usr(FLOG_ERROR, FL_ERR_HOST_NOTFOUND, me,
