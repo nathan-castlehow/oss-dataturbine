@@ -72,12 +72,12 @@ class LoggerNetSource extends RBNBBase {
 		logger.info("file line 1: " + fileLine1);
 		mdBuffer.append("\n");
 		
-		String fileLine2 = loggernetFileBuffer.readLine();
-		mdBuffer.append(fileLine2);
-		logger.info("file line 2: " + fileLine2);
-		mdBuffer.append("\n");
+		//String fileLine2 = loggernetFileBuffer.readLine();
+		//mdBuffer.append(fileLine2);
+		//logger.info("file line 2: " + fileLine2);
+		//mdBuffer.append("\n");
 		// junk line
-		loggernetFileBuffer.readLine();
+		//loggernetFileBuffer.readLine();
 		
 		parser.parse(mdBuffer.toString());
 		return (ChannelMap)parser.get("cmap");
@@ -125,8 +125,10 @@ class LoggerNetSource extends RBNBBase {
 		String dateString = null;
 		double[] lineData = null;
 		
+		logger.finer("processFile() lanuched");
+		
 		while((lineRead = loggernetFileBuffer.readLine()) != null) {
-			logger.finer("Lineread:" + lineRead);
+			logger.finer("HELLOOOOOOO   Lineread:" + lineRead);
 			lineSplit = lineRead.split(",");
 			// gotta convert from strings to doubles the old-fashioned way - the first element is a timestamp
 			lineData = new double[lineSplit.length];
@@ -149,16 +151,17 @@ class LoggerNetSource extends RBNBBase {
 	
 	
 	private void postData(double[] someData) throws SAPIException {
-			// put data onto the ring buffer - skips first element, which is the rbnb timestamp
-			for(int i=1; i<someData.length; i++) {
-				cmap.PutTime(someData[0], 0.0);
+		// put data onto the ring buffer - skips first element, which is the rbnb timestamp
+		cmap.PutTime(someData[0], 0.0);
+		for(int i=1; i<someData.length; i++) {
 				double[] dataTmp = new double[1];
 				dataTmp[0] = someData[i];
 				String[] varChannels = (String[])parser.get("channels");
 				cmap.PutDataAsFloat64(cmap.GetIndex(varChannels[i]), dataTmp);
-				logger.finer("Posted data:" + someData[i] + " into channel: " + varChannels[i]);
-				myBaseSource.Flush(cmap);
-			}
+				logger.finer("Posted data:" + dataTmp[0] + " into channel: " + varChannels[i] + " : " + cmap.GetIndex(varChannels[i]));
+			}				
+			myBaseSource.Flush(cmap);
+
 	}
 	
 	

@@ -49,14 +49,14 @@ public class LoggerNetParser extends MetaDataParser {
 		String[] channelsTmp = channelsString.split(",");
 		channels = new String[channelsTmp.length];
 		
-		String unitsString = cmdReader.readLine();
-		logger.finer("unitsString: " + unitsString);
-		String[] unitsTmp = unitsString.split(",");
-		units = new String[unitsTmp.length];
+		//String unitsString = cmdReader.readLine();
+		//logger.finer("unitsString: " + unitsString);
+		//String[] unitsTmp = unitsString.split(",");
+		//units = new String[unitsTmp.length];
 		
-		if( (channelsTmp.length != unitsTmp.length) || (channelsTmp.length == 0) ) {
-			return false;
-		} else { // input makes sense
+		//if( (channelsTmp.length != unitsTmp.length) || (channelsTmp.length == 0) ) {
+		//	return false;
+		//} else { // input makes sense
 			// clean off the double quotes from each channel names and unit labels (first and last character of each string)
 			Pattern pattern = Pattern.compile("\"(.*)\"", Pattern.DOTALL);
 			Matcher matcher = null;
@@ -68,11 +68,11 @@ public class LoggerNetParser extends MetaDataParser {
 					logger.finer(channels[i]);
 				}
 				// units
-				matcher = pattern.matcher(unitsTmp[i]);
-				if(matcher.find()) {
-					units[i] = matcher.group(1).trim();
-					logger.finer(units[i]);
-				}
+		//		matcher = pattern.matcher(unitsTmp[i]);
+		//		if(matcher.find()) {
+		//			units[i] = matcher.group(1).trim();
+		//			logger.finer(units[i]);
+		//		}
 			}
 			
 			this.cmap = new ChannelMap();
@@ -81,13 +81,13 @@ public class LoggerNetParser extends MetaDataParser {
 			for(int i=0; i<channelsTmp.length; i++) {
 				this.cmap.Add(channels[i]);
 				this.cmap.PutMime(cmap.GetIndex(channels[i]), "application/octet-stream");
-				this.cmap.PutUserInfo(cmap.GetIndex(channels[i]), "units=" + units[i]);
+			//	this.cmap.PutUserInfo(cmap.GetIndex(channels[i]), "units=" + units[i]);
 			}
 			this.put("channels", channels);
-			this.put("units", units);
+			//this.put("units", units);
 			this.put("cmap", cmap);
 			return true;
-		}
+	
 	}
 	
 	public double getRbnbTimestamp(String loggernetDate) {
@@ -103,6 +103,7 @@ public class LoggerNetParser extends MetaDataParser {
 		retval.append(".00000");
 		String iso8601String = retval.toString();
 		logger.fine("ISO8601:" + iso8601String);
+		
 		ISOtoRbnbTime rbnbTimeConvert = new ISOtoRbnbTime(iso8601String);
 		return rbnbTimeConvert.getValue();
 	}
