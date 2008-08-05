@@ -144,7 +144,7 @@ int tcp_socket_make(const uint16_t SRV_PORT, const int QUEUE_LENGTH, const char 
     struct linger       so_linger;
 	
     // Clear struct
-	memset(&serv_in, 0x00, sizeof(serv_in));
+    memset(&serv_in, 0x00, sizeof(serv_in));
 	
     ppe = getprotobyname("tcp");
     if(ppe == NULL)
@@ -185,9 +185,11 @@ int tcp_socket_make(const uint16_t SRV_PORT, const int QUEUE_LENGTH, const char 
     // Set up servers' address
     serv_in.sin_family = AF_INET;
     serv_in.sin_port = htons(SRV_PORT);
-	serv_in.sin_len = sizeof(struct sockaddr_in);
 
-	// Did the caller specify an IP to bind to? If not, use the wildcard
+    // Oddly, sin_len is MIA on Linux. And Solaris. Works on OSX without it, so remove.
+    // serv_in.sin_len = sizeof(struct sockaddr_in);
+
+    // Did the caller specify an IP to bind to? If not, use the wildcard
     if(HOST_NAME != NULL)
     {
         flog_usr(FLOG_NOTICE, 0, me, "Binding to %s", HOST_NAME);
