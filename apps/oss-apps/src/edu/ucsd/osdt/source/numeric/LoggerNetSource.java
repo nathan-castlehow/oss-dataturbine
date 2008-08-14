@@ -22,13 +22,18 @@ import com.rbnb.sapi.SAPIException;
 import com.rbnb.sapi.Source;
 // java
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.FileWriter;
+import java.io.BufferedWriter;
+
 import java.util.logging.Logger;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
 import edu.ucsd.osdt.util.ISOtoRbnbTime;
+import java.util.TimeZone;
 
 /*! @brief A Dataturbine source accumulator that parses and puts Campbell
  *  Loggernet data onto the ring buffer. */
@@ -37,8 +42,11 @@ class LoggerNetSource extends RBNBBase {
 	private String loggernetFileName = DEFAULT_FILE_NAME;
 	private BufferedReader loggernetFileBuffer = null;
 	// rbnb
-	
+
+	private String TempFileName = null;
+
 	private LoggerNetParser parser = null;
+	
 	
 	public LoggerNetSource() {
 		super(new BaseSource(), null);
@@ -128,7 +136,7 @@ class LoggerNetSource extends RBNBBase {
 		logger.finer("processFile() lanuched");
 		
 		while((lineRead = loggernetFileBuffer.readLine()) != null) {
-			logger.finer("HELLOOOOOOO   Lineread:" + lineRead);
+			//logger.finer("HELLOOOOOOO   Lineread:" + lineRead);
 			lineSplit = lineRead.split(",");
 			// gotta convert from strings to doubles the old-fashioned way - the first element is a timestamp
 			lineData = new double[lineSplit.length];
@@ -137,7 +145,9 @@ class LoggerNetSource extends RBNBBase {
 				if(i==0) { // timestamp - handle specially
 					dateString = lineSplit[i].substring(1, (lineSplit[i].length()-1) );
 					logger.fine("Campbell date string: " + dateString);
-					lineData[i] = parser.getRbnbTimestamp(dateString);
+					
+					TimeZone tz = TimeZone.getDefault();
+					lineData[i] = parser.getRbnbTimestamp(dateString) + tz.getRawOffset();
 					logger.fine("Nice date:" + ISOtoRbnbTime.formatDate((long)lineData[i]*1000) + " for timestamp: " + Double.toString(lineData[i]) );
 				} else if(lineSplit[i].equals("\"NAN\"")) {
 					lineData[i] = Double.NaN;
@@ -164,6 +174,123 @@ class LoggerNetSource extends RBNBBase {
 
 	}
 	
+	private boolean tempFileExists() {
+		
+		try {
+			File f= new File (this.TempFileName);
+			if (f.exists()) {
+				return true;
+			}
+			else return false;
+		}
+		catch (NullPointerException e) {
+			logger.severe("No temporary file name suggested");
+			return false;
+		}
+	}
+	
+	
+	private String acquireDataFromInstrument() {
+		try {
+			loggernetFileBuffer = new BufferedReader(new FileReader(this.loggernetFileName));
+		}
+		catch (FileNotFoundException e) {
+			logger.severe("Loggernet file doesn't exist");
+			return null;
+		}
+		try {
+			loggernetFileBuffer.readLine();
+			loggernetFileBuffer.readLine();
+			String data = loggernetFileBuffer.readLine();
+			data = data.trim();
+			data = data + "\n";
+			return data;
+		}
+		catch (IOException e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+	
+
+	
+	private String acquireAllFromInstrument() {
+		try {
+			loggernetFileBuffer = new BufferedReader(new FileReader(this.loggernetFileName));
+		}
+		catch (FileNotFoundException e) {
+			logger.severe("Loggernet file doesn't exist");
+			return null;
+		}
+		try {
+			String data = loggernetFileBuffer.readLine();
+			data = data.trim();
+			data = data + "\n";
+			data += loggernetFileBuffer.readLine();
+			data = data.trim();
+			data = data + "\n";
+			data += loggernetFileBuffer.readLine();
+			data = data.trim();
+			data = data + "\n";
+			return data;
+		}
+		catch (IOException e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+
+	
+	
+	
+	
+	private void appendToTempFile(String someLine) {
+		BufferedWriter tempFile = null;
+		try {
+			boolean appendTrue = true;
+			tempFile= new BufferedWriter(new FileWriter(this.TempFileName, appendTrue));
+		}
+		catch (FileNotFoundException e) {
+			logger.severe("Loggernet file doesn't exist");
+			return;
+		} catch (IOException e) {
+			e.printStackTrace();
+			return;
+		}
+		try {
+			tempFile.write (someLine);
+			tempFile.flush();
+		}
+		catch (IOException e) {
+			e.printStackTrace();
+			return;
+		}
+		return;
+	}
+	
+	
+	
+	private boolean sendTempDataIntoDTSource() {
+		
+		return false;
+	}
+	
+	
+	private boolean deleteTempFile() {
+		try {
+			File f= new File (this.TempFileName);
+			if (f.delete()) {
+				return true;
+			}
+			else return false;
+		}
+		catch (SecurityException e) {
+			logger.severe("Temporary file not deleted");
+			return false;
+		}
+	}
+	
+	
 	
 	/*! @brief Setup of command-line args, acquisition of metadata, and launch of main program loop. */
 	/*****************************************************************************/
@@ -175,10 +302,22 @@ class LoggerNetSource extends RBNBBase {
 		}
 		try {	
 			
-			loggernet.initFile();
-			loggernet.initRbnb();
-			loggernet.processFile();
-			loggernet.closeRbnb();
+			if (loggernet.tempFileExists()) {
+				
+				if (loggernet.sendTempDataIntoDTSource()) {
+					loggernet.deleteTempFile();
+				}
+				else {
+					String acquiredData = loggernet.acquireDataFromInstrument();
+					loggernet.appendToTempFile (acquiredData);
+				}
+			}
+			else {
+				loggernet.initFile();
+				loggernet.initRbnb();
+				loggernet.processFile();
+				loggernet.closeRbnb();
+			}
 			
 		} catch(SAPIException sae) {
 			logger.severe("Unable to communicate with DataTurbine server. Terminating: " + sae.toString());
@@ -197,12 +336,12 @@ class LoggerNetSource extends RBNBBase {
 	
 	/*! @brief Command-line processing */
 	protected Options setOptions() {
-		Options opt = setBaseOptions(new Options()); // uses h, v, s, p, S
+		Options opt = setBaseOptions(new Options()); // uses h, v, s, p, S, t
 
 		opt.addOption("z",true, "DataTurbine cache size *" + DEFAULT_CACHE_SIZE);
 		opt.addOption("Z",true, "Dataturbine archive size *" + DEFAULT_ARCHIVE_SIZE);
 		opt.addOption("f",true, "Input LoggerNet file name *" + DEFAULT_FILE_NAME);
-
+		opt.addOption("t",true, "Temporary File Name ");
 		return opt;
 	} // setOptions()
 
@@ -242,7 +381,17 @@ class LoggerNetSource extends RBNBBase {
 			String v = cmd.getOptionValue("f");
 			loggernetFileName = v;
 		}
+		
+		if (cmd.hasOption('t')) {
+			String a = cmd.getOptionValue('t');
+			if (a!=null) {
+				this.TempFileName = a;
+			}
+			else	return false;
+		}
 		return true;
+		
+		
 	} // setArgs()
 	
 } // class
