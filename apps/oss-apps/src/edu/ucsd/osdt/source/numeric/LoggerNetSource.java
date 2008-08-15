@@ -21,14 +21,9 @@ import com.rbnb.sapi.ChannelMap;
 import com.rbnb.sapi.SAPIException;
 import com.rbnb.sapi.Source;
 // java
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.FileWriter;
-import java.io.BufferedWriter;
-import java.io.StringReader;
+
+import java.io.*;
+
 
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
@@ -175,9 +170,9 @@ class LoggerNetSource extends RBNBBase {
 				logger.finer("Posted data:" + dataTmp[0] + " into channel: " + varChannels[i] + " : " + cmap.GetIndex(varChannels[i]));
 			}				
 			myBaseSource.Flush(cmap);
-
 	}
 	
+
 	private boolean tempFileExists() {
 		
 		try {
@@ -400,6 +395,63 @@ class LoggerNetSource extends RBNBBase {
 			return false;
 		}
 	}
+	
+	
+
+	public void removeFirstTreeLinesFromFile(String file) {
+
+		try {
+
+			File inFile = new File(file);
+
+			if (!inFile.isFile()) {
+				System.out.println("Parameter is not an existing file");
+				return;
+			}
+
+			//Construct the new file that will later be renamed to the original filename. 
+			File tempFile = new File(inFile.getAbsolutePath() + ".tmp");
+
+			BufferedReader br = new BufferedReader(new FileReader(file));
+			PrintWriter pw = new PrintWriter(new FileWriter(tempFile));
+
+			String line = null;
+			
+			int lineCounter = 0;
+			//Read from the original file and write to the new 
+			//unless content matches data to be removed.
+			while ((line = br.readLine()) != null) {
+				lineCounter +=1;
+				
+				if (lineCounter >3) {
+
+					pw.println(line);
+					pw.flush();
+				}
+			}
+			pw.close();
+			br.close();
+
+			//Delete the original file
+			if (!inFile.delete()) {
+				System.out.println("Could not delete file");
+				return;
+			} 
+
+			//Rename the new file to the filename the original file had.
+			if (!tempFile.renameTo(inFile))
+				System.out.println("Could not rename file");
+
+		}
+		catch (FileNotFoundException ex) {
+			ex.printStackTrace();
+		}
+		catch (IOException ex) {
+			ex.printStackTrace();
+		}
+
+	}
+	
 	
 	
 	
