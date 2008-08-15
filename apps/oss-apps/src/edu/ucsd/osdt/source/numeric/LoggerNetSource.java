@@ -28,8 +28,12 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.FileWriter;
 import java.io.BufferedWriter;
+import java.io.StringReader;
 
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
 import edu.ucsd.osdt.util.ISOtoRbnbTime;
@@ -271,9 +275,116 @@ class LoggerNetSource extends RBNBBase {
 	
 	
 	private boolean sendTempDataIntoDTSource() {
+		String lineRead = null;
+		String[] lineSplit = null;
+		String dateString = null;
+		double[] lineData = null;
 		
+		logger.finer("processFile() lanuched");
+		
+		BufferedReader tempF;
+		try {
+			tempF = new BufferedReader(new FileReader(this.TempFileName));
+		}
+		catch (FileNotFoundException e) {
+			e.printStackTrace();
+			return false;
+		}
+			
+		try {
+			// first two lines are metadata
+			tempF.readLine();
+			tempF.readLine();
+			
+			while((lineRead = tempF.readLine()) != null) {
+				//logger.finer("HELLOOOOOOO   Lineread:" + lineRead);
+				lineSplit = lineRead.split(",");
+				// gotta convert from strings to doubles the old-fashioned way - the first element is a timestamp
+				lineData = new double[lineSplit.length];
+				for(int i=0; i<lineSplit.length; i++) {
+					logger.finer("Data token:" + lineSplit[i]);
+					if(i==0) { // timestamp - handle specially
+						dateString = lineSplit[i].substring(1, (lineSplit[i].length()-1) );
+						logger.fine("Campbell date string: " + dateString);
+						
+						TimeZone tz = TimeZone.getDefault();
+						lineData[i] = parser.getRbnbTimestamp(dateString) + tz.getRawOffset();
+						logger.fine("Nice date:" + ISOtoRbnbTime.formatDate((long)lineData[i]*1000) + " for timestamp: " + Double.toString(lineData[i]) );
+					} else if(lineSplit[i].equals("\"NAN\"")) {
+						lineData[i] = Double.NaN;
+					} else { // it's a double
+						lineData[i] = Double.parseDouble(lineSplit[i]);
+					}
+				}
+				postData(lineData);
+			}
+		} catch (NumberFormatException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (SAPIException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} // while
 		return false;
 	}
+	
+	
+	public ChannelMap parseChannelMap(String channelsString)  {		
+		
+		
+		logger.finer("channelsString: " + channelsString);
+		String[] channelsTmp = channelsString.split(",");
+		String[] channels = new String[channelsTmp.length];
+		
+		//String unitsString = cmdReader.readLine();
+		//logger.finer("unitsString: " + unitsString);
+		//String[] unitsTmp = unitsString.split(",");
+		//units = new String[unitsTmp.length];
+		
+		//if( (channelsTmp.length != unitsTmp.length) || (channelsTmp.length == 0) ) {
+		//	return false;
+		//} else { // input makes sense
+			// clean off the double quotes from each channel names and unit labels (first and last character of each string)
+			Pattern pattern = Pattern.compile("\"(.*)\"", Pattern.DOTALL);
+			Matcher matcher = null;
+			for(int i=0; i<channelsTmp.length; i++) {
+				// channels
+				matcher = pattern.matcher(channelsTmp[i]);
+				if(matcher.find()) {
+					channels[i] = matcher.group(1).trim();
+					logger.finer(channels[i]);
+				}
+				// units
+		//		matcher = pattern.matcher(unitsTmp[i]);
+		//		if(matcher.find()) {
+		//			units[i] = matcher.group(1).trim();
+		//			logger.finer(units[i]);
+		//		}
+			}
+			
+			this.cmap = new ChannelMap();
+			
+			// assume all data are doubles
+			for(int i=0; i<channelsTmp.length; i++) {
+				try {
+					this.cmap.Add(channels[i]);
+				} catch (SAPIException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				this.cmap.PutMime(cmap.GetIndex(channels[i]), "application/octet-stream");
+			//	this.cmap.PutUserInfo(cmap.GetIndex(channels[i]), "units=" + units[i]);
+			}
+	//		this.put("channels", channels);
+			//this.put("units", units);
+//			this.put("cmap", cmap);
+			return this.cmap;
+	
+	}
+	
 	
 	
 	private boolean deleteTempFile() {
