@@ -198,11 +198,14 @@ class LoggerNetSource extends RBNBBase {
 			return null;
 		}
 		try {
+
+			String newline = System.getProperty("line.seperator");
+			
 			loggernetFileBuffer.readLine();
 			loggernetFileBuffer.readLine();
 			String data = loggernetFileBuffer.readLine();
 			data = data.trim();
-			data = data + "\n";
+			data = data + newline;
 			return data;
 		}
 		catch (IOException e) {
@@ -222,15 +225,21 @@ class LoggerNetSource extends RBNBBase {
 			return null;
 		}
 		try {
+			String newline = System.getProperty("line.seperator");
+
 			String data = loggernetFileBuffer.readLine();
+
 			data = data.trim();
-			data = data + "\n";
+			data = data + newline;
+
 			data += loggernetFileBuffer.readLine();
 			data = data.trim();
-			data = data + "\n";
+			data = data + newline;
+			
 			data += loggernetFileBuffer.readLine();
 			data = data.trim();
-			data = data + "\n";
+			data = data + newline;
+			
 			return data;
 		}
 		catch (IOException e) {
@@ -289,7 +298,7 @@ class LoggerNetSource extends RBNBBase {
 		try {
 			// first two lines are metadata
 			tempF.readLine();
-			tempF.readLine();
+			String metaDataLine = tempF.readLine();
 			
 			while((lineRead = tempF.readLine()) != null) {
 				//logger.finer("HELLOOOOOOO   Lineread:" + lineRead);
@@ -418,8 +427,9 @@ class LoggerNetSource extends RBNBBase {
 			String line = null;
 			
 			int lineCounter = 0;
-			//Read from the original file and write to the new 
-			//unless content matches data to be removed.
+
+			//Read from the original file and write to the new file
+			// skipping first three lines
 			while ((line = br.readLine()) != null) {
 				lineCounter +=1;
 				
@@ -452,6 +462,56 @@ class LoggerNetSource extends RBNBBase {
 
 	}
 	
+	/*! @action: 1. reads the loggernet file content
+	 *           2. creates a tempFile
+	 *           3. writes the content to a file. 
+	 */
+	private void createTempFile() {
+		try {
+			loggernetFileBuffer = new BufferedReader(new FileReader(this.loggernetFileName));
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		String newline = System.getProperty("line.seperator");
+
+		String allData = "";
+		String line = "";
+		
+		try {
+			while ( (line = loggernetFileBuffer.readLine()) != null)
+			{
+				allData += line + newline;
+				
+			}
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+
+		try {
+
+			PrintWriter pw = new PrintWriter(new FileWriter(this.TempFileName));
+
+			pw.print(allData);
+			pw.flush();
+
+			pw.close();
+
+
+		}
+		catch (FileNotFoundException ex) {
+			ex.printStackTrace();
+		}
+		catch (IOException ex) {
+			ex.printStackTrace();
+		}
+
+		
+	}
+
 	
 	
 	
@@ -482,18 +542,26 @@ class LoggerNetSource extends RBNBBase {
 				loggernet.closeRbnb();
 			}
 			
-		} catch(SAPIException sae) {
+		} 
+		
+		catch(SAPIException sae) {
 			logger.severe("Unable to communicate with DataTurbine server. Terminating: " + sae.toString());
 			sae.printStackTrace();
-			System.exit(3);
-		} catch(FileNotFoundException fnf) {
+			loggernet.createTempFile();
+		} 
+		
+		catch(FileNotFoundException fnf) {
 			logger.severe("Unable to open input data file:" + loggernet.loggernetFileName + ". Terminating: " + fnf.toString());
 			System.exit(4);
-		} catch(IOException ioe) {
+		} 
+		
+		catch(IOException ioe) {
 			logger.severe("Unable to read input data file:" + loggernet.loggernetFileName + ". Terminating: " + ioe.toString());
 			System.exit(5);
 		}
 	} // main()
+
+
 	/*****************************************************************************/
 	
 	
