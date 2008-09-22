@@ -35,6 +35,14 @@ public class LoggerNetParams {
         return properties;
     }
 
+    public Properties readProperties(String fp) throws Exception {
+        Properties properties = new Properties();
+        FileInputStream fis = new FileInputStream(fp);
+        properties.loadFromXML(fis);
+ 
+        return properties;
+    }
+
 }
 
  
