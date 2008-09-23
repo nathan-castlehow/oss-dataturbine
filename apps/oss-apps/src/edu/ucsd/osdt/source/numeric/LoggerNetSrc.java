@@ -50,11 +50,16 @@ public class LoggerNetSrc extends RBNBBase{
 	private String TempFileName = null;
 	private String cfgFileName = null;
 	private String delimiter = null;
+	
 	private boolean appendMode = false;
 	private boolean timeZoneOffset = false;
 	
+	private int SensorInfoLineNumber = 1;
+	private int ChannelNameLineNumber = 2;
+	private int UnitLineNumber = 3;
+	private int ExtraInfoLineNumber= -1;
+	private int DataLineNumber = 4;
 	
-
 	protected ChannelMap cmap = null;
 	protected String[] channels = null;
 	protected String[] units = null;
@@ -99,14 +104,47 @@ public class LoggerNetSrc extends RBNBBase{
             }
                         
             this.delimiter = properties.getProperty("Delimiter");
-            if (delimiter.equals("comma")) {
+            if (delimiter.equals("comma")) 
             	delimiter = ",";
-            }
-            if (delimiter.equals("tab")) {
+            if (delimiter.equals("tab")) 
             	delimiter = "\t";
-            }
             
+			try {
+				Integer i =  new Integer(properties.getProperty("SensorInfoLineNumber"));
+				this.SensorInfoLineNumber = i.intValue();
+			} catch (Exception e) {
+				logger.severe("Enter a numeric value for SensorInfoLineNumber. ");
+			} 
+
+			try {
+				Integer i =  new Integer(properties.getProperty("ChannelNameLineNumber"));
+				this.ChannelNameLineNumber = i.intValue();
+			} catch (Exception e) {
+				logger.severe("Enter a numeric value for ChannelNameLineNumber. ");
+			} 
             
+			try {
+				Integer i =  new Integer(properties.getProperty("UnitLineNumber"));
+				this.UnitLineNumber = i.intValue();
+			} catch (Exception e) {
+				logger.severe("Enter a numeric value for UnitLineNumber. ");
+			} 
+
+			try {
+				Integer i =  new Integer(properties.getProperty("ExtraInfoLineNumber"));
+				this.ExtraInfoLineNumber = i.intValue();
+			} catch (Exception e) {
+				logger.severe("Enter a numeric value for ExtraInfoLineNumber. ");
+			} 
+
+			try {
+				Integer i =  new Integer(properties.getProperty("DataLineNumber"));
+				this.DataLineNumber = i.intValue();
+			} catch (Exception e) {
+				logger.severe("Enter a numeric value for DataLineNumber. ");
+			} 
+
+			
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -613,7 +651,8 @@ public class LoggerNetSrc extends RBNBBase{
 
 
 	public boolean parse(String cmdFromInstr) throws IOException, SAPIException {		
-		BufferedReader cmdReader = new BufferedReader(new StringReader(cmdFromInstr));
+
+		LineNumberReader cmdReader = new LineNumberReader(new StringReader(cmdFromInstr));
 
 		String[] channelsTmp = this.parseLine(cmdReader);
 		
