@@ -57,7 +57,7 @@ public class LoggerNetSrc extends RBNBBase{
 	private int SensorInfoLineNumber = 1;
 	private int ChannelNameLineNumber = 2;
 	private int UnitLineNumber = 3;
-	private int ExtraInfoLineNumber= -1;
+	private int [] ExtraInfoLineNumbers = {};
 	private int DataLineNumber = 4;
 	
 	protected ChannelMap cmap = null;
@@ -131,8 +131,11 @@ public class LoggerNetSrc extends RBNBBase{
 			} 
 
 			try {
-				Integer i =  new Integer(properties.getProperty("ExtraInfoLineNumber"));
-				this.ExtraInfoLineNumber = i.intValue();
+				String [] nums = properties.getProperty("ExtraInfoLineNumbers").split(",");
+				this.ExtraInfoLineNumbers = new int [nums.length];
+				for (int i=0; i< nums.length; i++) {
+					this.ExtraInfoLineNumbers[i] = new Integer(nums[i]).intValue();
+				}
 			} catch (Exception e) {
 				logger.severe("Enter a numeric value for ExtraInfoLineNumber. ");
 			} 
@@ -330,7 +333,7 @@ public class LoggerNetSrc extends RBNBBase{
 
 			data += loggernetFileBuffer.readLine();
 			data = data.trim();
-			data = data + newline;
+		data = data + newline;
 
 			data += loggernetFileBuffer.readLine();
 			data = data.trim();
@@ -628,7 +631,7 @@ public class LoggerNetSrc extends RBNBBase{
 	}
 	
 
-	public String[] parseLine (BufferedReader br) {
+	public String[] parseLine (LineNumberReader br, String del) {
 		
 		String unitLine = null;
 		try {
@@ -640,7 +643,7 @@ public class LoggerNetSrc extends RBNBBase{
 			e.printStackTrace();
 		}
 		
-		String [] units = unitLine.split(",");
+		String [] units = unitLine.split(del);
 		for (int i =0; i < units.length; i++) {
 			units[i] = units[i].replace("\"", "");
 			System.out.println ("units = " + units[i]);
@@ -654,7 +657,7 @@ public class LoggerNetSrc extends RBNBBase{
 
 		LineNumberReader cmdReader = new LineNumberReader(new StringReader(cmdFromInstr));
 
-		String[] channelsTmp = this.parseLine(cmdReader);
+		String[] channelsTmp = this.parseLine(cmdReader, this.delimiter);
 		
 		
 		this.cmap = new ChannelMap();

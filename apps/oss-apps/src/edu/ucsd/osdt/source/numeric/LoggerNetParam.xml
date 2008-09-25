@@ -11,6 +11,6 @@
   <entry key="SensorInfoLineNumber">1</entry>
   <entry key="ChannelNameLineNumber">2</entry>
   <entry key="UnitLineNumber">3</entry>
-  <entry key="ExtraInfoLineNumber">-1</entry>
+  <entry key="ExtraInfoLineNumbers">-1,-2</entry>
   <entry key="DataLineNumber">4</entry>
 </properties>
