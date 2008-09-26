@@ -63,6 +63,7 @@ public class LoggerNetSrc extends RBNBBase{
 	protected ChannelMap cmap = null;
 	protected String[] channels = null;
 	protected String[] units = null;
+	private String lineNumFilePath;
 	
 	
 
@@ -97,6 +98,7 @@ public class LoggerNetSrc extends RBNBBase{
             this.cfgFileName = properties.getProperty("ConfigFilePath");
             this.loggernetFileName = properties.getProperty("LoggerNetDataFilePath");
             this.TempFileName = properties.getProperty("tempFilePath");
+            this.lineNumFilePath = properties.getProperty("lineNumFilePath");
             
             String appendModeStr = properties.getProperty("AppendMode");
             if (appendModeStr.equals("Yes")) {
@@ -153,6 +155,148 @@ public class LoggerNetSrc extends RBNBBase{
         }
 	}
 
+	
+
+	private int getLineNum() {
+		int lineNum = 1;
+		BufferedReader br = null;
+		try {
+			br = this.initFile (this.lineNumFilePath);
+		}
+		catch (Exception e) {
+			
+		}
+		
+		try {
+			String line = br.readLine();
+			lineNum = Integer.parseInt(line);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		return lineNum;
+	}
+
+	private void processFileAppend() {
+		
+
+		this.channels = this.parseLine( this.loggernetFileName, this.ChannelNameLineNumber, this.delimiter);
+
+		this.units = this.parseLine( this.loggernetFileName, this.UnitLineNumber, this.delimiter);
+		
+		int numExtras = this.ExtraInfoLineNumbers.length;
+		for (int i =0; i < numExtras; i++ ) {
+			String[] tempLine = this.parseLine(this.loggernetFileName, this.ExtraInfoLineNumbers[i], this.delimiter);
+			if (tempLine != null) {
+				for (int j=0; j < channels.length; j++) {
+					if (this.units == null) {
+						this.units = tempLine;
+						continue;
+					}
+					else {
+						this.units[j] = this.units[j] + "\n" + tempLine[j];
+					}
+				}
+			}
+		}
+		
+		// metadata info is ready
+		
+	} // processFileAppend()
+
+
+	public String[] parseLine (String fp, int ln, String del) {
+		
+		BufferedReader lnr = null;
+		
+		try {
+			lnr = new BufferedReader (new FileReader (fp));
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+			logger.severe("LoggerNet File cannot be read");
+		}
+		
+		String unitLine = null;
+		try {
+			if (ln < 0) {
+				lnr.close();
+				return null;
+			}
+			
+			else {
+				for (int i = 0 ; i <= ln; i++)
+					unitLine = lnr.readLine();
+				logger.finer("item line: " + unitLine);
+				lnr.close();
+			}
+
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		if (unitLine == null) return null;
+		
+		String [] units = unitLine.split(del);
+		for (int i =0; i < units.length; i++) {
+			units[i] = units[i].replace("\"", "");
+			System.out.println ("item = " + units[i]);
+		}
+		
+		return units;
+	}
+	
+	
+	public boolean parse(String cmdFromInstr) throws IOException, SAPIException {		
+
+		LineNumberReader cmdReader = new LineNumberReader(new StringReader(cmdFromInstr));
+		
+		
+		String[] channelsTmp = this.parseLine(cmdFromInstr, this.ChannelNameLineNumber, this.delimiter);
+		
+		
+		this.cmap = new ChannelMap();
+
+		// assume all data are doubles
+		for(int i=0; i<channelsTmp.length; i++) {
+			try {
+				this.cmap.Add(channels[i]);
+				this.cmap.PutMime(cmap.GetIndex(channels[i]), "application/octet-stream");
+				//	this.cmap.PutUserInfo(cmap.GetIndex(channels[i]), "units=" + units[i]);
+			}
+			catch (Exception ne) {
+				createTempFile();
+			}
+			
+		}
+
+		return true;
+	}
+	
+	
+	private void createLineNumFile() {
+		BufferedWriter tempFile = null;
+		try {
+			tempFile= new BufferedWriter(new FileWriter(this.lineNumFilePath));
+		}
+		catch (IOException e) {
+			logger.severe("Line number file cannot be created");
+			e.printStackTrace();
+			return;
+		}
+		try {
+			tempFile.write (Integer.toString(this.DataLineNumber));
+			tempFile.flush();
+			tempFile.close();
+		}
+		catch (IOException e) {
+			e.printStackTrace();
+			return;
+		}
+		return;
+	}
+
+	
 	/*! @brief instantiates file reading operations */
 	public void initFile() throws FileNotFoundException {
 		loggernetFileBuffer = new BufferedReader(new FileReader(loggernetFileName));
@@ -284,6 +428,23 @@ public class LoggerNetSrc extends RBNBBase{
 			return false;
 		}
 	}
+	
+
+	private boolean fileExists(String fileName) {
+
+		try {
+			File f= new File (fileName);
+			if (f.exists()) {
+				return true;
+			}
+			else return false;
+		}
+		catch (NullPointerException e) {
+			logger.severe("No temporary file name suggested");
+			return false;
+		}
+	}
+	
 
 
 	private String acquireDataFromInstrument() {
@@ -631,54 +792,8 @@ public class LoggerNetSrc extends RBNBBase{
 	}
 	
 
-	public String[] parseLine (LineNumberReader br, String del) {
-		
-		String unitLine = null;
-		try {
-			unitLine = br.readLine();
-			logger.finer("unit line: " + unitLine);
-
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
-		String [] units = unitLine.split(del);
-		for (int i =0; i < units.length; i++) {
-			units[i] = units[i].replace("\"", "");
-			System.out.println ("units = " + units[i]);
-		}
-		
-		return units;
-	}
 
 
-	public boolean parse(String cmdFromInstr) throws IOException, SAPIException {		
-
-		LineNumberReader cmdReader = new LineNumberReader(new StringReader(cmdFromInstr));
-
-		String[] channelsTmp = this.parseLine(cmdReader, this.delimiter);
-		
-		
-		this.cmap = new ChannelMap();
-
-		// assume all data are doubles
-		for(int i=0; i<channelsTmp.length; i++) {
-			try {
-				this.cmap.Add(channels[i]);
-				this.cmap.PutMime(cmap.GetIndex(channels[i]), "application/octet-stream");
-				//	this.cmap.PutUserInfo(cmap.GetIndex(channels[i]), "units=" + units[i]);
-			}
-			catch (Exception ne) {
-				createTempFile();
-			}
-			
-		}
-		
-	
-		return true;
-	}
-	
 	
 	
 	
@@ -694,46 +809,72 @@ public class LoggerNetSrc extends RBNBBase{
 		}
 		
 		loggernet.getParamsFromCF ();
-
-		try {	
-			
-			if (loggernet.tempFileExists()) {
-
-				if (loggernet.sendTempDataIntoDTSource()) {
-					loggernet.deleteTempFile();
-				}
-				else {
-					String acquiredData = loggernet.acquireDataFromInstrument();
-					loggernet.appendToTempFile (acquiredData);
-				}
+		
+		if (loggernet.appendMode) {
+			// do the append mode
+			if (loggernet.fileExists(loggernet.lineNumFilePath)) {
+				// then read the file and parse the ch info and data
+				int lnum = loggernet.getLineNum();
+				
 			}
 			else {
-				loggernet.initFile();
-				loggernet.initRbnb();
-				loggernet.processFile();
-				loggernet.closeRbnb();
+				// create a line number file from the cfg file.
+				loggernet.createLineNumFile();
 			}
+			// process the file in append mode.
+			loggernet.processFileAppend();
+			
+			// insert the data into rbnb
+			
+			// if successful, move the cursor
+			
+			// if not, do not change the cursor
+		}
+		
+		else {
+			try {	
 
-		} 
+				if (loggernet.tempFileExists()) {
 
-		catch(SAPIException sae) {
-			logger.severe("Unable to communicate with DataTurbine server. Terminating: " + sae.toString());
-			sae.printStackTrace();
-			loggernet.createTempFile();
-		} 
+					if (loggernet.sendTempDataIntoDTSource()) {
+						loggernet.deleteTempFile();
+					}
+					else {
+						String acquiredData = loggernet.acquireDataFromInstrument();
+						loggernet.appendToTempFile (acquiredData);
+					}
+				}
+				else {
+					loggernet.initFile();
+					loggernet.initRbnb();
+					loggernet.processFile();
+					loggernet.closeRbnb();
+				}
 
-		catch(FileNotFoundException fnf) {
-			logger.severe("Unable to open input data file:" + loggernet.loggernetFileName + ". Terminating: " + fnf.toString());
-			fnf.printStackTrace();
-			loggernet.createTempFile();
-			System.exit(4);
-		} 
+			} 
 
-		catch(IOException ioe) {
-			logger.severe("Unable to read input data file:" + loggernet.loggernetFileName + ". Terminating: " + ioe.toString());
-			System.exit(5);
+			catch(SAPIException sae) {
+				logger.severe("Unable to communicate with DataTurbine server. Terminating: " + sae.toString());
+				sae.printStackTrace();
+				loggernet.createTempFile();
+			} 
+
+			catch(FileNotFoundException fnf) {
+				logger.severe("Unable to open input data file:" + loggernet.loggernetFileName + ". Terminating: " + fnf.toString());
+				fnf.printStackTrace();
+				loggernet.createTempFile();
+				System.exit(4);
+			} 
+
+			catch(IOException ioe) {
+				logger.severe("Unable to read input data file:" + loggernet.loggernetFileName + ". Terminating: " + ioe.toString());
+				System.exit(5);
+			}
 		}
 	} // main()
+
+
+
 
 
 	/*****************************************************************************/
