@@ -178,14 +178,14 @@ public class LoggerNetSrc extends RBNBBase{
 		return lineNum;
 	}
 
-	private void processFileAppend() {
+	
+	private void prepareMetaData () {
 		
-
 		this.channels = this.parseLine( this.loggernetFileName, this.ChannelNameLineNumber, this.delimiter);
-
 		this.units = this.parseLine( this.loggernetFileName, this.UnitLineNumber, this.delimiter);
 		
 		int numExtras = this.ExtraInfoLineNumbers.length;
+		
 		for (int i =0; i < numExtras; i++ ) {
 			String[] tempLine = this.parseLine(this.loggernetFileName, this.ExtraInfoLineNumbers[i], this.delimiter);
 			if (tempLine != null) {
@@ -199,13 +199,181 @@ public class LoggerNetSrc extends RBNBBase{
 					}
 				}
 			}
-		}
+		}	
+	}
+	
+	
+	private void processFileAppend() {
 		
+		this.prepareMetaData();
 		// metadata info is ready
+
+		// create a channel map with channels and units
+		if (this.createChMap()) {
+			// if successful, then put data 
+			// get line number and start processing the data
+			int dataLineNum = this.getLineNum();
+			
+			processDataLines(this.loggernetFileName, dataLineNum);
+			
+			// also save the data line number again
+			System.out.println("channel map created");
+			this.createLineNumFile();
+
+			this.closeRbnb();
+			
+		}
+		else {
+			// otherwise, don't do anything (it'll be processed later)
+			System.out.println("channel map not created");
+		}
 		
 	} // processFileAppend()
 
+		
+	private boolean processDataLines(String fp, int ln) {
+		
+		BufferedReader lnr = null;
+		
+		try {
+			lnr = new BufferedReader (new FileReader (fp));
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+			System.out.println("LoggerNet File cannot be read");
+		}
+		
+		String unitLine = null;
 
+		try {
+			if (ln < 0) {
+				lnr.close();
+				return true;
+			}
+			
+			else {
+				int counter = 0;
+				for (counter = 0 ; counter <= ln; counter++)
+					unitLine = lnr.readLine();
+				
+				counter = ln;
+				while (unitLine != null) {
+					processOneDataLine(unitLine);
+					unitLine = lnr.readLine();
+					counter++;
+				}
+				counter--;
+				this.DataLineNumber = counter;
+				
+				lnr.close();
+				this.closeRbnb();
+				return true;
+			}
+
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return false;
+		}
+	}
+	
+	
+	private boolean processOneDataLine (String dl) {
+		
+		String [] data = dl.split(this.delimiter);
+		double [] doubleData = new double [data.length];
+		
+		for (int i =0; i < data.length; i++) {
+			data[i] = data[i].replace("\"", "");
+		}
+		
+		for (int i=0; i < data.length; i++) {
+			
+			if (i==0) {
+				String dateString = data[0];
+				System.out.println("Campbell date string: " + dateString);
+
+				TimeZone tz = TimeZone.getDefault();
+				doubleData[0] = this.getRbnbTimestamp(dateString) + ((double) tz.getRawOffset() / 1000.0);
+				System.out.println("Nice date:" + ISOtoRbnbTime.formatDate((long)doubleData[0]*1000) + " for timestamp: " + Double.toString(doubleData[0]) );
+			}
+			
+			else if (data[i].equals("NAN")) {
+				doubleData[i] = Double.NaN;
+			} 
+			else { // it's a double
+				doubleData[i] = Double.parseDouble(data[i]);
+			}
+		}
+		
+		
+		try {
+			postData(doubleData);
+			return true;
+		} catch (SAPIException e) {
+			// TODO Auto-generated catch block
+			System.out.println ("Couldn't post the data");
+			e.printStackTrace();
+			return false;
+		}
+	} // while
+	
+	
+	
+	
+	private boolean createChMap () {
+		System.out.println("RBNB archival size is " + this.rbnbArchiveSize);
+		this.rbnbArchiveSize = 100;
+		if (0 < rbnbArchiveSize) {
+			myBaseSource = new BaseSource(rbnbCacheSize, "append", rbnbArchiveSize);
+		} else {
+			myBaseSource = new BaseSource(rbnbCacheSize, "none", 0);
+		}
+		try {
+			myBaseSource.OpenRBNBConnection(serverName, rbnbClientName);
+			logger.config("Set up connection to RBNB on " + serverName +
+					" as source = " + rbnbClientName);
+			logger.config(" with RBNB Cache Size = " + rbnbCacheSize + " and RBNB Archive Size = " + rbnbArchiveSize);
+		}
+		catch (SAPIException se) {
+			System.out.println("SAPI Exception at createChMap");
+			return false;
+		}
+
+		this.cmap = new ChannelMap();
+
+		// assume all data are doubles
+		for(int i=0; i< this.channels.length; i++) {
+			
+			try {
+				this.cmap.Add(this.channels[i]);
+				this.cmap.PutMime(cmap.GetIndex(this.channels[i]), "application/octet-stream");
+				
+				if (this.units != null) {
+					this.cmap.PutUserInfo(cmap.GetIndex(this.channels[i]), this.units[i]);
+				}
+				
+			}
+			catch (Exception ne) {
+				ne.printStackTrace();
+				System.out.println("SAPI Exception at createChMap");
+
+				return false;
+			}
+		}
+
+		try {
+			myBaseSource.Register(this.cmap);
+			myBaseSource.Flush(this.cmap);
+		}
+		catch (SAPIException se) {
+			System.out.println("SAPI Exception at createChMap");
+			return false;
+		}
+
+		return true;
+	}
+	
+	
 	public String[] parseLine (String fp, int ln, String del) {
 		
 		BufferedReader lnr = null;
@@ -245,6 +413,7 @@ public class LoggerNetSrc extends RBNBBase{
 		
 		return units;
 	}
+	
 	
 	
 	public boolean parse(String cmdFromInstr) throws IOException, SAPIException {		
@@ -334,6 +503,7 @@ public class LoggerNetSrc extends RBNBBase{
 
 	/*! @brief Sets up the connection to an rbnb server. */
 	public void initRbnb() throws SAPIException, IOException {
+		
 		if (0 < rbnbArchiveSize) {
 			myBaseSource = new BaseSource(rbnbCacheSize, "append", rbnbArchiveSize);
 		} else {
@@ -367,48 +537,70 @@ public class LoggerNetSrc extends RBNBBase{
 	/* @todo move this functionality to the parser
 		"2007-11-12 07:30:00",0,1.994,1.885,253.6,18.72,0,24.27,84.5,542.1,381.2,0.19,533.3,0.272,739.2,0.134,402.2,0.037,91.5,0,26.02,0.011,12.23,22.56,13.08,0.209,0.302,0.148
 	 */
-	private void processFile() throws IOException, SAPIException {
-		String lineRead = null;
-		String[] lineSplit = null;
-		String dateString = null;
-		double[] lineData = null;
+	private boolean processFile() {
+		
+		this.prepareMetaData();
+		// metadata info is ready
 
-		logger.finer("processFile() lanuched");
-
-		while((lineRead = loggernetFileBuffer.readLine()) != null) {
-			//logger.finer("HELLOOOOOOO   Lineread:" + lineRead);
-			lineSplit = lineRead.split(",");
-			// gotta convert from strings to doubles the old-fashioned way - the first element is a timestamp
-			lineData = new double[lineSplit.length];
-			for(int i=0; i<lineSplit.length; i++) {
-				logger.finer("Data token:" + lineSplit[i]);
-				if(i==0) { // timestamp - handle specially
-					dateString = lineSplit[i].substring(1, (lineSplit[i].length()-1) );
-					logger.fine("Campbell date string: " + dateString);
-
-					TimeZone tz = TimeZone.getDefault();
-					lineData[i] = this.getRbnbTimestamp(dateString) + tz.getRawOffset();
-					logger.fine("Nice date:" + ISOtoRbnbTime.formatDate((long)lineData[i]*1000) + " for timestamp: " + Double.toString(lineData[i]) );
-				} else if(lineSplit[i].equals("\"NAN\"")) {
-					lineData[i] = Double.NaN;
-				} else { // it's a double
-					lineData[i] = Double.parseDouble(lineSplit[i]);
-				}
+		// create a channel map with channels and units
+		if (this.createChMap()) {
+			// if successful, then put data 
+			// get line number and start processing the data
+			
+			if (processDataLines(this.loggernetFileName, this.DataLineNumber))  {
+				this.closeRbnb();
+				return true;
 			}
-			postData(lineData);
-		} // while
+			else return false;
+		}
+		else {
+			// otherwise, create a tempfile.
+			this.createTempFile();
+			System.out.println("channel map not created");
+			return false;
+		}
 	} // processFile()
 
 
+	
+	
+	
+	private void prepareTempMetaData () {
+		
+		this.channels = this.parseLine( this.TempFileName, this.ChannelNameLineNumber, this.delimiter);
+		this.units = this.parseLine( this.TempFileName, this.UnitLineNumber, this.delimiter);
+		
+		int numExtras = this.ExtraInfoLineNumbers.length;
+		
+		for (int i =0; i < numExtras; i++ ) {
+			String[] tempLine = this.parseLine(this.TempFileName, this.ExtraInfoLineNumbers[i], this.delimiter);
+			if (tempLine != null) {
+				for (int j=0; j < channels.length; j++) {
+					if (this.units == null) {
+						this.units = tempLine;
+						continue;
+					}
+					else {
+						this.units[j] = this.units[j] + "\n" + tempLine[j];
+					}
+				}
+			}
+		}	
+	}
+
+	
+	
+	
+	
 	private void postData(double[] someData) throws SAPIException {
 		// put data onto the ring buffer - skips first element, which is the rbnb timestamp
-		cmap.PutTime(someData[0], 0.0);
+		this.cmap.PutTime(someData[0], 0.0);
 		for(int i=1; i<someData.length; i++) {
 			double[] dataTmp = new double[1];
 			dataTmp[0] = someData[i];
 			String[] varChannels = channels;
 			this.cmap.PutDataAsFloat64(cmap.GetIndex(varChannels[i]), dataTmp);
-			logger.finer("Posted data:" + dataTmp[0] + " into channel: " + varChannels[i] + " : " + cmap.GetIndex(varChannels[i]));
+			System.out.println("Posted data:" + dataTmp[0] + " into channel: " + varChannels[i] + " : " + cmap.GetIndex(varChannels[i]));
 		}				
 		myBaseSource.Flush(this.cmap);
 	}
@@ -459,14 +651,13 @@ public class LoggerNetSrc extends RBNBBase{
 		
 		try {
 
-			String newline = System.getProperty("line.seperator");
-
-			loggernetFileBuffer.readLine();
-			loggernetFileBuffer.readLine();
-			String data = loggernetFileBuffer.readLine();
-			data = data.trim();
-			data = data + newline;
-			return data;
+			String line = null;
+			
+			int counter = 0;
+			for (counter = 0 ; counter <= this.DataLineNumber; counter++)
+				line = loggernetFileBuffer.readLine();
+			
+			return line;
 		}
 		catch (IOException e) {
 			e.printStackTrace();
@@ -494,7 +685,7 @@ public class LoggerNetSrc extends RBNBBase{
 
 			data += loggernetFileBuffer.readLine();
 			data = data.trim();
-		data = data + newline;
+			data = data + newline;
 
 			data += loggernetFileBuffer.readLine();
 			data = data.trim();
@@ -539,63 +730,86 @@ public class LoggerNetSrc extends RBNBBase{
 
 
 	private boolean sendTempDataIntoDTSource() {
-		String lineRead = null;
-		String[] lineSplit = null;
-		String dateString = null;
-		double[] lineData = null;
+	
+		this.prepareMetaData();
+		// metadata info is ready
 
-		logger.finer("processFile() lanuched");
-
-		BufferedReader tempF;
-		try {
-			tempF = new BufferedReader(new FileReader(this.TempFileName));
+		// create a channel map with channels and units
+		if (this.createChMap()) {
+			// if successful, then put data 
+			// get line number and start processing the data
+			if (this.processTempDataLines(this.TempFileName, this.DataLineNumber)) {
+				// delete this portion
+				return true;
+			}
+			
+			this.closeRbnb();
+			
 		}
-		catch (FileNotFoundException e) {
-			e.printStackTrace();
+		else {
+			// otherwise, create a tempfile.
+			String newStr = this.acquireAllFromInstrument();
+			this.appendToTempFile(newStr);
+			System.out.println("temp data added");
 			return false;
 		}
+		
+		return true;
+		
+	}
+	
+	
+	private boolean processTempDataLines(String fp, int ln) {
+		
+		BufferedReader lnr = null;
+		
+		try {
+			lnr = new BufferedReader (new FileReader (fp));
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+			System.out.println("LoggerNet File cannot be read");
+		}
+		
+		String unitLine = null;
 
 		try {
-			// first two lines are metadata
-			tempF.readLine();
-			String metaDataLine = tempF.readLine();
-
-			while((lineRead = tempF.readLine()) != null) {
-				//logger.finer("HELLOOOOOOO   Lineread:" + lineRead);
-				lineSplit = lineRead.split(",");
-				// gotta convert from strings to doubles the old-fashioned way - the first element is a timestamp
-				lineData = new double[lineSplit.length];
-				for(int i=0; i<lineSplit.length; i++) {
-					logger.finer("Data token:" + lineSplit[i]);
-					if(i==0) { // timestamp - handle specially
-						dateString = lineSplit[i].substring(1, (lineSplit[i].length()-1) );
-						logger.fine("Campbell date string: " + dateString);
-
-						TimeZone tz = TimeZone.getDefault();
-						lineData[i] = this.getRbnbTimestamp(dateString) + tz.getRawOffset();
-						logger.fine("Nice date:" + ISOtoRbnbTime.formatDate((long)lineData[i]*1000) + " for timestamp: " + Double.toString(lineData[i]) );
-					} else if(lineSplit[i].equals("\"NAN\"")) {
-						lineData[i] = Double.NaN;
-					} else { // it's a double
-						lineData[i] = Double.parseDouble(lineSplit[i]);
+			if (ln < 0) {
+				lnr.close();
+				return true;
+			}
+			
+			else {
+				int counter = 0;
+				for (counter = 0 ; counter <= ln; counter++)
+					unitLine = lnr.readLine();
+				
+				counter = ln;
+				while (unitLine != null) {
+					if (processOneDataLine(unitLine)) {
+						unitLine = lnr.readLine();
+						counter++;
+					}
+					else {
+						this.removeDataLinesFromFile(this.TempFileName, counter);
+						return false;
 					}
 				}
-				postData(lineData);
+				
+				lnr.close();
+				this.closeRbnb();
+				return true;
 			}
-		} catch (NumberFormatException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		} catch (SAPIException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} // while
-		return false;
+			return false;
+		}
+		
 	}
 
-
+	
+	
 	public ChannelMap parseChannelMap(String channelsString)  {		
 
 
@@ -667,7 +881,7 @@ public class LoggerNetSrc extends RBNBBase{
 
 
 
-	public void removeFirstTreeLinesFromFile(String file) {
+	public void removeOneTempPortionFromFile(String file) {
 
 		try {
 
@@ -693,7 +907,7 @@ public class LoggerNetSrc extends RBNBBase{
 			while ((line = br.readLine()) != null) {
 				lineCounter +=1;
 
-				if (lineCounter >3) {
+				if (lineCounter >this.DataLineNumber) {
 
 					pw.println(line);
 					pw.flush();
@@ -722,6 +936,70 @@ public class LoggerNetSrc extends RBNBBase{
 
 	}
 
+	
+	
+	public void removeDataLinesFromFile(String file, int lastSentLine) {
+
+		try {
+
+			File inFile = new File(file);
+
+			if (!inFile.isFile()) {
+				System.out.println("Parameter is not an existing file");
+				return;
+			}
+
+			//Construct the new file that will later be renamed to the original filename. 
+			File tempFile = new File(inFile.getAbsolutePath() + ".tmp");
+
+			BufferedReader br = new BufferedReader(new FileReader(file));
+			PrintWriter pw = new PrintWriter(new FileWriter(tempFile));
+
+			String line = null;
+
+			int lineCounter = 0;
+
+			//Read from the original file and write to the new file
+			// skipping first three lines
+			while ((line = br.readLine()) != null) {
+				lineCounter +=1;
+
+				if (lineCounter >lastSentLine) {
+					pw.println(line);
+					pw.flush();
+				}
+				if (lineCounter < this.DataLineNumber) {
+					pw.println(line);
+					pw.flush();
+				}
+			}
+			pw.close();
+			br.close();
+
+			//Delete the original file
+			if (!inFile.delete()) {
+				System.out.println("Could not delete file");
+				return;
+			} 
+
+			//Rename the new file to the filename the original file had.
+			if (!tempFile.renameTo(inFile))
+				System.out.println("Could not rename file");
+
+		}
+		catch (FileNotFoundException ex) {
+			ex.printStackTrace();
+		}
+		catch (IOException ex) {
+			ex.printStackTrace();
+		}
+
+	}
+
+	
+	
+	
+	
 	/*! @action: 1. reads the loggernet file content
 	 *           2. creates a tempFile
 	 *           3. writes the content to a file. 
@@ -743,7 +1021,6 @@ public class LoggerNetSrc extends RBNBBase{
 			while ( (line = loggernetFileBuffer.readLine()) != null)
 			{
 				allData += line + newline;
-
 			}
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -754,13 +1031,9 @@ public class LoggerNetSrc extends RBNBBase{
 		try {
 
 			PrintWriter pw = new PrintWriter(new FileWriter(this.TempFileName));
-
 			pw.print(allData);
 			pw.flush();
-
 			pw.close();
-
-
 		}
 		catch (FileNotFoundException ex) {
 			ex.printStackTrace();
@@ -788,6 +1061,10 @@ public class LoggerNetSrc extends RBNBBase{
 		logger.fine("ISO8601:" + iso8601String);
 		
 		ISOtoRbnbTime rbnbTimeConvert = new ISOtoRbnbTime(iso8601String);
+		
+		System.out.println ("original date string = " + loggernetDate);
+		System.out.println ("ISO date string = " + iso8601String);
+		
 		return rbnbTimeConvert.getValue();
 	}
 	
@@ -824,53 +1101,29 @@ public class LoggerNetSrc extends RBNBBase{
 			// process the file in append mode.
 			loggernet.processFileAppend();
 			
-			// insert the data into rbnb
-			
-			// if successful, move the cursor
-			
-			// if not, do not change the cursor
 		}
 		
 		else {
-			try {	
 
-				if (loggernet.tempFileExists()) {
+			if (loggernet.tempFileExists()) {
 
-					if (loggernet.sendTempDataIntoDTSource()) {
-						loggernet.deleteTempFile();
-					}
-					else {
-						String acquiredData = loggernet.acquireDataFromInstrument();
-						loggernet.appendToTempFile (acquiredData);
-					}
+				if (loggernet.sendTempDataIntoDTSource()) {
+					loggernet.deleteTempFile();
 				}
 				else {
-					loggernet.initFile();
-					loggernet.initRbnb();
-					loggernet.processFile();
-					loggernet.closeRbnb();
+					String acquiredData = loggernet.acquireDataFromInstrument();
+					loggernet.appendToTempFile(acquiredData);
 				}
-
-			} 
-
-			catch(SAPIException sae) {
-				logger.severe("Unable to communicate with DataTurbine server. Terminating: " + sae.toString());
-				sae.printStackTrace();
-				loggernet.createTempFile();
-			} 
-
-			catch(FileNotFoundException fnf) {
-				logger.severe("Unable to open input data file:" + loggernet.loggernetFileName + ". Terminating: " + fnf.toString());
-				fnf.printStackTrace();
-				loggernet.createTempFile();
-				System.exit(4);
-			} 
-
-			catch(IOException ioe) {
-				logger.severe("Unable to read input data file:" + loggernet.loggernetFileName + ". Terminating: " + ioe.toString());
-				System.exit(5);
 			}
-		}
+			else {
+				if (loggernet.processFile()) return;
+
+				else {
+					loggernet.createTempFile();
+				}
+			}
+		} 
+
 	} // main()
 
 
@@ -947,9 +1200,3 @@ public class LoggerNetSrc extends RBNBBase{
 	} // setArgs()
 
 } // class
-
-
-
-
-
-
