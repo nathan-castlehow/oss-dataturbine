@@ -3,15 +3,15 @@
 <properties>
   <comment>Application Configuration</comment>
   <entry key="ConfigFilePath">/Users/petershin/Documents/workspace/LoggerNetParam.xml</entry>
-  <entry key="AppendMode">Yes</entry>
+  <entry key="AppendMode">No</entry>
   <entry key="tempFilePath">/Users/petershin/Documents/workspace/LoggerNetSource.tmp</entry>
-  <entry key="lineNumFilePath">C:\Documents and Settings\Peter\workspace\OSSDT\lineNum.txt</entry>
+  <entry key="lineNumFilePath">/Users/petershin/Documents/workspace/lineNum.txt</entry>
   <entry key="Delimiter">comma</entry>
   <entry key="TimeZoneOffsetSpecified">no</entry>
   <entry key="SensorInfoLineNumber">0</entry>
   <entry key="ChannelNameLineNumber">1</entry>
   <entry key="UnitLineNumber">2</entry>
-  <entry key="ExtraInfoLineNumbers">200</entry>
-  <entry key="DataLineNumber">1000</entry>
-  <entry key="LoggerNetDataFilePath">C:\Documents and Settings\Peter\workspace\OSSDT\Station02_LS_30Min_LastVal.dat</entry>
+  <entry key="ExtraInfoLineNumbers">3</entry>
+  <entry key="DataLineNumber">4</entry>
+  <entry key="LoggerNetDataFilePath">/Users/petershin/Documents/workspace/LN.dat</entry>
 </properties>
