@@ -565,29 +565,6 @@ public class LoggerNetSrc extends RBNBBase{
 	
 	
 	
-	private void prepareTempMetaData () {
-		
-		this.channels = this.parseLine( this.TempFileName, this.ChannelNameLineNumber, this.delimiter);
-		this.units = this.parseLine( this.TempFileName, this.UnitLineNumber, this.delimiter);
-		
-		int numExtras = this.ExtraInfoLineNumbers.length;
-		
-		for (int i =0; i < numExtras; i++ ) {
-			String[] tempLine = this.parseLine(this.TempFileName, this.ExtraInfoLineNumbers[i], this.delimiter);
-			if (tempLine != null) {
-				for (int j=0; j < channels.length; j++) {
-					if (this.units == null) {
-						this.units = tempLine;
-						continue;
-					}
-					else {
-						this.units[j] = this.units[j] + "\n" + tempLine[j];
-					}
-				}
-			}
-		}	
-	}
-
 	
 	
 	
@@ -731,7 +708,7 @@ public class LoggerNetSrc extends RBNBBase{
 
 	private boolean sendTempDataIntoDTSource() {
 	
-		this.prepareMetaData();
+		this.prepareTempMetaData();
 		// metadata info is ready
 
 		// create a channel map with channels and units
@@ -757,6 +734,32 @@ public class LoggerNetSrc extends RBNBBase{
 		return true;
 		
 	}
+	
+	
+	private void prepareTempMetaData () {
+		
+		this.channels = this.parseLine( this.TempFileName, this.ChannelNameLineNumber, this.delimiter);
+		this.units = this.parseLine( this.TempFileName, this.UnitLineNumber, this.delimiter);
+		
+		int numExtras = this.ExtraInfoLineNumbers.length;
+		
+		for (int i =0; i < numExtras; i++ ) {
+			String[] tempLine = this.parseLine(this.TempFileName, this.ExtraInfoLineNumbers[i], this.delimiter);
+			if (tempLine != null) {
+				for (int j=0; j < channels.length; j++) {
+					if (this.units == null) {
+						this.units = tempLine;
+						continue;
+					}
+					else {
+						this.units[j] = this.units[j] + "\n" + tempLine[j];
+					}
+				}
+			}
+		}	
+	}
+
+
 	
 	
 	private boolean processTempDataLines(String fp, int ln) {
