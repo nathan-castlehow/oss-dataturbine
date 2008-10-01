@@ -185,7 +185,8 @@ public class LoggerNetSrc extends RBNBBase{
 		this.units = this.parseLine( this.loggernetFileName, this.UnitLineNumber, this.delimiter);
 		
 		int numExtras = this.ExtraInfoLineNumbers.length;
-		
+		String newline = System.getProperty("line.separator");
+
 		for (int i =0; i < numExtras; i++ ) {
 			String[] tempLine = this.parseLine(this.loggernetFileName, this.ExtraInfoLineNumbers[i], this.delimiter);
 			if (tempLine != null) {
@@ -195,7 +196,7 @@ public class LoggerNetSrc extends RBNBBase{
 						continue;
 					}
 					else {
-						this.units[j] = this.units[j] + "\n" + tempLine[j];
+						this.units[j] = this.units[j] + newline + tempLine[j];
 					}
 				}
 			}
@@ -653,7 +654,7 @@ public class LoggerNetSrc extends RBNBBase{
 			return null;
 		}
 		try {
-			String newline = System.getProperty("line.seperator");
+			String newline = System.getProperty("line.separator");
 
 			String data = loggernetFileBuffer.readLine();
 
@@ -694,6 +695,8 @@ public class LoggerNetSrc extends RBNBBase{
 			return;
 		}
 		try {
+			String newline = System.getProperty("line.separator");
+			tempFile.write(newline);
 			tempFile.write (someLine);
 			tempFile.flush();
 		}
@@ -724,10 +727,11 @@ public class LoggerNetSrc extends RBNBBase{
 			
 		}
 		else {
-			// otherwise, create a tempfile.
-			String newStr = this.acquireAllFromInstrument();
+			// otherwise, add to a tempfile.
+			String newStr = this.acquireDataFromInstrument(); // acquireAllFromInstrument();
 			this.appendToTempFile(newStr);
-			System.out.println("temp data added");
+			System.out.println("temp data added:  " + newStr);
+		
 			return false;
 		}
 		
@@ -742,7 +746,8 @@ public class LoggerNetSrc extends RBNBBase{
 		this.units = this.parseLine( this.TempFileName, this.UnitLineNumber, this.delimiter);
 		
 		int numExtras = this.ExtraInfoLineNumbers.length;
-		
+		String newline = System.getProperty("line.separator");
+
 		for (int i =0; i < numExtras; i++ ) {
 			String[] tempLine = this.parseLine(this.TempFileName, this.ExtraInfoLineNumbers[i], this.delimiter);
 			if (tempLine != null) {
@@ -752,7 +757,7 @@ public class LoggerNetSrc extends RBNBBase{
 						continue;
 					}
 					else {
-						this.units[j] = this.units[j] + "\n" + tempLine[j];
+						this.units[j] = this.units[j] + newline + tempLine[j];
 					}
 				}
 			}
@@ -1015,15 +1020,18 @@ public class LoggerNetSrc extends RBNBBase{
 			e.printStackTrace();
 		}
 
-		String newline = System.getProperty("line.seperator");
+		String newline = System.getProperty("line.separator");
 
+		System.out.println ("line separator is " + newline + " is that");
 		String allData = "";
 		String line = "";
 
 		try {
+			allData = loggernetFileBuffer.readLine();
+			
 			while ( (line = loggernetFileBuffer.readLine()) != null)
 			{
-				allData += line + newline;
+				allData += newline+ line;
 			}
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
