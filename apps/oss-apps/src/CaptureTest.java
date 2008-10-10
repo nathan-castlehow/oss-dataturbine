@@ -2,7 +2,7 @@
  * CaptureTest.java
  * Created on Jun 24, 2005
  * 
- * COPYRIGHT © 2005, THE REGENTS OF THE UNIVERSITY OF MICHIGAN,
+ * COPYRIGHT 2005, THE REGENTS OF THE UNIVERSITY OF MICHIGAN,
  * ALL RIGHTS RESERVED; see the file COPYRIGHT.txt in this folder for details
  * 
  * This work is supported in part by the George E. Brown, Jr. Network
