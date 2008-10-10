@@ -1,0 +1,408 @@
+// !$*UTF8*$!
+{
+	143C3EFF0DF0B76700043A46 /* Default.png */ = {
+		uiCtxt = {
+			sepNavWindowFrame = "{{15, 0}, {1110, 878}}";
+		};
+	};
+	14D8295D0DB6E14B00198EC5 /* ReadMe.txt */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {2178, 980}}";
+			sepNavSelRange = "{449, 0}";
+			sepNavVisRange = "{0, 2385}";
+		};
+	};
+	1D6058900D05DD3D006BFB54 /* AccelerometerGraph */ = {
+		activeExec = 0;
+		executables = (
+			E3EF7CF00E5E142C00F1C7C5 /* AccelerometerGraph */,
+		);
+	};
+	29B97313FDCFA39411CA2CEA /* Project object */ = {
+		activeBuildConfigurationName = Debug;
+		activeExecutable = E3EF7CF00E5E142C00F1C7C5 /* AccelerometerGraph */;
+		activeSDKPreference = iphonesimulator2.1;
+		activeTarget = 1D6058900D05DD3D006BFB54 /* AccelerometerGraph */;
+		codeSenseManager = E3EF7CFD0E5E144A00F1C7C5 /* Code sense */;
+		executables = (
+			E3EF7CF00E5E142C00F1C7C5 /* AccelerometerGraph */,
+		);
+		perUserDictionary = {
+			PBXConfiguration.PBXFileTableDataSource3.PBXErrorsWarningsDataSource = {
+				PBXFileTableDataSourceColumnSortingDirectionKey = "-1";
+				PBXFileTableDataSourceColumnSortingKey = PBXErrorsWarningsDataSource_LocationID;
+				PBXFileTableDataSourceColumnWidthsKey = (
+					20,
+					300,
+					387,
+				);
+				PBXFileTableDataSourceColumnsKey = (
+					PBXErrorsWarningsDataSource_TypeID,
+					PBXErrorsWarningsDataSource_MessageID,
+					PBXErrorsWarningsDataSource_LocationID,
+				);
+			};
+			PBXConfiguration.PBXFileTableDataSource3.PBXFileTableDataSource = {
+				PBXFileTableDataSourceColumnSortingDirectionKey = "-1";
+				PBXFileTableDataSourceColumnSortingKey = PBXFileDataSource_Filename_ColumnID;
+				PBXFileTableDataSourceColumnWidthsKey = (
+					20,
+					866,
+					20,
+					48,
+					43,
+					43,
+					20,
+				);
+				PBXFileTableDataSourceColumnsKey = (
+					PBXFileDataSource_FiletypeID,
+					PBXFileDataSource_Filename_ColumnID,
+					PBXFileDataSource_Built_ColumnID,
+					PBXFileDataSource_ObjectSize_ColumnID,
+					PBXFileDataSource_Errors_ColumnID,
+					PBXFileDataSource_Warnings_ColumnID,
+					PBXFileDataSource_Target_ColumnID,
+				);
+			};
+			PBXPerProjectTemplateStateSaveDate = 245354603;
+			PBXWorkspaceStateSaveDate = 245354603;
+		};
+		perUserProjectItems = {
+			E32890A80E9FD14800D34332 /* PBXTextBookmark */ = E32890A80E9FD14800D34332 /* PBXTextBookmark */;
+			E32890A90E9FD14800D34332 /* PBXTextBookmark */ = E32890A90E9FD14800D34332 /* PBXTextBookmark */;
+			E32890AA0E9FD14800D34332 /* PBXTextBookmark */ = E32890AA0E9FD14800D34332 /* PBXTextBookmark */;
+			E3522F180E7B362C00D9A4FE /* PBXBookmark */ = E3522F180E7B362C00D9A4FE /* PBXBookmark */;
+			E36EE2060E9BCEBA00CE093C /* PBXTextBookmark */ = E36EE2060E9BCEBA00CE093C /* PBXTextBookmark */;
+			E36EE2070E9BCEBA00CE093C /* PBXTextBookmark */ = E36EE2070E9BCEBA00CE093C /* PBXTextBookmark */;
+			E36EE2080E9BCEBA00CE093C /* PBXTextBookmark */ = E36EE2080E9BCEBA00CE093C /* PBXTextBookmark */;
+			E3EE96990E9546BC0069EDD3 /* PBXTextBookmark */ = E3EE96990E9546BC0069EDD3 /* PBXTextBookmark */;
+			E3EE969A0E9546BC0069EDD3 /* PBXTextBookmark */ = E3EE969A0E9546BC0069EDD3 /* PBXTextBookmark */;
+			E3EE969B0E9546BC0069EDD3 /* PBXBookmark */ = E3EE969B0E9546BC0069EDD3 /* PBXBookmark */;
+			E3EE969C0E9546BC0069EDD3 /* PlistBookmark */ = E3EE969C0E9546BC0069EDD3 /* PlistBookmark */;
+			E3EE969D0E9546BC0069EDD3 /* PBXBookmark */ = E3EE969D0E9546BC0069EDD3 /* PBXBookmark */;
+			E3EE96A70E9546BC0069EDD3 /* PBXBookmark */ = E3EE96A70E9546BC0069EDD3 /* PBXBookmark */;
+			E3EE96B30E9546EE0069EDD3 /* PBXTextBookmark */ = E3EE96B30E9546EE0069EDD3 /* PBXTextBookmark */;
+			E3EE96B40E9546EE0069EDD3 /* PBXTextBookmark */ = E3EE96B40E9546EE0069EDD3 /* PBXTextBookmark */;
+			E3EE96C60E954B800069EDD3 /* PBXTextBookmark */ = E3EE96C60E954B800069EDD3 /* PBXTextBookmark */;
+			E3EF7D360E5E2A1B00F1C7C5 /* PBXTextBookmark */ = E3EF7D360E5E2A1B00F1C7C5 /* PBXTextBookmark */;
+			E3EF7D370E5E2A1B00F1C7C5 /* PBXTextBookmark */ = E3EF7D370E5E2A1B00F1C7C5 /* PBXTextBookmark */;
+			E3EF7D380E5E2A1B00F1C7C5 /* PBXTextBookmark */ = E3EF7D380E5E2A1B00F1C7C5 /* PBXTextBookmark */;
+			E3EF7D390E5E2A1B00F1C7C5 /* PBXTextBookmark */ = E3EF7D390E5E2A1B00F1C7C5 /* PBXTextBookmark */;
+			E3EF7D3A0E5E2A1B00F1C7C5 /* PBXTextBookmark */ = E3EF7D3A0E5E2A1B00F1C7C5 /* PBXTextBookmark */;
+			E3EF7D3C0E5E2A1B00F1C7C5 /* PBXTextBookmark */ = E3EF7D3C0E5E2A1B00F1C7C5 /* PBXTextBookmark */;
+			E3EF7D800E5E3A2400F1C7C5 /* PlistBookmark */ = E3EF7D800E5E3A2400F1C7C5 /* PlistBookmark */;
+		};
+		sourceControlManager = E3EF7CFC0E5E144A00F1C7C5 /* Source Control */;
+		userBuildSettings = {
+		};
+	};
+	29B97316FDCFA39411CA2CEA /* main.m */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {675, 784}}";
+			sepNavSelRange = "{0, 0}";
+			sepNavVisRange = "{264, 2375}";
+		};
+	};
+	30D873950D76212900B213B8 /* AppDelegate.h */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {1044, 645}}";
+			sepNavSelRange = "{258, 0}";
+			sepNavVisRange = "{0, 767}";
+		};
+	};
+	30D873960D76212900B213B8 /* AppDelegate.m */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {1062, 1610}}";
+			sepNavSelRange = "{1725, 0}";
+			sepNavVisRange = "{524, 1992}";
+		};
+	};
+	3BF4E5190D69307C001F336A /* GraphView.h */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {675, 1143}}";
+			sepNavSelRange = "{0, 816}";
+			sepNavVisRange = "{0, 1177}";
+		};
+	};
+	3BF4E51A0D69307C001F336A /* GraphView.m */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {750, 2716}}";
+			sepNavSelRange = "{928, 0}";
+			sepNavVisRange = "{2240, 1632}";
+		};
+	};
+	E32890A80E9FD14800D34332 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 30D873960D76212900B213B8 /* AppDelegate.m */;
+		name = "AppDelegate.m: 44";
+		rLen = 0;
+		rLoc = 1725;
+		rType = 0;
+		vrLen = 1992;
+		vrLoc = 524;
+	};
+	E32890A90E9FD14800D34332 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 30D873960D76212900B213B8 /* AppDelegate.m */;
+		name = "AppDelegate.m: 44";
+		rLen = 0;
+		rLoc = 1725;
+		rType = 0;
+		vrLen = 1992;
+		vrLoc = 524;
+	};
+	E32890AA0E9FD14800D34332 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 14D8295D0DB6E14B00198EC5 /* ReadMe.txt */;
+		name = "ReadMe.txt: 12";
+		rLen = 0;
+		rLoc = 449;
+		rType = 0;
+		vrLen = 2385;
+		vrLoc = 0;
+	};
+	E3522F180E7B362C00D9A4FE /* PBXBookmark */ = {
+		isa = PBXBookmark;
+		fRef = 28C3B9260DA751B800FAF8D9 /* Icon.png */;
+	};
+	E36EE1F20E9BC19800CE093C /* RBNBController.java */ = {
+		isa = PBXFileReference;
+		lastKnownFileType = sourcecode.java;
+		name = RBNBController.java;
+		path = /Users/hubbard/code/rdv/src/org/rdv/rbnb/RBNBController.java;
+		sourceTree = "<absolute>";
+	};
+	E36EE2060E9BCEBA00CE093C /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = E36EE1F20E9BC19800CE093C /* RBNBController.java */;
+		name = "RBNBController.java: 825";
+		rLen = 0;
+		rLoc = 22909;
+		rType = 0;
+		vrLen = 1145;
+		vrLoc = 22539;
+	};
+	E36EE2070E9BCEBA00CE093C /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 30D873950D76212900B213B8 /* AppDelegate.h */;
+		name = "AppDelegate.h: 9";
+		rLen = 0;
+		rLoc = 258;
+		rType = 0;
+		vrLen = 767;
+		vrLoc = 0;
+	};
+	E36EE2080E9BCEBA00CE093C /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = E36EE1F20E9BC19800CE093C /* RBNBController.java */;
+		name = "RBNBController.java: 825";
+		rLen = 0;
+		rLoc = 22909;
+		rType = 0;
+		vrLen = 1145;
+		vrLoc = 22539;
+	};
+	E3EE968F0E9546530069EDD3 /* AppDelegate.m */ = {
+		isa = PBXFileReference;
+		lastKnownFileType = sourcecode.c.objc;
+		name = AppDelegate.m;
+		path = /Users/hubbard/code/AccelerometerGraph/AppDelegate.m;
+		sourceTree = "<absolute>";
+	};
+	E3EE96940E9546920069EDD3 /* GraphView.m */ = {
+		isa = PBXFileReference;
+		lastKnownFileType = sourcecode.c.objc;
+		name = GraphView.m;
+		path = /Users/hubbard/code/AccelerometerGraph/GraphView.m;
+		sourceTree = "<absolute>";
+	};
+	E3EE96990E9546BC0069EDD3 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 14D8295D0DB6E14B00198EC5 /* ReadMe.txt */;
+		name = "ReadMe.txt: 1";
+		rLen = 0;
+		rLoc = 449;
+		rType = 0;
+		vrLen = 2411;
+		vrLoc = 0;
+	};
+	E3EE969A0E9546BC0069EDD3 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 29B97316FDCFA39411CA2CEA /* main.m */;
+		name = "main.m: 1";
+		rLen = 0;
+		rLoc = 0;
+		rType = 0;
+		vrLen = 2375;
+		vrLoc = 264;
+	};
+	E3EE969B0E9546BC0069EDD3 /* PBXBookmark */ = {
+		isa = PBXBookmark;
+		fRef = 28C3B9260DA751B800FAF8D9 /* Icon.png */;
+	};
+	E3EE969C0E9546BC0069EDD3 /* PlistBookmark */ = {
+		isa = PlistBookmark;
+		fRef = 8D1107310486CEB800E47090 /* Info.plist */;
+		fallbackIsa = PBXBookmark;
+		isK = 0;
+		kPath = (
+		);
+		name = /Users/hubbard/code/AccelerometerGraph/Info.plist;
+		rLen = 0;
+		rLoc = 2147483647;
+	};
+	E3EE969D0E9546BC0069EDD3 /* PBXBookmark */ = {
+		isa = PBXBookmark;
+		fRef = 143C3EFF0DF0B76700043A46 /* Default.png */;
+	};
+	E3EE96A70E9546BC0069EDD3 /* PBXBookmark */ = {
+		isa = PBXBookmark;
+		fRef = 143C3EFF0DF0B76700043A46 /* Default.png */;
+	};
+	E3EE96B30E9546EE0069EDD3 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = E3EE96940E9546920069EDD3 /* GraphView.m */;
+		name = "GraphView.m: 37";
+		rLen = 0;
+		rLoc = 996;
+		rType = 0;
+		vrLen = 1650;
+		vrLoc = 0;
+	};
+	E3EE96B40E9546EE0069EDD3 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = E3EF7D1F0E5E299300F1C7C5 /* GraphView.h */;
+		name = "GraphView.h: 44";
+		rLen = 0;
+		rLoc = 1061;
+		rType = 0;
+		vrLen = 1117;
+		vrLoc = 0;
+	};
+	E3EE96C60E954B800069EDD3 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = E3EE968F0E9546530069EDD3 /* AppDelegate.m */;
+		name = "AppDelegate.m: 112";
+		rLen = 0;
+		rLoc = 4053;
+		rType = 0;
+		vrLen = 1569;
+		vrLoc = 2550;
+	};
+	E3EF7CF00E5E142C00F1C7C5 /* AccelerometerGraph */ = {
+		isa = PBXExecutable;
+		activeArgIndices = (
+		);
+		argumentStrings = (
+		);
+		autoAttachOnCrash = 1;
+		breakpointsEnabled = 0;
+		configStateDict = {
+		};
+		customDataFormattersEnabled = 1;
+		debuggerPlugin = GDBDebugging;
+		disassemblyDisplayState = 0;
+		dylibVariantSuffix = "";
+		enableDebugStr = 1;
+		environmentEntries = (
+		);
+		executableSystemSymbolLevel = 0;
+		executableUserSymbolLevel = 0;
+		libgmallocEnabled = 0;
+		name = AccelerometerGraph;
+		savedGlobals = {
+		};
+		sourceDirectories = (
+		);
+	};
+	E3EF7CFC0E5E144A00F1C7C5 /* Source Control */ = {
+		isa = PBXSourceControlManager;
+		fallbackIsa = XCSourceControlManager;
+		isSCMEnabled = 0;
+		scmConfiguration = {
+		};
+	};
+	E3EF7CFD0E5E144A00F1C7C5 /* Code sense */ = {
+		isa = PBXCodeSenseManager;
+		indexTemplatePath = "";
+	};
+	E3EF7D1F0E5E299300F1C7C5 /* GraphView.h */ = {
+		isa = PBXFileReference;
+		lastKnownFileType = sourcecode.c.h;
+		name = GraphView.h;
+		path = /Users/hubbard/code/AccelerometerGraph/GraphView.h;
+		sourceTree = "<absolute>";
+	};
+	E3EF7D360E5E2A1B00F1C7C5 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 14D8295D0DB6E14B00198EC5 /* ReadMe.txt */;
+		name = "ReadMe.txt: 1";
+		rLen = 0;
+		rLoc = 449;
+		rType = 0;
+		vrLen = 1044;
+		vrLoc = 1181;
+	};
+	E3EF7D370E5E2A1B00F1C7C5 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 3BF4E51A0D69307C001F336A /* GraphView.m */;
+		name = "GraphView.m: 1";
+		rLen = 0;
+		rLoc = 0;
+		rType = 0;
+		vrLen = 2202;
+		vrLoc = 0;
+	};
+	E3EF7D380E5E2A1B00F1C7C5 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 29B97316FDCFA39411CA2CEA /* main.m */;
+		name = "main.m: 1";
+		rLen = 0;
+		rLoc = 0;
+		rType = 0;
+		vrLen = 1919;
+		vrLoc = 720;
+	};
+	E3EF7D390E5E2A1B00F1C7C5 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 30D873950D76212900B213B8 /* AppDelegate.h */;
+		name = "AppDelegate.h: 1";
+		rLen = 0;
+		rLoc = 0;
+		rType = 0;
+		vrLen = 767;
+		vrLoc = 0;
+	};
+	E3EF7D3A0E5E2A1B00F1C7C5 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 30D873960D76212900B213B8 /* AppDelegate.m */;
+		name = "AppDelegate.m: 113";
+		rLen = 0;
+		rLoc = 3067;
+		rType = 0;
+		vrLen = 0;
+		vrLoc = 3544;
+	};
+	E3EF7D3C0E5E2A1B00F1C7C5 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 3BF4E5190D69307C001F336A /* GraphView.h */;
+		name = "GraphView.h: 74";
+		rLen = 0;
+		rLoc = 1217;
+		rType = 0;
+		vrLen = 0;
+		vrLoc = 1243;
+	};
+	E3EF7D800E5E3A2400F1C7C5 /* PlistBookmark */ = {
+		isa = PlistBookmark;
+		fRef = 8D1107310486CEB800E47090 /* Info.plist */;
+		fallbackIsa = PBXBookmark;
+		isK = 0;
+		kPath = (
+			LSRequiresIPhoneOS,
+		);
+		name = /Users/hubbard/code/AccelerometerGraph/Info.plist;
+		rLen = 0;
+		rLoc = 2147483647;
+	};
+}
