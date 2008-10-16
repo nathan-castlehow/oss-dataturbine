@@ -134,7 +134,7 @@ public class IQEyeJPEGSource extends JPEGSource {
 				try {
 					Integer i = new Integer(a);
 					int value = i.intValue();
-					cameraNumber = value;
+					//cameraNumber = value;
 				} catch (NumberFormatException nfe) {
 					System.out.println("Please ensure to enter a numeric value for -n option. " + a + " is not valid!");
 					return false;   

@@ -92,6 +92,7 @@ public class requestStartHelper {
 		requestStartHelper rsh = new requestStartHelper ();
 		long timeStamp = rsh.readLastTimeFromFile ("/Users/petershin/Documents/hi.txt");
 		
+		System.out.println("hello");
 		System.out.println(formatDate(timeStamp));
 		
 		long systimestamp = System.currentTimeMillis();
