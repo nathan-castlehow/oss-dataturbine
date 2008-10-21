@@ -42,6 +42,8 @@ import java.util.TimeZone;
  *  Loggernet data onto the ring buffer. */
 public class LoggerNetSrc extends RBNBBase{
 
+	private Source sapiSrc = null;
+	
 	private String DEFAULT_FILE_NAME = "loggernet.dat";
 	private String loggernetFileName = DEFAULT_FILE_NAME;
 	private BufferedReader loggernetFileBuffer = null;
@@ -322,15 +324,14 @@ public class LoggerNetSrc extends RBNBBase{
 	
 	
 	private boolean createChMap () {
-		System.out.println("RBNB archival size is " + this.rbnbArchiveSize);
-		this.rbnbArchiveSize = 100;
+		
 		if (0 < rbnbArchiveSize) {
-			myBaseSource = new BaseSource(rbnbCacheSize, "append", rbnbArchiveSize);
+			sapiSrc = new Source (rbnbCacheSize, "append", rbnbArchiveSize);
 		} else {
-			myBaseSource = new BaseSource(rbnbCacheSize, "none", 0);
+			sapiSrc = new Source (rbnbCacheSize, "none", 0);
 		}
 		try {
-			myBaseSource.OpenRBNBConnection(serverName, rbnbClientName);
+			sapiSrc.OpenRBNBConnection(serverName, rbnbClientName);
 			logger.config("Set up connection to RBNB on " + serverName +
 					" as source = " + rbnbClientName);
 			logger.config(" with RBNB Cache Size = " + rbnbCacheSize + " and RBNB Archive Size = " + rbnbArchiveSize);
@@ -363,8 +364,8 @@ public class LoggerNetSrc extends RBNBBase{
 		}
 
 		try {
-			myBaseSource.Register(this.cmap);
-			myBaseSource.Flush(this.cmap);
+			sapiSrc.Register(this.cmap);
+			sapiSrc.Flush(this.cmap);
 		}
 		catch (SAPIException se) {
 			System.out.println("SAPI Exception at createChMap");
@@ -506,30 +507,30 @@ public class LoggerNetSrc extends RBNBBase{
 	public void initRbnb() throws SAPIException, IOException {
 		
 		if (0 < rbnbArchiveSize) {
-			myBaseSource = new BaseSource(rbnbCacheSize, "append", rbnbArchiveSize);
+			sapiSrc = new Source (rbnbCacheSize, "append", rbnbArchiveSize);
 		} else {
-			myBaseSource = new BaseSource(rbnbCacheSize, "none", 0);
+			sapiSrc = new Source(rbnbCacheSize, "none", 0);
 		}
 		this.cmap = generateCmap();
-		myBaseSource.OpenRBNBConnection(serverName, rbnbClientName);
+		sapiSrc.OpenRBNBConnection(serverName, rbnbClientName);
 		logger.config("Set up connection to RBNB on " + serverName +
 				" as source = " + rbnbClientName);
 		logger.config(" with RBNB Cache Size = " + rbnbCacheSize + " and RBNB Archive Size = " + rbnbArchiveSize);
-		myBaseSource.Register(cmap);
-		myBaseSource.Flush(cmap);
+		sapiSrc.Register(cmap);
+		sapiSrc.Flush(cmap);
 	}
 
 
 	/*! @brief Gracefully closes the rbnb connection. */
 	protected void closeRbnb() {
-		if(myBaseSource == null) {
+		if(sapiSrc == null) {
 			return;
 		}
 
 		if (rbnbArchiveSize > 0) { // then close and keep the ring buffer
-			myBaseSource.Detach();
+			sapiSrc.Detach();
 		} else { // close and scrap the cache
-			myBaseSource.CloseRBNBConnection();
+			sapiSrc.CloseRBNBConnection();
 		}
 		logger.config("Closed RBNB connection");
 	}
@@ -580,7 +581,7 @@ public class LoggerNetSrc extends RBNBBase{
 			this.cmap.PutDataAsFloat64(cmap.GetIndex(varChannels[i]), dataTmp);
 			System.out.println("Posted data:" + dataTmp[0] + " into channel: " + varChannels[i] + " : " + cmap.GetIndex(varChannels[i]));
 		}				
-		myBaseSource.Flush(this.cmap);
+		sapiSrc.Flush(this.cmap);
 	}
 
 
@@ -1022,7 +1023,7 @@ public class LoggerNetSrc extends RBNBBase{
 
 		String newline = System.getProperty("line.separator");
 
-		System.out.println ("line separator is " + newline + " is that");
+		//System.out.println ("line separator is " + newline + " is that");
 		String allData = "";
 		String line = "";
 
