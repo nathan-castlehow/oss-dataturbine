@@ -56,9 +56,10 @@ class ADXL
                     // Init the port, matches name we were given
                     try
                     {
-                        serialPort = (SerialPort) portId.open("RXTX-RBNB", 64);
+                        serialPort = (SerialPort) portId.open("tx-skeleton", 64);
                     } catch (PortInUseException e)
                     {
+                        e.printStackTrace();
                         System.out.println("Port in use!");
                         return(4);
                     }
@@ -231,8 +232,8 @@ public class Main
     @SuppressWarnings("static-access")
     public static void main(String[] args)
     {
-        String hostname = "niagara-dev.sdsc.edu:3333";
-        String portName = "/dev/tty.USA19H3d1P1.1";
+        String hostname = "localhost:3333";
+        String portName = "/dev/tty.KeySerial1";
         String srcName = "ADXL-RBNB Accelerometer";
         String[] chanNames = {"X", "Y"};
         int[] chanIdx = {0, 1};

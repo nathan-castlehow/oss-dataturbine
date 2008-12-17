@@ -257,7 +257,7 @@ public class Main
         String hostname = "localhost:3333";
         String portName = "/dev/tty.KeySerial1";
         String srcName = "ADXL-RBNB Accelerometer";
-        String[] chanNames = {"X", "Y", "Lat", "Long", "Alt"};
+        String[] chanNames = {"X", "Y", "Lat", "Lon", "Alt"};
         int[] chanIdx = {0, 1};
         double[] vals = {0, 0};
         String unitsMetadata = "units=G,scale=1,offset=0";
