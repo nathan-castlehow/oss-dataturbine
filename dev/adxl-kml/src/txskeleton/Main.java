@@ -23,6 +23,12 @@ import java.util.*;
 class Location
 {
     static double latitude, longitude, elevation;
+    long seed = 10000;
+    Random r;
+
+    public Location() {
+      r = new Random(seed);
+    }
 
     public static void initialize(double latitude, double longitude, double elevation)
     {
@@ -34,8 +40,18 @@ class Location
         return;
     }
 
-    public double getLat() {return latitude;}
-    public double getLong() {return longitude;}
+    public double getLat() {
+
+        double d =	r.nextDouble();
+        latitude = latitude + (d - 0.5) ;
+        return latitude ;
+    }
+    public double getLong() {
+
+        double d =	r.nextDouble();
+        longitude = longitude + (d - 0.5);
+        return longitude;
+    }
     public double getElev() {return elevation;}
 
 }
@@ -256,7 +272,7 @@ public class Main
     {
         String hostname = "localhost:3333";
         String portName = "/dev/tty.KeySerial1";
-        String srcName = "ADXL-RBNB Accelerometer";
+        String srcName = "ADXL-RBNB-GEO";
         String[] chanNames = {"X", "Y", "Lat", "Lon", "Alt"};
         int[] chanIdx = {0, 1};
         double[] vals = {0, 0};
