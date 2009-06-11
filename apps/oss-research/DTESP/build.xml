@@ -1,0 +1,102 @@
+<?xml version="1.0"?>
+
+<!-- build.xml from Ant book pfh 4/8/04 -->
+<project default="jar" basedir=".">
+
+<property name="package.name" value="dtesp" />
+<property file="build.properties"/>
+
+<!-- src dir -->
+<property name="src.dir" value="src"/>
+
+<!-- documentation directory -->
+<property name="doc.dir" value="docs"/>
+
+<!-- environment access via env.* -->
+<property environment="env"/>
+	
+<!-- temp build dir -->
+<property name="build.dir" value="compile"/>
+<property name="build.classes" value="${build.dir}/classes"/>
+<property name="build.lib" value="${build.dir}/lib"/>
+<property name="lib.dir" value="${basedir}/lib"/>
+
+	
+
+
+<!-- classpath -->
+<path id="classpath">
+ <pathelement location="${java.home}/../lib/tools.jar"/>
+ <pathelement location="."/>
+ <pathelement location="${build.dir}"/>
+ 
+
+
+	
+ <fileset dir="${lib.dir}">
+   <include name="*.jar"/>
+ </fileset>
+
+
+ <pathelement path="${java.class.path}"/>
+ <fileset dir="${build.lib}">
+   <include name="*.jar"/>
+ </fileset>
+</path>
+ 
+<!-- target to make temp dirs -->
+<target name="prepare" description="Make directories">
+  <mkdir dir="${build.dir}"/>
+  <mkdir dir="${build.classes}"/>
+  <mkdir dir="${build.lib}"/>
+  <mkdir dir="${doc.dir}"/>
+</target>
+
+<target name="clean" description="Remove all generated files">
+  <delete dir="${build.dir}"/>
+</target>
+
+<!-- Build target -->
+<target name="compile" depends="prepare" description="Build from source">
+ <javac srcdir="${src.dir}" 
+        destdir="${build.classes}"
+        classpathref="classpath" debug="on">
+ </javac>
+</target>
+
+<!-- Doxygen target - all config in Doxyfile -->
+<target name="doxygen" depends="compile">
+  <exec executable="doxygen" failonerror="true"/>
+</target>
+
+<!-- javadoc target -->
+<target name="javadoc" depends="compile">
+    <javadoc packagenames="org.nees.ntcp.${package.name}"
+        sourcepath="${src.dir}"
+        destdir="${doc.dir}"
+        classpath="${ogsa.root}/lib/ntcp-server.jar"
+        author="true"
+        version="true"
+        use="true" />
+</target>
+
+<!-- Package (jar) target -->
+<target name="jar" depends="compile" description="Build dtesp.jar">
+  <jar jarfile="${build.lib}/${package.name}.jar" basedir="${build.classes}">
+    <include name="org/**" />
+    <include name="ts*"/>
+    <include name="*.xml" />
+    <include name="*.wsdd" />
+    <include name="*.class" />
+  </jar>
+</target>
+
+
+
+<!-- Run the client -->
+<target name="run" depends="jar" description="Run dtesp">
+ <java classpathref="classpath" classname="dtesp" />
+</target>
+
+
+</project>

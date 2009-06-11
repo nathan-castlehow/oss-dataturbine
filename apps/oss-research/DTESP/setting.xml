@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Setting>
+
+
+<RequestTime year="2009" month="4" date="10" hour="5" minute="57" second="0"></RequestTime>
+
+<Event name="Rain" field="rain"></Event>
+<Event name="Conductivity" field="conductivity"></Event>
+<Event name="Salinity" field="salinity"></Event>
+<Event name="Temperature" field="temperature"></Event>
+
+<Event name="Update" field="status"></Event>
+
+<Sink name="MCR" client="client" connection_string="iguassu.sdsc.edu:3333"></Sink>
+<SinkChannel name="Conductivity" 	sink="MCR" channel_string="MCR_Seacat_16plus/Conductivity" 	event="Conductivity"></SinkChannel>
+<SinkChannel name="Salinity" 		sink="MCR" channel_string="MCR_Seacat_16plus/Salinity" 		event="Salinity"	></SinkChannel>
+<SinkChannel name="Temperature" 	sink="MCR" channel_string="MCR_Seacat_16plus/Temperature" 	event="Temperature"	></SinkChannel>
+<SinkChannel name="Rain" 		sink="MCR" channel_string="Weather_Station/Rain_mm_Tot" 	event="Rain"		></SinkChannel>
+
+
+<Source name="source" client="client" connection_string="localhost"></Source>
+<SourceChannel name="LowSalinityRain" source="source" channel_string="MCR_Seacat_16plus_Event/LowSalinityRain" 	event="Update"></SourceChannel>
+<SourceChannel name="LowSalityHighTotalRain" source="source" channel_string="MCR_Seacat_16plus_Event/LowSalityHighTotalRain" 	event="Update"></SourceChannel>
+<SourceChannel name="SalinityQAQC1" source="source" 	channel_string="MCR_Seacat_16plus_Event/SalinityQAQC1" 		event="Update"></SourceChannel>
+<SourceChannel name="SalinityQAQC2" source="source" 	channel_string="MCR_Seacat_16plus_Event/SalinityQAQC2" 		event="Update"></SourceChannel>
+
+<Query query_string='insert into LowSalinityEvent select 36.5>salinity as status from Salinity'></Query>
+<Query query_string='insert into HighRainEvent    select avg(rain)>0   as status from Rain.win:time(5 min)'></Query>
+<Query query_string='insert into LowSalinityHighRainEvent select lse.status AND hre.status as status from LowSalinityEvent.std:lastevent() as lse, HighRainEvent.std:lastevent() as hre'></Query>
+<Query name="LowSalinityHighRainOn"		query_string="insert into LowSalinityHighRainForHourEvent select 1 as status from pattern [every LowSalinityHighRainEvent(status=true)-> timer:interval(4 min) and not LowSalinityHighRainEvent(status=true)]" 	event="Alarm" source_channel="LowSalinityRain"></Query>
+<Query name="LowSalinityHighRainOff" 	query_string="insert into LowSalinityHighRainForHourEvent select 0 as status from pattern [every LowSalinityHighRainForHourEvent(status=1)-> LowSalinityHighRainEvent(status=false)]" 					event="Alarm" source_channel="LowSalinityRain"></Query>
+
+
+
+<Query query_string="insert into RainWithTimestamp 	select *, current_timestamp as ts from Rain">            </Query>
+<Query query_string="insert into AccumulatedRain 	select prev(0,rain)*((prev(0, ts)-prev(1, ts))/1000/60) as rain from RainWithTimestamp.win:length(2) where prev(0, ts) is not null and prev(1, ts) is not null"> </Query>
+<Query query_string="insert into SalinityDelta 		select prev(0,salinity)-avg(salinity) as salinity from Salinity.win:time(7 day)">  </Query>
+<Query query_string="insert into TotalRainForADay	select sum(rain) as rain from AccumulatedRain.win:time(1 day)">          </Query>
+<Query query_string="insert into LowSalityHighTotalRain select (-0.2>salinity AND rain>100) as status from SalinityDelta.std:lastevent(), TotalRainForADay.std:lastevent()"></Query>
+<Query name="LowSalityHighTotalRainOn"   query_string="select 1 as status from pattern [LowSalityHighTotalRain(status=false) -> LowSalityHighTotalRain(status=true)]" event="Alarm" source_channel="LowSalityHighTotalRain"></Query>
+<Query name="LowSalityHighTotalRainOff"  query_string="select 0 as status from pattern [LowSalityHighTotalRain(status=true) -> LowSalityHighTotalRain(status=false)]" event="Alarm" source_channel="LowSalityHighTotalRain"></Query>
+
+
+
+<Query query_string="insert into AverageConductivityTemperature 		select avg(conductivity) as conductivity, avg(temperature) as temperature from Conductivity.win:time(10 min), Temperature.win:time(10 min) output every 5 min"></Query>
+<Query query_string="insert into ConductivityTemperatureRatioChange 	select (prev(1,conductivity)/prev(0,conductivity))*(prev(0,temperature)/prev(1,temperature)) as ratiochange from AverageConductivityTemperature.win:length(2) where prev(0, temperature) is not null and prev(1, temperature) is not null"></Query>
+<Query query_string="insert into ConductivityTemperatureRatioChangeEvent select (ratiochange>10 or 1/10>ratiochange) as status from ConductivityTemperatureRatioChange"></Query>
+<Query name="SalinityQAQC1On"   query_string="select 1 as status from pattern [ConductivityTemperatureRatioChangeEvent(status=false) -> ConductivityTemperatureRatioChangeEvent(status=true)]" event="Alarm" source_channel="SalinityQAQC1"></Query>
+<Query name="SalinityQAQC1Off"  query_string="select 0 as status from pattern [ConductivityTemperatureRatioChangeEvent(status=true) -> ConductivityTemperatureRatioChangeEvent(status=false)]" event="Alarm" source_channel="SalinityQAQC1"></Query>
+
+
+
+<Query query_string="insert into CTLowCorrelation select 0.5>correlation as status from AverageConductivityTemperature.stat:correl(conductivity, temperature)"></Query>
+<Query name="SalinityQAQC2On"   query_string="select 1 as status from pattern [CTLowCorrelation(status=false) -> CTLowCorrelation(status=true)]"  event="Alarm" source_channel="SalinityQAQC2"></Query>
+<Query name="SalinityQAQC2Off"  query_string="select 0 as status from pattern [CTLowCorrelation(status=true) -> CTLowCorrelation(status=false)]"  event="Alarm" source_channel="SalinityQAQC2"></Query>
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+</Setting>
