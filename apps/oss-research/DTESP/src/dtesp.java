@@ -422,13 +422,12 @@ public class dtesp {
 		 * Create from XML
 		 * (see fields)
 		 * attributes of xml:
-		 * name, query_string, event, and source_channel
+		 * name, query_string, and source_channel
 		 */
 		public QueryItem(Element e,dtesp ts) 
 		{
 			name						=						e.getAttribute("name");
 			query_string				=						e.getAttribute("query_string");
-			event_item					=ts.GetEvent		(	e.getAttribute("event"));
 			source_channel_item			=ts.GetSourceChannel(	e.getAttribute("source_channel"));
 		}	
 		
@@ -436,12 +435,10 @@ public class dtesp {
 		{
 			name				=name_;
 			query_string		=query_string_;
-			event_item			=event_item_; 
 			source_channel_item	=source_channel_item_;
-		}
+		}    
 		String				name;
 		String 				query_string;
-		EventItem 			event_item;
 		SourceChannelItem 	source_channel_item;
 	};		
 
@@ -674,7 +671,6 @@ public class dtesp {
     {
     	SourceChannelItem 	source_channel_item;
     	dtesp				dtesp_;
-        
 
 
         public EsperEventListener(SourceChannelItem sci, dtesp dtesp__)
@@ -919,8 +915,10 @@ public class dtesp {
         		 */
         		public int PopFirstChannelIndex()
         		{
-        			time_list.pop();
-        			return index_list.pop();
+        			time_list.removeFirst();
+        			int index=index_list.getFirst();
+        			index_list.removeFirst();
+        			return index;
         		}
         		
         		public boolean IsEmpty()
