@@ -1,19 +1,8 @@
 
 
 
-import java.text.DateFormat;
 import java.util.*;
 import com.rbnb.sapi.*;
-import java.io.*;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
-import org.xml.sax.SAXException;
 
 
 import com.espertech.esper.client.*;
@@ -32,538 +21,40 @@ public class dtesp {
 	 */
 	public static void main(String args[])
 	{
+		
 		dtesp sink=new dtesp();
+		DTESPConfigObjCreator coc=new DTESPConfigObjCreator();  
+		
+		sink.SetConfigObj(coc.CreateFromXml("setting.xml"));
 		sink.run();
 	}
 	
-
+	
 	/**
-	 * Load XML setting file
-	 * 	 * @param fn - filename
-	 * 
+	 * Configuration obj
 	 */
-	protected void LoadXml(String fn)
-	{
-		Document dom=null;
-		
-
-		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-
-		try {
-
-			//Using factory get an instance of document builder
-			DocumentBuilder db = dbf.newDocumentBuilder();
-
-			//parse using builder to get DOM representation of the XML file
-			dom = db.parse(fn);
-
-
-		}catch(ParserConfigurationException pce) {
-			pce.printStackTrace();
-		}catch(SAXException se) {
-			se.printStackTrace();
-		}catch(IOException ioe) {
-			ioe.printStackTrace();
-		}
+	DTESPConfigObj config_obj;
 	
-		Element docEle = dom.getDocumentElement();
-		
-		NodeList nl ;
-		
 
-		// Start parsing nodes
-		nl = docEle.getElementsByTagName("Setting");
-		if(nl != null && nl.getLength() > 0) 
-			for(int i = 0 ; i < nl.getLength();i++) SetEnvironment((Element)nl.item(i));
-		
-		
-		nl = docEle.getElementsByTagName("RequestTime");
-		if(nl != null && nl.getLength() > 0) 
-			for(int i = 0 ; i < nl.getLength();i++) SetTime((Element)nl.item(i));
-
-		
-		nl = docEle.getElementsByTagName("Source");
-		if(nl != null && nl.getLength() > 0) 
-			for(int i = 0 ; i < nl.getLength();i++) AddSource(new SourceItem((Element)nl.item(i)));
-		
-		nl = docEle.getElementsByTagName("Sink");
-		if(nl != null && nl.getLength() > 0) 
-			for(int i = 0 ; i < nl.getLength();i++) AddSink(new SinkItem((Element)nl.item(i)));
-		
-		nl = docEle.getElementsByTagName("Event");
-		if(nl != null && nl.getLength() > 0) 
-			for(int i = 0 ; i < nl.getLength();i++) AddEvent(new EventItem((Element)nl.item(i)));
-
-		nl = docEle.getElementsByTagName("SinkChannel");
-		if(nl != null && nl.getLength() > 0) 
-			for(int i = 0 ; i < nl.getLength();i++) AddSinkChannel(new SinkChannelItem((Element)nl.item(i),this));
-
-		nl = docEle.getElementsByTagName("SourceChannel");
-		if(nl != null && nl.getLength() > 0) 
-			for(int i = 0 ; i < nl.getLength();i++) AddSourceChannel(new SourceChannelItem((Element)nl.item(i),this));
-
-		nl = docEle.getElementsByTagName("Query");
-		if(nl != null && nl.getLength() > 0) 
-			for(int i = 0 ; i < nl.getLength();i++) AddQuery(new QueryItem((Element)nl.item(i),this));
-		
+	
+	public void SetConfigObj(DTESPConfigObj co)
+	{
+		config_obj=co;
 	}
-	
-	
-	
-	/**
-	 * <pre>
-	 *  set environment from xml file 
-	 *  tag <Setting>
-	 *  
-	 *  Attributes:
-	 *   esper_time_granuality_minute: 	maximum time step esper can advance at once (in minutes)
-	 *   esper_time_granuality_sec:     maximum time step esper can advance at once (in sec)
-	 */
-	protected void SetEnvironment(Element e)
-	{
-		try
-		{
-			maximum_time_granuality=new Integer(e.getAttribute("esper_time_granuality_minute"))*60*1000;
-		}		catch (Exception e_) {}
-		
-		try
-		{
-			maximum_time_granuality=new Integer(e.getAttribute("esper_time_granuality_sec"))*1000;
-		}		catch (Exception e_) {}
-	
-	}
-	
-	/**
-	 * <pre>
-	 *  Set time of data want to retrieve from xml file
-	 *  Tag <Requesttime> 
-	 *  
-	 *  Example: 4/10/2009 AM 5:57:0
-	 *  <RequestTime year="2009" month="4" date="10" hour="5" minute="57" second="0"></RequestTime>
-	 *  
-	 *  Attributes:
-	 *  request_time_window_min: length of data window to be requested for one fetch instruction in minutes   
-	 */
-	protected void SetTime(Element e)
-	{
-    	Calendar c=new GregorianCalendar();
-    	c.clear();
-    	
-		try
-		{
-			int t= 	new Integer(e.getAttribute("year"));
-			c.set(Calendar.YEAR,t);
-		}		catch (Exception e_) {}
-		
-		try
-		{
-			int t= 	new Integer(e.getAttribute("month"));
-			c.set(Calendar.MONTH,t-1);
-		}		catch (Exception e_) {}
-
-		try
-		{
-			int t= 	new Integer(e.getAttribute("date"));
-			c.set(Calendar.DATE,t);
-		}		catch (Exception e_) {}
-		
-		try
-		{
-			int t= 	new Integer(e.getAttribute("hour"));
-			c.set(Calendar.HOUR,t);
-		}		catch (Exception e_) {}
-
-		try
-		{
-			int t= 	new Integer(e.getAttribute("minute"));
-			c.set(Calendar.MINUTE,t);
-		}		catch (Exception e_) {}
-
-		try
-		{
-			int t= 	new Integer(e.getAttribute("second"));
-			c.set(Calendar.SECOND,t);
-		}		catch (Exception e_) {}
-
-		try
-		{
-			int t= 	new Integer(e.getAttribute("request_time_window_min"));
-			request_duration=t*60;
-		}		catch (Exception e_) {}
-		
-		
-		request_start=c.getTimeInMillis()/1000;
-		bRealTime=false;
-		DateFormat df=DateFormat.getInstance();
-		
-    	System.out.println("Requested time "+df.format(c.getTime()));
-
-	}
-	
-	
-	/**
-	 * <pre>
-	 * Data structure to save a configuration of a sink (DT server)
-	 * fields
-	 *   name- name of the sink
-	 *   sink- sink class created for this sink
-	 *   connection_string- string used for connection
-	 *   channel_item_list- list of sink channel configurations 
-	 */	
-	protected class 			SinkItem
-	{
-		
-		/**
-		 * <pre>
-		 * Parse from xml file.
-		 * 
-		 *   attributes:
-		 *   name
-		 *   client
-		 *   connection_string
-		 */
-		public SinkItem(Element e) 
-		{
-			name= 				e.getAttribute("name");
-			client=				e.getAttribute("client");
-			connection_string=	e.getAttribute("connection_string");
-		}		
-		
-		public SinkItem(String name_, String client_, String connection_string_)
-		{
-			name= name_;
-			client=client_;
-			connection_string=connection_string_;
-		}
-		
-		public void AddChannel(SinkChannelItem sci)
-		{
-			channel_item_list.add(sci);
-		}
-		String					name;
-		String					client;
-		Sink          			sink;
-	    String					connection_string;
-	    ChannelMap				cmap;
-	    List<SinkChannelItem>	channel_item_list= new LinkedList<SinkChannelItem>();		
-	};
-	
-	
-	/**
-	 * <pre>
-	 * Data structure to save a configuration of a sink channel
-	 * fields
-	 *   name- name of the channel
-	 *   sink- sink class owns this channel (initialized with string id of sink)
-	 *   channel_string- name of channel to be used for connection 
-	 *   event- name of esper event associated with the channel 
-	 */	
-	protected class 			SinkChannelItem
-	{
-		/**
-		 * <pre>
-		 * Parse from xml file.
-		 *
-		 *   attributes of xml:
-		 *   name- name of the channel
-		 *   sink- name of the sink
-		 *   channel_string- name of channel 
-		 *   event- name of esper event associated with the channel 
-		 */		
-		public SinkChannelItem(Element e, dtesp ts) 
-		{
-			name				=				e.getAttribute("name");
-			channel_string		=				e.getAttribute("channel_string");
-			
-			SinkItem si			=ts.GetSink(	e.getAttribute("sink"));
-			si.AddChannel(this);
-			sink_item=si;
-			event_item			=ts.GetEvent(	e.getAttribute("event"));
-		}		
-		
-		/**
-		 * Creating explicitly specifying parameters
-		 */
-		public SinkChannelItem(String name_, SinkItem si, String channel_string_, EventItem event_item_)
-		{
-			name= name_;
-			si.AddChannel(this);
-			sink_item=si;
-			channel_string	=channel_string_;
-			event_item		=event_item_;
-		}
-		String			name;
-		String			channel_string;
-		SinkItem		sink_item;
-	    EventItem 		event_item;
-	    double			last_data_time=-1;
-	};
-	
-	/**
-	 * <pre>
-	 * Data structure to save a configuration of a source (DT server)
-	 * fields
-	 *   name- name of the channel
-	 *   client- name of this client
-	 *   source- source class (initialized with string id of source)
-	 *   connection_string- connection string to be used for connection 
-	 *   cmap- channel map class to be used with this source 
-	 */	
-	protected class 			SourceItem
-	{
-		/**
-		 * Create from xml
-		 * attributes of xml(see fields):
-		 * 		name, client, and connection_string
-		 */
-		public SourceItem(Element e) 
-		{
-			name= 					e.getAttribute("name");
-			client=					e.getAttribute("client");
-			connection_string=		e.getAttribute("connection_string");
-		}		
-		
-		/**
-		 * Create explicitly 
-		 */
-		public SourceItem(String name_, String client_, String connection_string_)
-		{
-			name= name_;
-			client=client_;
-			connection_string=connection_string_;
-		}
-		String				name;
-		String				client;
-		Source          	source;
-	    String				connection_string;
-	    ChannelMap			cmap;
-	};
-	
-	/**
-	 * <pre>
-	 * Data structure to save a configuration of a source channel
-	 * fields
-	 *   name- name of the channel
-	 *   source_item- the source configuration class (initialized with string id)
-	 *   channel_string- string to connect this channel 
-	 *   channel_index- channel index associated with source (initialized when connected)
-	 *   event_item - configuration of an event associated with this channel (initialized with string id)
-	 */		
-	protected class 			SourceChannelItem
-	{
-		/**
-		 * <pre>
-		 * Create from XML file
-		 * (see fields)
-		 * attributes of xml:
-		 * name, channel_string, source, and event
-		 */
-		
-		public SourceChannelItem(Element e, dtesp ts) 
-		{
-			name				=				e.getAttribute("name");
-			channel_string		=				e.getAttribute("channel_string");
-			
-			source_item			=ts.GetSource(	e.getAttribute("source"));
-			event_item			=ts.GetEvent(	e.getAttribute("event"));
-		}		
-				
-		/**
-		 * Create explicitly
-		 */
-		public SourceChannelItem(String name_, SourceItem source_item_, String channel_string_, EventItem event_item_)
-		{
-			name= name_;
-			channel_string	=channel_string_;
-			source_item		=source_item_;
-			event_item		=event_item_;
-		}
-		String				name;
-		String				channel_string;
-	    EventItem	 		event_item;
-	    SourceItem         	source_item;	  
-	    int					channel_index;
-	};	
-
-	/**
-	 * <pre>
-	 * Data structure to save a configuration of a event
-	 * fields
-	 *   name- name of the event
-	 *   field- name of the field to be used in esper
-	 */		
-	protected class 			EventItem
-	{
-		public EventItem(Element e) 
-		{
-			name				=e.getAttribute("name");
-			field				=e.getAttribute("field");
-		}		
-						
-		public EventItem(String name_, String field_)
-		{
-			name	=name_;
-			field	=field_;
-		}
-		String				name;
-		String				field;
-	};	
-	
-	/**
-	 * <pre>
-	 * Data structure to save a configuration of a esper query
-	 * fields
-	 *   name- name of the channel
-	 *   query_string- esper query string
-	 *   event_item- output event of query 
-	 */		
-	protected class 			QueryItem
-	{
-		/**
-		 * Create from XML
-		 * (see fields)
-		 * attributes of xml:
-		 * name, query_string, and source_channel
-		 */
-		public QueryItem(Element e,dtesp ts) 
-		{
-			name						=						e.getAttribute("name");
-			query_string				=						e.getAttribute("query_string");
-			source_channel_item			=ts.GetSourceChannel(	e.getAttribute("source_channel"));
-		}	
-		
-		public QueryItem(String name_,String query_string_, EventItem event_item_, SourceChannelItem source_channel_item_)
-		{
-			name				=name_;
-			query_string		=query_string_;
-			source_channel_item	=source_channel_item_;
-		}    
-		String				name;
-		String 				query_string;
-		SourceChannelItem 	source_channel_item;
-	};		
-
-	
-	/**
-	 * List of source configuration(SourceItem)
-	 */
-	HashMap<String, SourceItem> 		hmap_source_item			= new HashMap<String, SourceItem>();
-	/**
-	 * List of sink configuration(SinkItem)
-	 */
-	HashMap<String, SinkItem> 			hmap_sink_item				= new HashMap<String, SinkItem>();			
-	/**
-	 * List of source channel configuration(SourceChannelItem)
-	 */
-	HashMap<String, SourceChannelItem> 	hmap_source_channel_item	= new HashMap<String, SourceChannelItem>();
-	/**
-	 * List of sink channel configuration(SinkChannelItem)
-	 */
-	HashMap<String, SinkChannelItem> 	hmap_sink_channel_item		= new HashMap<String, SinkChannelItem>();
-	/**
-	 * List of event configuration(EventItem)
-	 */
-	HashMap<String, EventItem>			hmap_event_item				= new HashMap<String, EventItem>();
-	/**
-	 * List of query configuration(QueryItem)
-	 */
-	List<QueryItem>						list_query_item				= new LinkedList<QueryItem>();
-	
-	
-	/**
-	 * Add source configuration to list
-	 */
-	public SourceItem AddSource(SourceItem si)
-	{
-		hmap_source_item.put(si.name, si);
-		return si;
-	}
-	/**
-	 * Retrieve source by its name 
-	 */
-	public SourceItem GetSource(String name)
-	{
-		return hmap_source_item.get(name);
-	}
-
-	/**
-	 * Add sink configuration to list
-	 */
-	public SinkItem AddSink(SinkItem si)
-	{
-		hmap_sink_item.put(si.name, si);
-		return si;
-	}
-	/**
-	 * Retrieve sink by its name 
-	 */
-	public SinkItem GetSink(String name)
-	{
-		return hmap_sink_item.get(name);
-	}
-	
-	/**
-	 * Add source channel configuration to list
-	 */	
-	public dtesp AddSourceChannel(SourceChannelItem sci)
-	{
-		hmap_source_channel_item.put(sci.name, sci);
-		return this;
-	}
-	
-	/**
-	 * Add sink channel configuration to list
-	 */	
-	public dtesp AddSinkChannel(SinkChannelItem sci)
-	{
-		hmap_sink_channel_item.put(sci.name, sci);
-		return this;
-	}
-	
-	/**
-	 * Retrieve source channel by its name 
-	 */	
-	public SourceChannelItem	GetSourceChannel(String name)
-	{
-		return hmap_source_channel_item.get(name);
-	}
-	/**
-	 * Add event configuration to list
-	 */	
-	public dtesp AddEvent(EventItem ei)
-	{
-		hmap_event_item.put(ei.name, ei);
-		return this;
-	}
-	/**
-	 * Retrieve event channel by its name 
-	 */	
-	public EventItem GetEvent(String name)
-	{
-		return hmap_event_item.get(name);
-	}
-	/**
-	 * Add query configuration to list
-	 */	
-	public dtesp AddQuery(QueryItem qi)
-	{
-		list_query_item.add(qi);
-		return this;
-	}
-	
-	
-
+	 
     
 /**
+ * <pre>
  * Start service
- * 1. Loads XML
- * 2. Initialize data turbine
- * 3. Initialize Esper
- * 4. Start Fetching data 
+ *  
+ * !Do SetConfigObj before you run!
+ * 
+ * 1. Initialize data turbine
+ * 2. Initialize Esper
+ * 3. Start Fetching data 
  */
     public void run()
     {
-    	LoadXml("setting.xml");
     	Init_DT();
     	Init_Esper();
     	Fetch();
@@ -578,7 +69,7 @@ public class dtesp {
     	
         
         // Create source
-        for (SourceItem s : hmap_source_item.values())
+        for (SourceItem s : config_obj.hmap_source_item.values())
         {
         	System.out.println("Connecting Source "+s.name+": "+s.connection_string);
 	        try
@@ -600,7 +91,7 @@ public class dtesp {
         
 
         // Attach source channel
-        for (SourceChannelItem c:hmap_source_channel_item.values())
+        for (SourceChannelItem c:config_obj.hmap_source_channel_item.values())
         {
         	System.out.println("Adding SourceChannel "+c.name+": "+c.channel_string);        	
 	        try 
@@ -616,7 +107,7 @@ public class dtesp {
 
      
         // Create sink        
-        for (SinkItem s : hmap_sink_item.values())
+        for (SinkItem s : config_obj.hmap_sink_item.values())
         {
         	System.out.println("Connecting Sink "+s.name+": "+s.connection_string);
 	        try
@@ -642,7 +133,7 @@ public class dtesp {
 			        	System.out.println("Adding SinkChannel"+c.name+": "+c.channel_string);
 			        	s.cmap.Add(c.channel_string);
 			        }
-			        if (bRealTime)
+			        if (config_obj.bRealTime)
 			        	// if realtime subscribe
 			        	s.sink.Subscribe(s.cmap);
 
@@ -697,7 +188,7 @@ public class dtesp {
     	    try
     	    {
 	    	    data[0] = v ;
-				if (dtesp_.bRealTime)
+				if (dtesp_.config_obj.bRealTime)
 	    	    	// if real time
 	    	    	output_cmap.PutTimeAuto("timeofday");
 	    	    else
@@ -731,35 +222,21 @@ public class dtesp {
      *  Esper runtime object
      */
 	public EPRuntime 			epRuntime;
+
 	
-	
-    /** 
-     *  If this is true, esper will process data in real time. Time stamp from data turbine will be discarded, and time of running this application will be used.
-     *  If data of certain time is requested, then set to false;
-     */	
-	public boolean bRealTime=true;
-	
-    /** 
+	/** 
      *  Start time of the request
      */	
-	double request_start;
-    /** 
-     *  Data duration for one fetch
-     */	
-	double request_duration=60; // 1 min
+	double current_request_start;
     /** 
      * Last time of esper we set 
      */	
 	long last_saved_esper_time;
-    /** 
-     * maximum of time advancement for esper
-     * 
-     *   Example:
-     *   Current esper time is 0 sec. maximum_time_granuality is .5 sec. Next data came at 2 sec. 
-     *   Then, esper time will be set at .5 sec, 1 sec, 1.5 sec, and 2 sec.
-     */	
-	long maximum_time_granuality=60000; // 1 min
 	
+    /** 
+     * until when all input channel has been received 
+     */	
+	double time_all_channel_received;
 
     /** 
      * <pre>Initialize esper
@@ -775,19 +252,20 @@ public class dtesp {
 		epRuntime = epService.getEPRuntime();
 		
 		// (If not real time)Set esper time
-		if (!bRealTime)
+		if (!config_obj.bRealTime)
 		{
+			current_request_start=config_obj.request_start;
 			// external time mode
 			epRuntime.sendEvent(new TimerControlEvent(TimerControlEvent.ClockType.CLOCK_EXTERNAL));
 
 			// esper time = time of requested data 
-			last_saved_esper_time=new Double(request_start*1000).longValue();
+			last_saved_esper_time=new Double(current_request_start*1000).longValue();
 			epRuntime.sendEvent(new CurrentTimeEvent(last_saved_esper_time));
 			
 		}
 
 		// Register event that will be sent to esper
-		for (EventItem ei:hmap_event_item.values())
+		for (EventItem ei:config_obj.hmap_event_item.values())
 		{		
         	System.out.println("Creating Event "+ei.name+": field "+ei.field);
 			
@@ -797,7 +275,7 @@ public class dtesp {
 		}
 		
 		// Create query and register listener if we want to 
-		for (QueryItem qi:list_query_item)
+		for (QueryItem qi:config_obj.list_query_item)
 		{		
         	System.out.println("Adding Query "+qi.name+": "+qi.query_string);
 			EPStatement statement = epService.getEPAdministrator().createEPL(qi.query_string);
@@ -810,6 +288,54 @@ public class dtesp {
     }
         
 
+    void SetTimeAllChannelReceived() throws SAPIException
+    {
+        for (SinkItem s : config_obj.hmap_sink_item.values())
+	        if (!s.channel_item_list.isEmpty())
+		        s.sink.Request(s.cmap, 0,0, "newest");
+	        
+		
+	    time_all_channel_received=-1;
+	    Boolean received_from_all_channel=true;
+		// fetch from all the channel
+		for (SinkItem s:config_obj.hmap_sink_item.values())
+		{
+			ChannelMap outmap = s.sink.Fetch(1000);
+	
+			if (outmap.GetIfFetchTimedOut())
+			{
+	        	received_from_all_channel=false;
+	        	continue;
+			}
+	    
+			for (SinkChannelItem c:s.channel_item_list)
+			{
+	            int chanIdx = outmap.GetIndex(c.channel_string);
+	           
+	            if(chanIdx >= 0)
+	            {
+	                double[] data_time;
+	                data_time = outmap.GetTimes(chanIdx);
+	                
+	                
+	                // set to lastest time
+	                if (c.last_data_time<=data_time[0])
+	                	c.last_data_time=data_time[0];
+	
+	                if (time_all_channel_received<=data_time[0] || time_all_channel_received==-1)
+	                	time_all_channel_received=data_time[0];                
+	            }
+	            else
+	            	received_from_all_channel=false;
+			}
+		}
+			
+		if (!received_from_all_channel)
+			time_all_channel_received=-1;
+    }
+    	
+
+    
 
     /** 
      * <pre>Main loop for fetching data\n
@@ -839,109 +365,7 @@ public class dtesp {
             System.out.println("Waiting for data...");
   
             
-            /**
-             * 
-             * Temporary class needed for processing data in time order
-             * This represents time stamped data received from a channel. 
-             * 
-             */
-        	class ReceivedDataFromChannel
-        	{
-        		SinkChannelItem		sink_channel;
-        		double[] data;						// data received from one fetch in a channel
-        		double[] data_time;					// time stamp associated with it
-        		int index=0;						// how many data has been sent?
-        		
-        		// have we sent all?
-        		boolean bIsempty()
-        		{
-        			if (index>=data.length) return false;
-        			return true;
-        		}
-        		
-        		
-        		double	GetLastTime()			{return data_time[data_time.length-1];}
-        		
-        		double 	GetData()       		{return data[index];}
-        		double 	GetTime()       		{return data_time[index];}
-        		void 	Next()        			{index++;}						// get next data
-        		void 	Clear()					{index=0; data=null; data_time=null;}
-        	};    
         	
-        	
-            /**
-             * 
-             * Temporary class needed for processing data in time order
-             * This implements a sorted linked list of time and ReceivedDataFromChannel pair in time order.
-             * So first node will be ReceivedDataFromChannel class with earliest data.
-             * We add all the first data and ReceivedDataFromChannel class into the sorted linked list. 
-             * And we process data in the channel whose index is first node in the sorted linked list. 
-             * 
-             */
-        	
-        	class ReceivedDataSortedByTime
-        	{
-        		LinkedList<Double>	time_list	=new LinkedList<Double>();		// sorted linked list of time in ascending order of time
-        		LinkedList<ReceivedDataFromChannel>	rd_list	=new LinkedList<ReceivedDataFromChannel>();		// sorted linked list of ReceivedDataFromChannel in ascending order of time 
-        		
-        		public void Clear()
-        		{
-        			rd_list.clear();
-        			time_list.clear();
-        		}
-        		
-        		/**
-        		 * Add time and index. List will be sorted in time order
-        		 * @param time       time
-        		 * @param ReceivedDataFromChannel     ReceivedDataFromChannel class that represents data from a channel
-        		 */
-        		public void Add(double time, ReceivedDataFromChannel rd)
-        		{
-        			int index=0;
-        			ListIterator<Double> iter			=time_list.listIterator();
-        			ListIterator<ReceivedDataFromChannel> iter_rd	=rd_list.listIterator();
-        			for (;iter.hasNext();)
-        			{
-        				iter_rd.next();
-        				if (time<iter.next())
-        				{
-        					iter.previous();
-        					iter_rd.previous();
-        					
-        					iter.add(time);
-        					iter_rd.add(rd);
-        					return;
-        				}
-        			index++;
-        			}
-					time_list.addLast(time);
-					rd_list.addLast(rd);
-        		}
-        	
-        		/**
-        		 * Return the ReceivedDataFromChannel whose data is earliest
-        		 * @return channel index
-        		 */
-        		public ReceivedDataFromChannel GetFirstRd()
-        		{
-        			ReceivedDataFromChannel rd=rd_list.getFirst();
-        			return rd;
-        		}
-        		
-        		public void RemoveFirst()
-        		{
-        			rd_list.removeFirst();
-        			time_list.removeFirst();
-        		}
-
-        		
-        		
-        		
-        		public boolean IsEmpty()
-        		{
-        			return time_list.isEmpty();
-        		}
-        	};
             
 //        	Vector<ReceivedDataFromChannel> list_received_data 		= new Vector<ReceivedDataFromChannel>();
         	ReceivedDataSortedByTime sorted_rd_list			= new ReceivedDataSortedByTime();
@@ -950,43 +374,61 @@ public class dtesp {
 
 
 
-            // count of how channel has been received 
-//            int recieved_channel_count;
-            
+        	if (!config_obj.bRealTime)
+        		SetTimeAllChannelReceived();
+        	int retry_times=0;
+        	double next_request_start=0;
+        	
             
             while (true) 
             {
-     	
-            	// we request data at certain point if we are not doing in real time
-            	if (!bRealTime)
-	                for (SinkItem s : hmap_sink_item.values())
-	        	        if (!s.channel_item_list.isEmpty())
-	        	        {
-	        		        try 
-	        		        {
-	        			        for (SinkChannelItem c:s.channel_item_list)
-	        			        {
-	        			        	s.cmap.Add(c.channel_string);
-	        			        }
-	        			        s.sink.Request(s.cmap, request_start,request_duration, "absolute");
-	        		        }
-	        		        catch (SAPIException se) 
-	        		        {
-	        		            System.out.println("Error requsting channel!");
-	        		            return;
-	        		        }
-	        	        }
-	        	        
-                
+            	// request data for next window if not subscribe
+            	if (!config_obj.bRealTime)
+            	{
+		        	//fetch only until all the data is received
+		        	double duration=config_obj.request_duration;
+		        	if (current_request_start+config_obj.request_duration>time_all_channel_received)
+		        	{
+		        		duration=time_all_channel_received-current_request_start;
+		        	}
+	        		next_request_start=current_request_start+duration;
+		        	
+		        	
+		        	// if no data to fetch
+		        	if (duration<=0)
+		        	{
+		        		retry_times++;
+		        		if (retry_times>1)
+		        		{
+		        			// sleep 100 ms before finding out the last time of all channels again
+		        			retry_times=1;
+		        			try
+		        			{
+		        				Thread.sleep(100);
+		        			}
+		        			catch (Exception e)
+		        			{
+		        			}
+		        		}
+		        		
+		        		// finding out the last time of all channels
+		        		SetTimeAllChannelReceived();
+		        		continue;
+		        	}
+		        	else
+		        		retry_times=0;
 
-//            	sorted_rd_list.Clear();
-//            	recieved_channel_count=0;
-            	
-          	
+		        	// we request data
+	                for (SinkItem s : config_obj.hmap_sink_item.values())
+	        	        if (!s.channel_item_list.isEmpty())
+       			        	s.sink.Request(s.cmap, current_request_start,duration, "absolute");
+	        	        
+            		sorted_rd_list.Clear();
+            	}
             	
             	
             	// fetch all the data
-            	for (SinkItem s:hmap_sink_item.values())
+            	for (SinkItem s:config_obj.hmap_sink_item.values())
             	{
             		ChannelMap outmap = s.sink.Fetch(1000);
             		
@@ -1005,7 +447,6 @@ public class dtesp {
     	                    data = outmap.GetDataAsFloat64(chanIdx);
     	                    data_time = outmap.GetTimes(chanIdx);
     	                    
-    	                    // used ReceivedDataFromChannel instance from already created pool
     	                    ReceivedDataFromChannel rd= new ReceivedDataFromChannel();
     	                    
     	                    rd.sink_channel=c;
@@ -1015,10 +456,10 @@ public class dtesp {
     	                    // add the earliest time of data of the channel and it's index
     	                    sorted_rd_list.Add(rd.GetTime(), rd);
     	                    
-//    	                    recieved_channel_count++;
     	                    
-    	                    
-    	                    c.last_data_time=rd.GetLastTime();
+    	                    if (c.last_data_time<=rd.GetLastTime())
+    	                    	c.last_data_time=rd.GetLastTime();
+
     	                }
     	               
             		}
@@ -1026,11 +467,6 @@ public class dtesp {
             	}
             	
             	
-            	double time_all_channel_received=-2;
-            	for (SinkItem s:hmap_sink_item.values())
-            		for (SinkChannelItem c:s.channel_item_list)
-            			if (time_all_channel_received>c.last_data_time || time_all_channel_received==-2)
-            				time_all_channel_received=c.last_data_time;
             	
             	
             	
@@ -1047,21 +483,22 @@ public class dtesp {
             		double data_time=rd.GetTime();
             		SinkChannelItem c=rd.sink_channel;
             		
-            		
+                    if (data_time>time_all_channel_received && config_obj.bRealTime)
+                    {
+                    	System.out.println("!declined DT "+ c.name +" : " + data+ " @ " + current_request_start+ " "+ data_time);
+                    	break;
+                    }
+
+                    sorted_rd_list.RemoveFirst();
+
             		//to eliminate duplicated data from last request
-                    if (data_time==request_start) continue;
+                    if (data_time==current_request_start)        	continue;
                     
 
                     
-                    if (data_time>time_all_channel_received && bRealTime)
-                    {
-                    	System.out.println("!declined DT "+ c.name +" : " + data+ " @ " + request_start+ " "+ data_time);
-                    	break;
-                    }
                                         
-                    sorted_rd_list.RemoveFirst();
                     
-                    System.out.println("DT "+ c.name +" : " + data+ " @ " + request_start+ " "+ data_time);
+                    System.out.println("DT "+ c.name +" : " + data+ " @ " + current_request_start+ " "+ data_time);
 
                     // send new time to esper 
                     
@@ -1071,12 +508,12 @@ public class dtesp {
                     {
                     	// to make time advancement less than maximum time granuality 
                     	long time_advancement=l_data_time-last_saved_esper_time;
-                    	if (time_advancement>maximum_time_granuality)
+                    	if (time_advancement>config_obj.maximum_time_granuality)
                     	{
                     		long temp_time=last_saved_esper_time;
-                    		for (;temp_time+maximum_time_granuality<data_time;)
+                    		for (;temp_time+config_obj.maximum_time_granuality<data_time;)
                     		{
-                    			temp_time+=maximum_time_granuality;
+                    			temp_time+=config_obj.maximum_time_granuality;
                     			// advance time according to maximum_time_granuality 
                             	epRuntime.sendEvent(new CurrentTimeEvent(temp_time));
                     		}
@@ -1105,9 +542,9 @@ public class dtesp {
             	}    
                 	
             	
-            	if (!bRealTime)
+            	if (!config_obj.bRealTime)
             	{
-            		request_start+=request_duration;
+            		current_request_start=next_request_start;
             	}
             		
             		
@@ -1117,13 +554,14 @@ public class dtesp {
             System.out.println("Error reading data!");
         }
 
+
         // close connection
-        for (SourceItem si:hmap_source_item.values())
+        for (SourceItem si:config_obj.hmap_source_item.values())
         {
         	if (si.source.VerifyConnection())
         		si.source.CloseRBNBConnection();
         }
-        for (SinkItem si:hmap_sink_item.values())
+        for (SinkItem si:config_obj.hmap_sink_item.values())
         {
         	if (si.sink.VerifyConnection())
         		si.sink.CloseRBNBConnection();
