@@ -296,6 +296,7 @@ public class dtesp {
 		String			channel_string;
 		SinkItem		sink_item;
 	    EventItem 		event_item;
+	    double			last_data_time=-1;
 	};
 	
 	/**
@@ -736,7 +737,7 @@ public class dtesp {
      *  If this is true, esper will process data in real time. Time stamp from data turbine will be discarded, and time of running this application will be used.
      *  If data of certain time is requested, then set to false;
      */	
-	public boolean bRealTime;
+	public boolean bRealTime=true;
 	
     /** 
      *  Start time of the request
@@ -771,12 +772,11 @@ public class dtesp {
     protected void Init_Esper()
     {
 		epService = EPServiceProviderManager.getDefaultProvider();
+		epRuntime = epService.getEPRuntime();
 		
 		// (If not real time)Set esper time
 		if (!bRealTime)
 		{
-			epRuntime = epService.getEPRuntime();
-			
 			// external time mode
 			epRuntime.sendEvent(new TimerControlEvent(TimerControlEvent.ClockType.CLOCK_EXTERNAL));
 
@@ -826,6 +826,9 @@ public class dtesp {
      * 5. Send the earliest data in the sorted list to esper, and remove it. Add next data of the channel to the sorted list. Repeat from 4 until all the data is sent to esper. 
      * </pre> 
      */ 
+    
+    
+    
      
     protected void Fetch()
     {
@@ -856,6 +859,9 @@ public class dtesp {
         			return true;
         		}
         		
+        		
+        		double	GetLastTime()			{return data_time[data_time.length-1];}
+        		
         		double 	GetData()       		{return data[index];}
         		double 	GetTime()       		{return data_time[index];}
         		void 	Next()        			{index++;}						// get next data
@@ -866,60 +872,70 @@ public class dtesp {
             /**
              * 
              * Temporary class needed for processing data in time order
-             * This implements a sorted linked list of time and index pair in time order.
-             * So first node will be an index of channel with earliest data.
-             * We add all the first data and index pair of the channels into the sorted linked list. 
+             * This implements a sorted linked list of time and ReceivedDataFromChannel pair in time order.
+             * So first node will be ReceivedDataFromChannel class with earliest data.
+             * We add all the first data and ReceivedDataFromChannel class into the sorted linked list. 
              * And we process data in the channel whose index is first node in the sorted linked list. 
              * 
              */
         	
-        	class ChannelIndexSortedByTime
+        	class ReceivedDataSortedByTime
         	{
         		LinkedList<Double>	time_list	=new LinkedList<Double>();		// sorted linked list of time in ascending order of time
-        		LinkedList<Integer>	index_list	=new LinkedList<Integer>();		// sorted linked list of ReceivedDataFromChannel index in ascending order of time 
+        		LinkedList<ReceivedDataFromChannel>	rd_list	=new LinkedList<ReceivedDataFromChannel>();		// sorted linked list of ReceivedDataFromChannel in ascending order of time 
         		
         		public void Clear()
         		{
-        			index_list.clear();
+        			rd_list.clear();
         			time_list.clear();
         		}
         		
         		/**
         		 * Add time and index. List will be sorted in time order
         		 * @param time       time
-        		 * @param cindex     channel index
+        		 * @param ReceivedDataFromChannel     ReceivedDataFromChannel class that represents data from a channel
         		 */
-        		public void Add(double time, int cindex)
+        		public void Add(double time, ReceivedDataFromChannel rd)
         		{
         			int index=0;
         			ListIterator<Double> iter			=time_list.listIterator();
-        			ListIterator<Integer> iter_cindex	=index_list.listIterator();
+        			ListIterator<ReceivedDataFromChannel> iter_rd	=rd_list.listIterator();
         			for (;iter.hasNext();)
         			{
-        				iter_cindex.next();
+        				iter_rd.next();
         				if (time<iter.next())
         				{
+        					iter.previous();
+        					iter_rd.previous();
+        					
         					iter.add(time);
-        					iter_cindex.add(cindex);
+        					iter_rd.add(rd);
         					return;
         				}
         			index++;
         			}
 					time_list.addLast(time);
-					index_list.addLast(cindex);
+					rd_list.addLast(rd);
         		}
         	
         		/**
-        		 * Return the channel index whose data is earliest
+        		 * Return the ReceivedDataFromChannel whose data is earliest
         		 * @return channel index
         		 */
-        		public int PopFirstChannelIndex()
+        		public ReceivedDataFromChannel GetFirstRd()
         		{
-        			time_list.removeFirst();
-        			int index=index_list.getFirst();
-        			index_list.removeFirst();
-        			return index;
+        			ReceivedDataFromChannel rd=rd_list.getFirst();
+        			return rd;
         		}
+        		
+        		public void RemoveFirst()
+        		{
+        			rd_list.removeFirst();
+        			time_list.removeFirst();
+        		}
+
+        		
+        		
         		
         		public boolean IsEmpty()
         		{
@@ -927,18 +943,15 @@ public class dtesp {
         		}
         	};
             
-        	ArrayList<ReceivedDataFromChannel> list_received_data 	= new ArrayList<ReceivedDataFromChannel>();
-        	ChannelIndexSortedByTime sorted_channel_index			= new ChannelIndexSortedByTime();
+//        	Vector<ReceivedDataFromChannel> list_received_data 		= new Vector<ReceivedDataFromChannel>();
+        	ReceivedDataSortedByTime sorted_rd_list			= new ReceivedDataSortedByTime();
         	
         	
-        	// Prepare and instantiate classes instead of doing this in main loop for time efficiency   
-            for (SinkItem s : hmap_sink_item.values())
-  			        for (SinkChannelItem c:s.channel_item_list)
-  			        		list_received_data.add(new ReceivedDataFromChannel());
+
 
 
             // count of how channel has been received 
-            int recieved_channel_count;
+//            int recieved_channel_count;
             
             
             while (true) 
@@ -966,9 +979,13 @@ public class dtesp {
 	        	        
                 
 
-            	sorted_channel_index.Clear();
-            	recieved_channel_count=0;
+//            	sorted_rd_list.Clear();
+//            	recieved_channel_count=0;
             	
+          	
+            	
+            	
+            	// fetch all the data
             	for (SinkItem s:hmap_sink_item.values())
             	{
             		ChannelMap outmap = s.sink.Fetch(1000);
@@ -989,28 +1006,40 @@ public class dtesp {
     	                    data_time = outmap.GetTimes(chanIdx);
     	                    
     	                    // used ReceivedDataFromChannel instance from already created pool
-    	                    ReceivedDataFromChannel rd=list_received_data.get(recieved_channel_count);
-    	                    rd.Clear();
+    	                    ReceivedDataFromChannel rd= new ReceivedDataFromChannel();
     	                    
     	                    rd.sink_channel=c;
     	                    rd.data=data;
     	                    rd.data_time=data_time;
     	                    
     	                    // add the earliest time of data of the channel and it's index
-    	                    sorted_channel_index.Add(rd.GetTime(), recieved_channel_count);
+    	                    sorted_rd_list.Add(rd.GetTime(), rd);
     	                    
-    	                    recieved_channel_count++;
+//    	                    recieved_channel_count++;
+    	                    
+    	                    
+    	                    c.last_data_time=rd.GetLastTime();
     	                }
+    	               
             		}
+            		
             	}
             	
             	
-            	// until list is empty. this means until every data is sent
-            	while (!sorted_channel_index.IsEmpty())
+            	double time_all_channel_received=-2;
+            	for (SinkItem s:hmap_sink_item.values())
+            		for (SinkChannelItem c:s.channel_item_list)
+            			if (time_all_channel_received>c.last_data_time || time_all_channel_received==-2)
+            				time_all_channel_received=c.last_data_time;
+            	
+            	
+            	
+            	
+            	// all the channel is received and until list is empty. this means until every data is sent 
+            	while (!sorted_rd_list.IsEmpty())
             	{
-            		// first channel index would be channel with earliest data
-            		int index=sorted_channel_index.PopFirstChannelIndex();
-            		ReceivedDataFromChannel rd=list_received_data.get(index);
+            		// first received data would be data with earliest data
+            		ReceivedDataFromChannel rd=sorted_rd_list.GetFirstRd();
             		
             		
             		// get the data out
@@ -1020,8 +1049,17 @@ public class dtesp {
             		
             		
             		//to eliminate duplicated data from last request
-                    if (data_time==request_start) break;
+                    if (data_time==request_start) continue;
                     
+
+                    
+                    if (data_time>time_all_channel_received && bRealTime)
+                    {
+                    	System.out.println("!declined DT "+ c.name +" : " + data+ " @ " + request_start+ " "+ data_time);
+                    	break;
+                    }
+                                        
+                    sorted_rd_list.RemoveFirst();
                     
                     System.out.println("DT "+ c.name +" : " + data+ " @ " + request_start+ " "+ data_time);
 
@@ -1060,7 +1098,7 @@ public class dtesp {
                     if (!rd.bIsempty())
                     {
                     	rd.Next();
-                    	sorted_channel_index.Add(rd.GetTime(),index);
+                    	sorted_rd_list.Add(rd.GetTime(),rd);
                     }
                     else
                     	rd.Clear();
