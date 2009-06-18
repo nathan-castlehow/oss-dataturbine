@@ -39,7 +39,12 @@ public class DTESPConfigObj {
 	 * List of query configuration(QueryItem)
 	 */
 	List<QueryItem>						list_query_item				= new LinkedList<QueryItem>();
-	
+
+	/**
+	 * List of SaveData (save data to DT before running)
+	 */
+	LinkedList<SaveDataItem>			list_save_data_item			= new LinkedList<SaveDataItem>();
+
 	
 	/**
 	 * Add source configuration to list
@@ -118,19 +123,22 @@ public class DTESPConfigObj {
 		list_query_item.add(qi);
 	}
 	
+	public void AddSaveData(SaveDataItem sd)
+	{
+		list_save_data_item.add(sd);
+	}
 	
 	
 	
     /** 
-     *  If this is true, esper will process data in real time.
-     *  If data of certain time is requested, then set to false;
+     *  Use subscribe to receive data from data turbine
      */	
-	public boolean bRealTime=true;
+	public boolean bSubscribe=false;
 	
     /** 
      *  Start time of the request
      */	
-	double request_start;
+	double request_start=0;
     /** 
      *  Data duration for one fetch
      */	
@@ -139,7 +147,8 @@ public class DTESPConfigObj {
      * Last time of esper we set 
      */	
 	long last_saved_esper_time;
-    /** 
+    /**
+     * <pre> 
      * maximum of time advancement for esper
      * 
      *   Example:
@@ -147,6 +156,18 @@ public class DTESPConfigObj {
      *   Then, esper time will be set at .5 sec, 1 sec, 1.5 sec, and 2 sec.
      */	
 	long maximum_time_granuality=60000; // 1 min
+	
+    /** 
+     * <pre>
+     * Console output level
+     *
+     * 1 - input from DT & output from ESPER
+     * 2 - output from ESPER
+     * 3 - no input & output
+     * 4 - none
+     */	
+	int	output_level=1;
+	
 }
 
 

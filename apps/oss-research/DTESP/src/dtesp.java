@@ -21,11 +21,13 @@ public class dtesp {
 	 */
 	public static void main(String args[])
 	{
-		
 		dtesp sink=new dtesp();
 		DTESPConfigObjCreator coc=new DTESPConfigObjCreator();  
 		
-		sink.SetConfigObj(coc.CreateFromXml("setting.xml"));
+		if (args.length==0)
+			sink.SetConfigObj(coc.CreateFromXml("setting.xml"));
+		else
+			sink.SetConfigObj(coc.CreateFromXml(args[0]));
 		sink.run();
 	}
 	
@@ -61,7 +63,9 @@ public class dtesp {
     }
     
     /**
-     * Prepare DT connection. Create and connect source, source channel, sink, and sink channel 
+     * <pre>
+     * Prepare DT connection. Create and connect source, source channel, sink, and sink channel
+     * Data will be saved in DT by <SaveData> node.  
      */
     
     public void Init_DT()
@@ -133,7 +137,7 @@ public class dtesp {
 			        	System.out.println("Adding SinkChannel"+c.name+": "+c.channel_string);
 			        	s.cmap.Add(c.channel_string);
 			        }
-			        if (config_obj.bRealTime)
+			        if (config_obj.bSubscribe)
 			        	// if realtime subscribe
 			        	s.sink.Subscribe(s.cmap);
 
@@ -145,73 +149,111 @@ public class dtesp {
 	        }
 	        
         }
-    }
-
         
         
-
-
+        // save sample data
         
+        Iterator<SaveDataItem> i=config_obj.list_save_data_item.iterator();
         
-        
-
-    
-    /**
-     * <pre> Listener that listen to esper event and sends to dt
-     */
-    public class EsperEventListener implements UpdateListener
-    {
-    	SourceChannelItem 	source_channel_item;
-    	dtesp				dtesp_;
-
-
-        public EsperEventListener(SourceChannelItem sci, dtesp dtesp__)
+        while (i.hasNext())
         {
-        	source_channel_item=sci;
-        	dtesp_=dtesp__;
+        	SaveDataItem s=i.next();
+        	
+        	if (s.time_to_insert>0) continue;
+        	
+        	// send sample data to DT
+        	SendToDT(s.list_data,s.list_time,s.sci);
+        	
+        	// remove it from list
+        	i.remove();
         }
         
-    	
-    	public void update(EventBean[] newEvents, EventBean[] oldEvents) 
-    	{
-    	    double[]          data = {0};
-    	    EventBean event = newEvents[0];
-    	    
-    	    
-    	    double v=Double.parseDouble(event.get(source_channel_item.event_item.field).toString());
-    	    
-    	    System.out.println("E "+source_channel_item.name+" : " + v);
+        
 
-    	    ChannelMap 	output_cmap		=source_channel_item.source_item.cmap;
-    	    Source 		source			=source_channel_item.source_item.source;
-    	    int			channel_index	=source_channel_item.channel_index;
-    	    try
-    	    {
-	    	    data[0] = v ;
-				if (dtesp_.config_obj.bRealTime)
-	    	    	// if real time
-	    	    	output_cmap.PutTimeAuto("timeofday");
-	    	    else
-	    	    {
-	    	    	// if not, use esper time
-	    	    	double[] time={0};
-	    	    	time[0]=dtesp_.last_saved_esper_time;
-	    	    	output_cmap.PutTimes(time);
-	    	    }
-	    	    
-	    	    // On nees, we assume that octet-stream data is double-precision float
-	    	    output_cmap.PutMime(channel_index, "application/octet-stream");
-	    	    output_cmap.PutDataAsFloat64(channel_index, data);
-	    	    
-	    	    source.Flush(output_cmap, false);
-	    	}
-    	    catch (SAPIException mse) 
-	    	{
-	    	    System.out.println("Error saving data!");
-	    	}
-    	    
-    	}    	
+        // not using subscribe
+		if (!config_obj.bSubscribe)
+		{
+	        // load start time if we need to fetch from the start
+			if (config_obj.request_start==-1)
+			{
+				double oldest_time=-1;
+		        try 
+		        {
+			        for (SinkItem s : config_obj.hmap_sink_item.values())
+				        if (!s.channel_item_list.isEmpty())
+					        s.sink.Request(s.cmap, 0,0, "oldest");
+				        
+					
+					// fetch from all the channel
+					for (SinkItem s:config_obj.hmap_sink_item.values())
+					{
+						ChannelMap outmap = s.sink.Fetch(1000);
+				
+						if (outmap.GetIfFetchTimedOut())	continue;
+				    
+						for (SinkChannelItem c:s.channel_item_list)
+						{
+				            int chanIdx = outmap.GetIndex(c.channel_string);
+				           
+				            if(chanIdx >= 0)
+				            {
+				                double[] data_time = outmap.GetTimes(chanIdx);
+				                
+				                
+				                // set to lastest time
+				                if (oldest_time>=data_time[0] || oldest_time==-1)
+				                	oldest_time=data_time[0];
+				            }
+						}
+					}
+						
+		        }
+		        catch (SAPIException se) {
+		            System.out.println("Error finding oldest time");
+		            return;
+		        }
+		        
+		        config_obj.request_start=oldest_time;
+		        
+			}
+		}
+        
+        
     }
+
+        
+        
+    /**
+     * Send data to Data Turbine 
+     * @param data			array of data (double[])
+     * @param time			array of time (double[])
+     * @param source_channel_item	source channel object(SourceChannelItem)
+     */
+
+    void SendToDT(double []data, double []time, SourceChannelItem source_channel_item)
+    {
+       	ChannelMap 	output_cmap		=source_channel_item.source_item.cmap;
+	    Source 		source			=source_channel_item.source_item.source;
+	    int			channel_index	=source_channel_item.channel_index;
+	    try
+	    {
+ 	    	output_cmap.PutTimes(time);
+    	    
+    	    // On nees, we assume that octet-stream data is double-precision float
+    	    output_cmap.PutMime(channel_index, "application/octet-stream");
+    	    output_cmap.PutDataAsFloat64(channel_index, data);
+    	    
+    	    source.Flush(output_cmap, false);
+    	}
+	    catch (SAPIException mse) 
+    	{
+    	    System.out.println("Error saving data!");
+    	}       
+    }
+        
+        
+        
+
 
     
     /** 
@@ -245,6 +287,7 @@ public class dtesp {
      * 2. Register event that will be sent to esper
      * 3. Create query and register listener if we want to 
      */
+	
 
     protected void Init_Esper()
     {
@@ -252,7 +295,7 @@ public class dtesp {
 		epRuntime = epService.getEPRuntime();
 		
 		// (If not real time)Set esper time
-		if (!config_obj.bRealTime)
+		if (!config_obj.bSubscribe)
 		{
 			current_request_start=config_obj.request_start;
 			// external time mode
@@ -322,7 +365,7 @@ public class dtesp {
 	                if (c.last_data_time<=data_time[0])
 	                	c.last_data_time=data_time[0];
 	
-	                if (time_all_channel_received<=data_time[0] || time_all_channel_received==-1)
+	                if (time_all_channel_received>=data_time[0] || time_all_channel_received==-1)
 	                	time_all_channel_received=data_time[0];                
 	            }
 	            else
@@ -362,28 +405,61 @@ public class dtesp {
         try 
         {
             
-            System.out.println("Waiting for data...");
+            System.out.println("start fetching data...");
   
             
         	
             
-//        	Vector<ReceivedDataFromChannel> list_received_data 		= new Vector<ReceivedDataFromChannel>();
         	ReceivedDataSortedByTime sorted_rd_list			= new ReceivedDataSortedByTime();
         	
         	
 
 
 
-        	if (!config_obj.bRealTime)
+        	if (!config_obj.bSubscribe)
         		SetTimeAllChannelReceived();
         	int retry_times=0;
         	double next_request_start=0;
         	
-            
+        	
+        	long start_tick=System.currentTimeMillis();
+        	long duration_not_to_include=0;
+        	
+
+        	// cleared after client received first request
+        	Boolean b_first_request=true;
+        	
+        	
+        	// main loop starts
             while (true) 
             {
+            	long current_tick=System.currentTimeMillis();
+
+            	
+            	// if time_to_insert ms is passed, insert sample data
+            	{
+	                Iterator<SaveDataItem> i=config_obj.list_save_data_item.iterator();
+	                
+	                while (i.hasNext())
+	                {
+	                	SaveDataItem s=i.next();
+	                	
+	                	if (s.time_to_insert>current_tick-start_tick) continue;
+	                	
+	                	// send sample data to DT
+	                	SendToDT(s.list_data,s.list_time,s.sci);
+	                	
+	                	// remove it from list
+	                	i.remove();
+	                }
+            	}
+            	// don't include time for sending the sample data
+            	duration_not_to_include+=System.currentTimeMillis()-current_tick;
+            	
+            	
+            	
             	// request data for next window if not subscribe
-            	if (!config_obj.bRealTime)
+            	if (!config_obj.bSubscribe)
             	{
 		        	//fetch only until all the data is received
 		        	double duration=config_obj.request_duration;
@@ -397,8 +473,12 @@ public class dtesp {
 		        	// if no data to fetch
 		        	if (duration<=0)
 		        	{
-		        		retry_times++;
-		        		if (retry_times>1)
+		        		if (retry_times==0 && config_obj.output_level<4)
+                    		System.out.println("waiting for data .. Duration of operation "+ 	(current_tick-start_tick-duration_not_to_include)/1000);	        				
+		        		
+		            	current_tick=System.currentTimeMillis();
+
+		        		if (retry_times>0)
 		        		{
 		        			// sleep 100 ms before finding out the last time of all channels again
 		        			retry_times=1;
@@ -413,6 +493,11 @@ public class dtesp {
 		        		
 		        		// finding out the last time of all channels
 		        		SetTimeAllChannelReceived();
+
+		        		if (retry_times!=0)
+		                	duration_not_to_include+=System.currentTimeMillis()-current_tick;
+		        		
+		        		retry_times++;
 		        		continue;
 		        	}
 		        	else
@@ -483,22 +568,24 @@ public class dtesp {
             		double data_time=rd.GetTime();
             		SinkChannelItem c=rd.sink_channel;
             		
-                    if (data_time>time_all_channel_received && config_obj.bRealTime)
+                    if (data_time>time_all_channel_received && config_obj.bSubscribe)
                     {
-                    	System.out.println("!declined DT "+ c.name +" : " + data+ " @ " + current_request_start+ " "+ data_time);
+                    	if (config_obj.output_level<3)
+                    		System.out.println("!declined DT "+ c.name +" : " + data+ " @ " + current_request_start+ " "+ data_time);
                     	break;
                     }
 
                     sorted_rd_list.RemoveFirst();
 
             		//to eliminate duplicated data from last request
-                    if (data_time==current_request_start)        	continue;
+                    if (data_time==current_request_start && !b_first_request)       continue;
                     
 
                     
                                         
                     
-                    System.out.println("DT "+ c.name +" : " + data+ " @ " + current_request_start+ " "+ data_time);
+                	if (config_obj.output_level<2)
+                		System.out.println("DT "+ c.name +" : " + data+ " @ " + current_request_start+ " "+ data_time);
 
                     // send new time to esper 
                     
@@ -542,11 +629,12 @@ public class dtesp {
             	}    
                 	
             	
-            	if (!config_obj.bRealTime)
+            	if (!config_obj.bSubscribe)
             	{
             		current_request_start=next_request_start;
             	}
             		
+            	b_first_request=false;
             		
             }
         }catch (SAPIException mse) 

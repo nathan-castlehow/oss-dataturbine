@@ -1,7 +1,6 @@
 import com.rbnb.sapi.ChannelMap;
 import com.rbnb.sapi.Source;
 import org.w3c.dom.Element;
-import org.xml.sax.SAXException;
 
 	/**
 	 * <pre>
