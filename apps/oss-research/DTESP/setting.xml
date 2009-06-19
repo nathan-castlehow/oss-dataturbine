@@ -42,7 +42,7 @@
 
 
 
-<Query query_string="insert into AverageConductivityTemperature 		select avg(conductivity) as conductivity, avg(temperature) as temperature from Conductivity.win:time(10 min), Temperature.win:time(10 min) output every 5 min"></Query>
+<Query query_string="insert into AverageConductivityTemperature 		select avg(conductivity) as conductivity, avg(temperature) as temperature from Conductivity.win:time(10 min), Temperature.win:time(10 min) having count(conductivity) !=0 and count(temperature) !=0 output every 5 min"></Query>
 <Query query_string="insert into ConductivityTemperatureRatioChange 	select (prev(1,conductivity)/prev(0,conductivity))*(prev(0,temperature)/prev(1,temperature)) as ratiochange from AverageConductivityTemperature.win:length(2) where prev(0, temperature) is not null and prev(1, temperature) is not null"></Query>
 <Query query_string="insert into ConductivityTemperatureRatioChangeEvent select (ratiochange>10 or 1/10>ratiochange) as status from ConductivityTemperatureRatioChange"></Query>
 <Query name="SalinityQAQC1On"   query_string="select 1 as status from pattern [ConductivityTemperatureRatioChangeEvent(status=false) -> ConductivityTemperatureRatioChangeEvent(status=true)]" event="Alarm" source_channel="SalinityQAQC1"></Query>
