@@ -2,7 +2,8 @@
 <Setting>
 
 
-<RequestTime year="2009" month="4" date="10" hour="5" minute="57" second="0"></RequestTime>
+<RequestTime year="2009" month="4" date="10" hour="5" minute="57" second="0"/>
+<EndTime year="2009" month="5" date="10" hour="5" minute="57" second="0"/>
 
 <Event name="Rain" field="rain"></Event>
 <Event name="Conductivity" field="conductivity"></Event>
