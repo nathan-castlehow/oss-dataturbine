@@ -13,6 +13,10 @@ import java.util.*;
 public class DTESPConfigObj {
 
 
+	/**
+	 * Name of the xml file loaded
+	 */
+	String config_name;
 
 	
 	/**
@@ -142,10 +146,15 @@ public class DTESPConfigObj {
     /** 
      *  Data duration for one fetch
      */	
-	double request_duration=600; // 10 min
+	double request_duration=1200; // 20 min
+	
+    /** 
+     * Time of end request 
+     */		
+	double end_time=-1;
     /** 
      * Last time of esper we set 
-     */	
+     */		
 	long last_saved_esper_time;
     /**
      * <pre> 

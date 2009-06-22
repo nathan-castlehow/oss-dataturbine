@@ -1,6 +1,9 @@
 
 
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.PrintWriter;
 import java.util.*;
 import com.rbnb.sapi.*;
 
@@ -21,14 +24,16 @@ public class dtesp {
 	 */
 	public static void main(String args[])
 	{
-		dtesp sink=new dtesp();
+		dtesp dtesp_=new dtesp();
 		DTESPConfigObjCreator coc=new DTESPConfigObjCreator();  
 		
 		if (args.length==0)
-			sink.SetConfigObj(coc.CreateFromXml("setting.xml"));
+			dtesp_.SetConfigObj(coc.CreateFromXml("setting.xml"));
 		else
-			sink.SetConfigObj(coc.CreateFromXml(args[0]));
-		sink.run();
+		{
+			dtesp_.SetConfigObj(coc.CreateFromXml(args[0]));
+		}
+		dtesp_.run();
 	}
 	
 	
@@ -107,8 +112,6 @@ public class dtesp {
 	        }
         }
 
-        
-
      
         // Create sink        
         for (SinkItem s : config_obj.hmap_sink_item.values())
@@ -152,20 +155,22 @@ public class dtesp {
         
         
         // save sample data
-        
-        Iterator<SaveDataItem> i=config_obj.list_save_data_item.iterator();
-        
-        while (i.hasNext())
         {
-        	SaveDataItem s=i.next();
-        	
-        	if (s.time_to_insert>0) continue;
-        	
-        	// send sample data to DT
-        	SendToDT(s.list_data,s.list_time,s.sci);
-        	
-        	// remove it from list
-        	i.remove();
+        
+	        Iterator<SaveDataItem> i=config_obj.list_save_data_item.iterator();
+	        
+	        while (i.hasNext())
+	        {
+	        	SaveDataItem s=i.next();
+	        	
+	        	if (s.time_to_insert>0) continue;
+	        	
+	        	// send sample data to DT
+	        	SendToDT(s.list_data,s.list_time,s.sci);
+	        	
+	        	// remove it from list
+	        	i.remove();
+	        }
         }
         
         
@@ -219,6 +224,41 @@ public class dtesp {
 		}
         
         
+		
+		
+        // if we need to copy sink to a source
+        // Create sink        
+        for (SinkItem s : config_obj.hmap_sink_item.values())
+        {
+        	if (s.copy_to_source==null) continue;
+        	
+	        
+        	// Create sink channel		        	
+	        for (SinkChannelItem c:s.channel_item_list)
+	        {
+	        	System.out.println("Adding Copy to SourceChannel"+c.name+": "+c.channel_string);
+	        	
+	        	SourceChannelItem src_c=new SourceChannelItem("Copy_"+c.name,s.copy_to_source,c.channel_string,null,false);
+	        	c.copy_to_source_channel=src_c;
+		        try 
+		        {
+		            src_c.channel_index = src_c.source_item.cmap.Add(src_c.channel_string);
+		        }catch (SAPIException se) {
+		            System.out.println("Error adding to channel map!");
+		            return;
+		        }
+	        }
+	        
+        }		
+
+        
+        
+
+
+        
+
+     
+
     }
 
         
@@ -237,9 +277,9 @@ public class dtesp {
 	    int			channel_index	=source_channel_item.channel_index;
 	    try
 	    {
- 	    	output_cmap.PutTimes(time);
     	    
     	    // On nees, we assume that octet-stream data is double-precision float
+ 	    	output_cmap.PutTimes(time);
     	    output_cmap.PutMime(channel_index, "application/octet-stream");
     	    output_cmap.PutDataAsFloat64(channel_index, data);
     	    
@@ -248,7 +288,8 @@ public class dtesp {
 	    catch (SAPIException mse) 
     	{
     	    System.out.println("Error saving data!");
-    	}       
+    	}
+	    
     }
         
         
@@ -274,6 +315,7 @@ public class dtesp {
      * Last time of esper we set 
      */	
 	long last_saved_esper_time;
+	
 	
     /** 
      * until when all input channel has been received 
@@ -302,7 +344,7 @@ public class dtesp {
 			epRuntime.sendEvent(new TimerControlEvent(TimerControlEvent.ClockType.CLOCK_EXTERNAL));
 
 			// esper time = time of requested data 
-			last_saved_esper_time=new Double(current_request_start*1000).longValue();
+			last_saved_esper_time=new Double(current_request_start).longValue();
 			epRuntime.sendEvent(new CurrentTimeEvent(last_saved_esper_time));
 			
 		}
@@ -375,6 +417,8 @@ public class dtesp {
 			
 		if (!received_from_all_channel)
 			time_all_channel_received=-1;
+		
+		
     }
     	
 
@@ -401,7 +445,57 @@ public class dtesp {
      
     protected void Fetch()
     {
-		
+
+
+    	
+//    	{
+//    		
+//    		double [] data=new double[100];
+//    		double [] time=new double[100];
+//    		
+//    		int k;
+//    		for (k=0;k<data.length;k++)
+//    			time[k]=k;
+//    		
+//    		
+//        Iterator<SaveDataItem> i=config_obj.list_save_data_item.iterator();
+//        
+//        while (i.hasNext())
+//        {
+//        	SaveDataItem s=i.next();
+//
+//        	Random r=new Random();
+//    		for (k=0;k<data.length;k++)
+//    			data[k]=r.nextDouble();
+//        	
+//        	double []dd={0};
+//        	double []dt={0};
+//        	
+//        	// send sample data to DT
+//    		for (k=0;k<data.length;k++)
+//    		{
+//    			dd[0]=data[k];
+//    			dt[0]=time[k];
+//    			SendToDT(dd,dt,s.sci);
+//    		}
+//        	
+//        	
+//        	// remove it from list
+//        	i.remove();
+//        }
+//    	}
+//    	
+//    	try
+//    	{
+//    		while (true)
+//    			Thread.sleep(100);
+//    	}
+//    	catch (Exception e)
+//    	{
+//    		
+//    	}
+    	
+    	
         try 
         {
             
@@ -467,12 +561,28 @@ public class dtesp {
 		        	{
 		        		duration=time_all_channel_received-current_request_start;
 		        	}
+		        	
+		        	if (current_request_start+config_obj.request_duration>config_obj.end_time && config_obj.end_time!=-1)
+		        	{
+		        		duration=config_obj.end_time-current_request_start;
+		        	}
+		        	
 	        		next_request_start=current_request_start+duration;
 		        	
 		        	
 		        	// if no data to fetch
 		        	if (duration<=0)
 		        	{
+		        		if (current_request_start+duration>=config_obj.end_time && config_obj.end_time!=-1)
+		        		{
+                    		System.out.println("End of request range");
+                    		while (true)
+                    		{
+                    			try {Thread.sleep(1000);} catch (Exception e) {}
+                    		}
+		        			
+		        		}
+		        		
 		        		if (retry_times==0 && config_obj.output_level<4)
                     		System.out.println("waiting for data .. Duration of operation "+ 	(current_tick-start_tick-duration_not_to_include)/1000);	        				
 		        		
@@ -538,12 +648,21 @@ public class dtesp {
     	                    rd.data=data;
     	                    rd.data_time=data_time;
     	                    
-    	                    // add the earliest time of data of the channel and it's index
+    	                    // add the earliest time of data of the channel and data
     	                    sorted_rd_list.Add(rd.GetTime(), rd);
     	                    
     	                    
     	                    if (c.last_data_time<=rd.GetLastTime())
     	                    	c.last_data_time=rd.GetLastTime();
+    	                    
+    	                    
+    	                    
+//    	                    // copy to source
+//    	                    
+//    	                    if (c.copy_to_source_channel!=null)
+//    	                    {
+//    	                    	SendToDT(data,data_time,c.copy_to_source_channel);
+//    	                    }
 
     	                }
     	               
@@ -582,6 +701,57 @@ public class dtesp {
                     
 
                     
+                    //if copy to
+                    if (c.copy_to_source_channel!=null)
+                    {
+//                    	double []d={1+new Random().nextDouble()};
+                    	double []d={data};
+                    	double []t={data_time};
+                    	SendToDT(d, t, c.copy_to_source_channel);
+                    	
+                    	try {
+                        	FileWriter outFile = new FileWriter(config_obj.config_name+"s.txt",true);
+//                        	PrintWriter out = new PrintWriter(outFile);
+            	            
+                        	String line=" "+c.name+" : "+data+" : "+data_time;
+                        	BufferedWriter writer = new BufferedWriter(outFile);
+                        	
+                        	writer.write(line);
+                        	writer.newLine();
+                        	
+                       
+//                        	outFile.write(" "+c.name+" : "+data+" : "+data_time);
+                        	
+                        	writer.flush();
+                        	writer.close();
+                        	}
+                        	catch (Exception e)
+                        	{
+                        	}
+                        	
+                    }
+
+
+                	try {
+                    	FileWriter outFile = new FileWriter(config_obj.config_name+"a.txt",true);
+//                    	PrintWriter out = new PrintWriter(outFile);
+        	            
+                    	String line=" "+c.name+" : "+data+" : "+data_time;
+                    	BufferedWriter writer = new BufferedWriter(outFile);
+                    	
+                    	writer.write(line);
+                    	writer.newLine();
+                    	
+                   
+//                    	outFile.write(" "+c.name+" : "+data+" : "+data_time);
+                    	
+                    	writer.flush();
+                    	writer.close();
+                    	}
+                    	catch (Exception e)
+                    	{
+                    	}
+                    
                                         
                     
                 	if (config_obj.output_level<2)
@@ -590,7 +760,7 @@ public class dtesp {
                     // send new time to esper 
                     
                     
-                    long l_data_time=new Double(data_time*1000).longValue();
+                    long l_data_time=new Double(data_time).longValue();
                     if (last_saved_esper_time<l_data_time)
                     {
                     	// to make time advancement less than maximum time granuality 

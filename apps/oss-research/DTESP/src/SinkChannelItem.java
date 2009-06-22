@@ -10,6 +10,8 @@ import org.w3c.dom.Element;
  *   sink- sink class owns this channel (initialized with string id of sink)
  *   channel_string- name of channel to be used for connection 
  *   event- name of esper event associated with the channel 
+ *   
+ *   copy_to_source_channel- source channel to copy sink channel to
  */	
 public class 			SinkChannelItem
 {
@@ -50,4 +52,7 @@ public class 			SinkChannelItem
 	SinkItem		sink_item;
     EventItem 		event_item;
     double			last_data_time=-1;
+    
+    
+    public SourceChannelItem	copy_to_source_channel;    
 };

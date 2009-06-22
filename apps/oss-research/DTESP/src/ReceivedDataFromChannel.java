@@ -21,7 +21,7 @@ public class ReceivedDataFromChannel
 		return true;
 	}
 	
-	
+	SinkChannelItem GetSink()		{return sink_channel;}
 	double	GetLastTime()			{return data_time[data_time.length-1];}
 	
 	double 	GetData()       		{return data[index];}
