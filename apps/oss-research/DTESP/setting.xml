@@ -3,7 +3,7 @@
 
 
 <RequestTime year="2009" month="4" date="10" hour="5" minute="57" second="0"/>
-<EndTime year="2009" month="5" date="10" hour="5" minute="57" second="0"/>
+<EndTime_ year="2009" month="5" date="10" hour="5" minute="57" second="0"/>
 
 <Event name="Rain" field="rain"></Event>
 <Event name="Conductivity" field="conductivity"></Event>
@@ -13,9 +13,9 @@
 <Event name="Update" field="status"></Event>
 
 <Sink name="MCR" client="client" connection_string="iguassu.sdsc.edu:3333"></Sink>
-<SinkChannel name="Conductivity" 	sink="MCR" channel_string="MCR_Seacat_16plus/Conductivity" 	event="Conductivity"></SinkChannel>
-<SinkChannel name="Salinity" 		sink="MCR" channel_string="MCR_Seacat_16plus/Salinity" 		event="Salinity"	></SinkChannel>
-<SinkChannel name="Temperature" 	sink="MCR" channel_string="MCR_Seacat_16plus/Temperature" 	event="Temperature"	></SinkChannel>
+<SinkChannel name="Conductivity" 	sink="MCR" channel_string="New_Seacat_CTD_16plus/Conductivity" 	event="Conductivity"></SinkChannel>
+<SinkChannel name="Salinity" 		sink="MCR" channel_string="New_Seacat_CTD_16plus/Salinity" 		event="Salinity"	></SinkChannel>
+<SinkChannel name="Temperature" 	sink="MCR" channel_string="New_Seacat_CTD_16plus/Temperature" 	event="Temperature"	></SinkChannel>
 <SinkChannel name="Rain" 		sink="MCR" channel_string="Weather_Station/Rain_mm_Tot" 	event="Rain"		></SinkChannel>
 
 

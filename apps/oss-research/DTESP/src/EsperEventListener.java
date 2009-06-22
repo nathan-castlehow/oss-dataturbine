@@ -8,13 +8,13 @@ import com.espertech.esper.client.*;
     public class EsperEventListener implements UpdateListener
     {
     	SourceChannelItem 	source_channel_item;
-    	dtesp				dtesp_;
+    	DTESPReceiver dtr;
 
 
-        public EsperEventListener(SourceChannelItem sci, dtesp dtesp__)
+        public EsperEventListener(SourceChannelItem sci, DTESPReceiver r)
         {
         	source_channel_item=sci;
-        	dtesp_=dtesp__;
+        	dtr=r;
         }
         
     	
@@ -37,7 +37,7 @@ import com.espertech.esper.client.*;
     	    	
     	    	double v=Double.parseDouble(event.get(source_channel_item.event_item.field).toString());
 	    	    
-	    	    if (dtesp_.config_obj.output_level<3)
+	    	    if (dtr.config_obj.output_level<3)
 	    	    	System.out.println("E "+source_channel_item.name+" : " + v);
 	
 	    	    ChannelMap 	output_cmap		=source_channel_item.source_item.cmap;
@@ -55,18 +55,18 @@ import com.espertech.esper.client.*;
 			    	else
 			    	    data[0] = v ;
 		    	    
-					if (dtesp_.config_obj.bSubscribe)
-		    	    	// if real time
-		    	    	output_cmap.PutTimeAuto("timeofday");
-		    	    else
+//					if (co.bSubscribe)
+//		    	    	// if real time
+//		    	    	output_cmap.PutTimeAuto("timeofday");
+//		    	    else
 		    	    {
 		    	    	// if not, use esper time
-		    	    	time[0]=dtesp_.last_saved_esper_time;
+		    	    	time[0]=dtr.last_saved_esper_time;
 		    	    	
 				    	if (source_channel_item.is_zero_one_graph)
 				    	{
 				    		// increment 1
-				    		time[1]=Double.longBitsToDouble(Double.valueOf(time[0]).longValue()+1);
+				    		time[1]=Double.longBitsToDouble(Double.doubleToLongBits(time[0])+1);
 				    	}
 
 		    	    	output_cmap.PutTimes(time);				    	

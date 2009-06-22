@@ -137,7 +137,7 @@ public class DTESPConfigObj {
     /** 
      *  Use subscribe to receive data from data turbine
      */	
-	public boolean bSubscribe=false;
+//	public boolean bSubscribe=false;
 	
     /** 
      *  Start time of the request
@@ -152,10 +152,6 @@ public class DTESPConfigObj {
      * Time of end request 
      */		
 	double end_time=-1;
-    /** 
-     * Last time of esper we set 
-     */		
-	long last_saved_esper_time;
     /**
      * <pre> 
      * maximum of time advancement for esper
