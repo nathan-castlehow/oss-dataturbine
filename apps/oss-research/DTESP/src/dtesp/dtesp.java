@@ -41,8 +41,10 @@ public class dtesp {
 		while (true)
 		{
 			ReceivedDataSortedByTime rds=f.Fetch();
-			if (rds.IsEmpty()) return;
-			if (!r.Process(rds)) return;
+			if (f==null) return;
+			if (!rds.IsEmpty()) 
+				if (!r.Process(rds)) 
+					return;
 		}
 	}
 	
