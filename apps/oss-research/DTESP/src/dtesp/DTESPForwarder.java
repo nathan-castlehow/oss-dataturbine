@@ -2,16 +2,11 @@ package dtesp;
 
 
 
-import java.io.BufferedWriter;
-import java.io.FileWriter;
-import java.io.PrintWriter;
+import java.text.DateFormat;
 import java.util.*;
 import com.rbnb.sapi.*;
 
 
-import com.espertech.esper.client.*;
-import com.espertech.esper.client.time.CurrentTimeEvent;
-import com.espertech.esper.client.time.TimerControlEvent;
 
 
 
@@ -121,9 +116,9 @@ public class DTESPForwarder {
 			        	System.out.println("Adding SinkChannel"+c.name+": "+c.channel_string);
 			        	s.cmap.Add(c.channel_string);
 			        }
-//			        if (config_obj.bSubscribe)
-//			        	// if realtime subscribe
-//			        	s.sink.Subscribe(s.cmap);
+			        if (config_obj.bSubscribe)
+			        	// if realtime subscribe
+			        	s.sink.Subscribe(s.cmap);
 
 		        }
 		        catch (SAPIException se) {
@@ -201,6 +196,12 @@ public class DTESPForwarder {
 		        
 		        config_obj.request_start=oldest_time;
 		        
+				DateFormat df=DateFormat.getInstance();
+				Calendar c=Calendar.getInstance();
+				c.setTimeInMillis((long)oldest_time*1000);
+				
+				System.out.println("Requested time "+df.format(c.getTime()));
+		        
 			}
 		}
         
@@ -237,7 +238,7 @@ public class DTESPForwarder {
 
 
         
-//		if (!config_obj.bSubscribe)
+		if (!config_obj.bSubscribe)
 			current_request_start=config_obj.request_start;
      
 
@@ -294,53 +295,73 @@ public class DTESPForwarder {
 
         
 
-    void SetTimeAllChannelReceived() throws SAPIException
+	public    void SetTimeAllChannelReceived() 
     {
-        for (SinkItem s : config_obj.hmap_sink_item.values())
-	        if (!s.channel_item_list.isEmpty())
-		        s.sink.Request(s.cmap, 0,0, "newest");
-	        
-		
-	    time_all_channel_received=-1;
-	    Boolean received_from_all_channel=true;
-		// fetch from all the channel
-		for (SinkItem s:config_obj.hmap_sink_item.values())
+
+		try
 		{
-			ChannelMap outmap = s.sink.Fetch(1000);
-	
-			if (outmap.GetIfFetchTimedOut())
+	        for (SinkItem s : config_obj.hmap_sink_item.values())
+		        if (!s.channel_item_list.isEmpty())
+			        s.sink.Request(s.cmap, 0,0, "newest");
+		        
+			
+		    time_all_channel_received=-1;
+		    Boolean received_from_all_channel=true;
+			// fetch from all the channel
+			for (SinkItem s:config_obj.hmap_sink_item.values())
 			{
-	        	received_from_all_channel=false;
-	        	continue;
+				ChannelMap outmap = s.sink.Fetch(1000);
+		
+				if (outmap.GetIfFetchTimedOut())
+				{
+		        	received_from_all_channel=false;
+		        	continue;
+				}
+		    
+				for (SinkChannelItem c:s.channel_item_list)
+				{
+		            int chanIdx = outmap.GetIndex(c.channel_string);
+		           
+		            if(chanIdx >= 0)
+		            {
+		                double[] data_time;
+		                data_time = outmap.GetTimes(chanIdx);
+		                
+		                
+		                // set to lastest time
+		                if (c.last_data_time<=data_time[0])
+		                	c.last_data_time=data_time[0];
+		
+		                if (time_all_channel_received>=data_time[0] || time_all_channel_received==-1)
+		                	time_all_channel_received=data_time[0];                
+		            }
+		            else
+		            	received_from_all_channel=false;
+				}
 			}
-	    
-			for (SinkChannelItem c:s.channel_item_list)
-			{
-	            int chanIdx = outmap.GetIndex(c.channel_string);
-	           
-	            if(chanIdx >= 0)
-	            {
-	                double[] data_time;
-	                data_time = outmap.GetTimes(chanIdx);
-	                
-	                
-	                // set to lastest time
-	                if (c.last_data_time<=data_time[0])
-	                	c.last_data_time=data_time[0];
-	
-	                if (time_all_channel_received>=data_time[0] || time_all_channel_received==-1)
-	                	time_all_channel_received=data_time[0];                
-	            }
-	            else
-	            	received_from_all_channel=false;
-			}
+				
+			if (!received_from_all_channel)
+				time_all_channel_received=-1;
+			
+			
+
+			
+			
+//			if (time_all_channel_received!=-1)
+//			{
+//				DateFormat df=DateFormat.getInstance();
+//				Calendar c=Calendar.getInstance();
+//				c.setTimeInMillis((long)time_all_channel_received*1000);
+//				
+//				System.out.println("Last time of data "+df.format(c.getTime()));
+//			}
+		}
+		catch (SAPIException e)
+		{
+		
 		}
 			
-		if (!received_from_all_channel)
-			time_all_channel_received=-1;
-		
-		
-    }
+	}
     	
 
     
@@ -381,7 +402,7 @@ public class DTESPForwarder {
      
     protected ReceivedDataSortedByTime Fetch()
     {
-
+		System.out.println("In");
 
     	
     	
@@ -398,8 +419,6 @@ public class DTESPForwarder {
 
 
 
-//        	if (!config_obj.bSubscribe)
-        		SetTimeAllChannelReceived();
         	int retry_times=0;
         	double next_request_start=0;
         	
@@ -412,7 +431,8 @@ public class DTESPForwarder {
             {
             	long current_tick=System.currentTimeMillis();
 
-            	
+        		System.out.println("1");
+
             	// if time_to_insert ms is passed, insert sample data
             	{
 	                Iterator<SaveDataItem> i=config_obj.list_save_data_item.iterator();
@@ -434,9 +454,10 @@ public class DTESPForwarder {
             	duration_not_to_include+=System.currentTimeMillis()-current_tick;
             	
             	
-            	
+        		System.out.println("2");
+          	
             	// request data for next window if not subscribe
-//            	if (!config_obj.bSubscribe)
+            	if (!config_obj.bSubscribe)
             	{
 		        	//fetch only until all the data is received
 		        	double duration=config_obj.request_duration;
@@ -445,7 +466,7 @@ public class DTESPForwarder {
 		        		duration=time_all_channel_received-current_request_start;
 		        	}
 		        	
-		        	if (current_request_start+config_obj.request_duration>config_obj.end_time && config_obj.end_time!=-1)
+		        	if (current_request_start+duration>config_obj.end_time && config_obj.end_time!=-1)
 		        	{
 		        		duration=config_obj.end_time-current_request_start;
 		        	}
@@ -496,16 +517,16 @@ public class DTESPForwarder {
 		        	else
 		        		retry_times=0;
 
-		        	
+	        		System.out.println("3");	        	
 		        	// duration smaller by very little amount to eliminate getting duplicated data   
-		        	double duration_=Double.longBitsToDouble(Double.doubleToLongBits(duration)-1);
+//		        	double duration_=Double.longBitsToDouble(Double.doubleToLongBits(duration)-1);
 		        	// we request data
 	                for (SinkItem s : config_obj.hmap_sink_item.values())
 	        	        if (!s.channel_item_list.isEmpty())
-       			        	s.sink.Request(s.cmap, current_request_start,duration_, "absolute");
+       			        	s.sink.Request(s.cmap, current_request_start,duration, "absolute");
 	        	        
-            		sorted_rd_list.Clear();
             	}
+        		sorted_rd_list.Clear();
             	
             	
             	// fetch all the data
@@ -555,12 +576,18 @@ public class DTESPForwarder {
             		}
             		
             	}
-            	
-//            	if (!config_obj.bSubscribe)
+        		System.out.println("4");         	
+            	if (!config_obj.bSubscribe)
             	{
             		current_request_start=next_request_start;
             	}
-            		
+    			try
+    			{
+    				Thread.sleep(100);
+    			}
+    			catch (Exception e)
+    			{
+    			}            		
               	
             	
             	return sorted_rd_list;

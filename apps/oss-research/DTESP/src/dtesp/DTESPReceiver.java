@@ -2,12 +2,8 @@ package dtesp;
 
 
 
-import java.io.BufferedWriter;
-import java.io.FileWriter;
-import java.io.PrintWriter;
 import java.util.*;
 
-import com.rbnb.sapi.*;
 
 
 import com.espertech.esper.client.*;
@@ -38,8 +34,12 @@ public class DTESPReceiver {
 	
 	public void Init(DTESPConfigObj co)
 	{
+		sorted_rd_list=new ReceivedDataSortedByTime();
+		
 		SetConfigObj(co);
 		Init_Esper();
+		
+		hashmap_channel_last_timestamp=new HashMap<String, Double> ();
 	}
     
   
@@ -62,6 +62,12 @@ public class DTESPReceiver {
      */	
 	long last_saved_esper_time;
 	
+
+	/**
+	 * Buffer for received data
+	 */
+	ReceivedDataSortedByTime sorted_rd_list;
+
 	
     /** 
      * <pre>Initialize esper
@@ -118,6 +124,8 @@ public class DTESPReceiver {
     	
 
     
+    public HashMap<String, Double> 	hashmap_channel_last_timestamp;
+    
 
     /** 
      * <pre>Main loop for fetching data\n
@@ -137,9 +145,13 @@ public class DTESPReceiver {
     
     
     
-     
-    protected Boolean Process(ReceivedDataSortedByTime  sorted_rd_list)
+    protected Boolean Process(ReceivedDataSortedByTime  sorted_rd_list_)
     {
+    	
+    	if (sorted_rd_list.IsEmpty())
+    		sorted_rd_list=sorted_rd_list_;
+    	else
+    		sorted_rd_list.Add(sorted_rd_list_);
 
     	
     	// all the channel is received and until list is empty. this means until every data is sent 
@@ -154,14 +166,28 @@ public class DTESPReceiver {
     		double data_time=rd.GetTime();
     		SinkChannelItem c=rd.sink_channel;
     		
-//            if (data_time>time_all_channel_received && config_obj.bSubscribe)
-//            {
-//            	if (config_obj.output_level<3)
-//            		System.out.println("!declined DT "+ c.name +" : " + data+ " @ " + current_request_start+ " "+ data_time);
-//            	break;
-//            }
+            if (data_time>sorted_rd_list.GetMinTimeOfLastTimeOfAllChannels())// && config_obj.bSubscribe)
+            {
+            	if (config_obj.output_level<3)
+            		System.out.println("!declined DT "+ c.name +" : " + data+ " @ " + data_time);
+            	return true;
+            }
 
-            sorted_rd_list.RemoveFirst();
+            
+            sorted_rd_list.RemoveFirstElementAndSort();
+            
+            
+            
+            if (hashmap_channel_last_timestamp.containsKey(rd.sink_channel.name))
+            {
+        		Double lt=hashmap_channel_last_timestamp.get(rd.sink_channel.name);
+            	if (data_time==lt)       
+            		continue;
+            	hashmap_channel_last_timestamp.remove(lt);
+            }
+            else
+            	hashmap_channel_last_timestamp.put(rd.sink_channel.name, data_time);
+            
 
     		//to eliminate duplicated data from last request  (*) we might not need this because adjustment of duration 
 //            if (data_time==current_request_start && !b_first_request)       continue;
@@ -212,14 +238,11 @@ public class DTESPReceiver {
             data_.put(c.event_item.field, data);
             
             epService.getEPRuntime().sendEvent(data_, c.event_item.name);                        
+
             
+
             
             // if the channel has more data, push it into list so that rest of the data can be processed
-            if (!rd.bIsempty())
-            {
-            	rd.Next();
-            	sorted_rd_list.Add(rd.GetTime(),rd);
-            }
     	}    
         return true;
   }

@@ -35,16 +35,21 @@ public class dtesp {
 
 		
 		f.StartMeasure();
+		f.SetTimeAllChannelReceived();
         System.out.println("start fetching data...");
 
 		
 		while (true)
 		{
+    		System.out.println("!!");
 			ReceivedDataSortedByTime rds=f.Fetch();
 			if (f==null) return;
+    		System.out.println("@@");
 			if (!rds.IsEmpty()) 
 				if (!r.Process(rds)) 
 					return;
+			
+    		System.out.println("##");
 		}
 	}
 	

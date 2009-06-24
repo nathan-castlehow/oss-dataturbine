@@ -48,6 +48,8 @@ public class 			SaveDataItem
 	    	 double d=0,t=Double.parseDouble(r[1]);
 	    	 if (r[0].isEmpty())
 	    		 d=t;
+	    	 else
+	    		 d=Double.parseDouble(r[0]);
 	    	
 	    	 list_data[i]=d;
 	    	 list_time[i]=t;

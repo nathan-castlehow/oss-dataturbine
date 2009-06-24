@@ -16,10 +16,10 @@ public class ReceivedDataFromChannel
 	int index=0;						// how many data has been sent?
 	
 	// have we sent all?
-	boolean bIsempty()
+	boolean IsEmpty()
 	{
-		if (index>=data.length) return false;
-		return true;
+		if (index>=data.length) return true;
+		return false;
 	}
 	
 	SinkChannelItem GetSink()		{return sink_channel;}

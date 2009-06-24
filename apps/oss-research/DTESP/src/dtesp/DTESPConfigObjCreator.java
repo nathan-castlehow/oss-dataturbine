@@ -195,26 +195,33 @@ public class DTESPConfigObjCreator
     	c.clear();
     	
     	int t;
+    	
+    	t=-1;
     	t= 	new Integer(e.getAttribute("year"));
-		c.set(Calendar.YEAR,t);
+		if (t!=-1) c.set(Calendar.YEAR,t);
 
+    	t=-1;
 		t= 	new Integer(e.getAttribute("month"));
-		c.set(Calendar.MONTH,t-1);
+		if (t!=-1) c.set(Calendar.MONTH,t-1);
 
+    	t=-1;
 		t= 	new Integer(e.getAttribute("date"));
-		c.set(Calendar.DATE,t);
+		if (t!=-1) c.set(Calendar.DATE,t);
 		
 		
+    	t=-1;
 		t= 	new Integer(e.getAttribute("hour"));
-		c.set(Calendar.HOUR,t);
+		if (t!=-1) c.set(Calendar.HOUR,t);
 		
 
+    	t=-1;
 		t= 	new Integer(e.getAttribute("minute"));
-		c.set(Calendar.MINUTE,t);
+		if (t!=-1) c.set(Calendar.MINUTE,t);
 		
 
+    	t=-1;
 		t= 	new Integer(e.getAttribute("second"));
-		c.set(Calendar.SECOND,t);
+		if (t!=-1) c.set(Calendar.SECOND,t);
 		
 		
 		return c;

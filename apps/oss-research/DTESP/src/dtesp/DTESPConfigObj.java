@@ -139,7 +139,7 @@ public class DTESPConfigObj {
     /** 
      *  Use subscribe to receive data from data turbine
      */	
-//	public boolean bSubscribe=false;
+	public boolean bSubscribe=false;
 	
     /** 
      *  Start time of the request
@@ -148,7 +148,7 @@ public class DTESPConfigObj {
     /** 
      *  Data duration for one fetch
      */	
-	double request_duration=1200; // 20 min
+	double request_duration=1200*2; // 20 min
 	
     /** 
      * Time of end request 
