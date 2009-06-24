@@ -41,15 +41,11 @@ public class dtesp {
 		
 		while (true)
 		{
-    		System.out.println("!!");
 			ReceivedDataSortedByTime rds=f.Fetch();
 			if (f==null) return;
-    		System.out.println("@@");
 			if (!rds.IsEmpty()) 
 				if (!r.Process(rds)) 
 					return;
-			
-    		System.out.println("##");
 		}
 	}
 	

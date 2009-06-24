@@ -402,7 +402,7 @@ public class DTESPForwarder {
      
     protected ReceivedDataSortedByTime Fetch()
     {
-		System.out.println("In");
+
 
     	
     	
@@ -431,7 +431,7 @@ public class DTESPForwarder {
             {
             	long current_tick=System.currentTimeMillis();
 
-        		System.out.println("1");
+
 
             	// if time_to_insert ms is passed, insert sample data
             	{
@@ -454,7 +454,7 @@ public class DTESPForwarder {
             	duration_not_to_include+=System.currentTimeMillis()-current_tick;
             	
             	
-        		System.out.println("2");
+
           	
             	// request data for next window if not subscribe
             	if (!config_obj.bSubscribe)
@@ -517,7 +517,7 @@ public class DTESPForwarder {
 		        	else
 		        		retry_times=0;
 
-	        		System.out.println("3");	        	
+      	
 		        	// duration smaller by very little amount to eliminate getting duplicated data   
 //		        	double duration_=Double.longBitsToDouble(Double.doubleToLongBits(duration)-1);
 		        	// we request data
@@ -576,7 +576,7 @@ public class DTESPForwarder {
             		}
             		
             	}
-        		System.out.println("4");         	
+
             	if (!config_obj.bSubscribe)
             	{
             		current_request_start=next_request_start;
