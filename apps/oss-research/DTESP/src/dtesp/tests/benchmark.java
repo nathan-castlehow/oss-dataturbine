@@ -3,6 +3,7 @@ package dtesp.tests;
 import java.util.Vector;
 
 import dtesp.*;
+import dtesp.Config.*;
 
 
 
@@ -48,9 +49,9 @@ public class benchmark
 	}
 	
 	
-	static public DTESPConfigObj MakeConfiguration(double hertz, int channels, int window_time_size, int duration)
+	static public ConfigObj MakeConfiguration(double hertz, int channels, int window_time_size, int duration)
 	{
-		DTESPConfigObj co= new DTESPConfigObj();
+		ConfigObj co= new ConfigObj();
 		
 	
 		

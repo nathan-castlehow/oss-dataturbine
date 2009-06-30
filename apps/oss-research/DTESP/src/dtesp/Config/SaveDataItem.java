@@ -1,4 +1,4 @@
-package dtesp;
+package dtesp.Config;
 
 import java.util.Random;
 
@@ -18,7 +18,7 @@ import org.w3c.dom.Element;
  */
 public class 			SaveDataItem
 {
-	public SaveDataItem(Element e, DTESPConfigObj co) 
+	public SaveDataItem(Element e, ConfigObj co) 
 	{
 		sci=co.GetSourceChannel(e.getAttribute("source_channel"));
 		time_to_insert=Long.parseLong(e.getAttribute("after"));
@@ -98,10 +98,10 @@ public class 			SaveDataItem
 			t+=T;
 		}
 	}	
-	SourceChannelItem				sci;
-	long							time_to_insert=-1;
-	double [] 						list_data;
-	double [] 						list_time;
+	public SourceChannelItem				sci;
+	public long								time_to_insert=-1;
+	public double [] 						list_data;
+	public double [] 						list_time;
 	
 	
 };	

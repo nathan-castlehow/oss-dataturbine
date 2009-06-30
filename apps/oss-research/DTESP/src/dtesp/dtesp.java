@@ -34,11 +34,11 @@ public class dtesp
 	public static void run(ConfigObj co)
 	{
 		
-		Forwarder f=new Forwarder();
+		SinkStub f=new SinkStub();
 		
 		f.Init(co);
 		
-		Receiver r=new Receiver();
+		EsperStub r=new EsperStub();
 		r.Init(co);
 
 

@@ -1,4 +1,4 @@
-package dtesp;
+package dtesp.Config;
 
 
 import com.rbnb.sapi.ChannelMap;
@@ -49,15 +49,15 @@ import org.w3c.dom.Element;
 			client=client_;
 			connection_string=connection_string_;
 		}
-		String				name;
-		String				client;
-		Source          	source;
-	    String				connection_string;
-	    ChannelMap			cmap;
+		public String				name;
+		public String				client;
+		public Source      	    	source;
+		public String				connection_string;
+		public ChannelMap			cmap;
 	    
-		int					cacheSize=100;
-		String				archiveMode="none";
-		int					archiveSize=0;	    
+		public int					cacheSize=100;
+		public String				archiveMode="none";
+		public int					archiveSize=0;	    
 	};
 	
 	

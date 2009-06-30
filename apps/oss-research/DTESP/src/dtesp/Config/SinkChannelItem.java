@@ -1,5 +1,4 @@
-package dtesp;
-
+package dtesp.Config;
 
 import org.w3c.dom.Element;
 
@@ -28,7 +27,7 @@ public class 			SinkChannelItem
 	 *   channel_string- name of channel 
 	 *   event- name of esper event associated with the channel 
 	 */		
-	public SinkChannelItem(Element e, DTESPConfigObj co) 
+	public SinkChannelItem(Element e, ConfigObj co) 
 	{
 		name				=				e.getAttribute("name");
 		channel_string		=				e.getAttribute("channel_string");
@@ -50,11 +49,11 @@ public class 			SinkChannelItem
 		channel_string	=channel_string_;
 		event_item		=event_item_;
 	}
-	String			name;
-	String			channel_string;
-	SinkItem		sink_item;
-    EventItem 		event_item;
-    double			last_data_time=-1;
+	public String			name;
+	public String			channel_string;
+	public SinkItem		sink_item;
+	public EventItem 		event_item;
+    public double			last_data_time=-1;
     
     
     public SourceChannelItem	copy_to_source_channel;    

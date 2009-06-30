@@ -1,4 +1,4 @@
-package dtesp;
+package dtesp.Config;
 
 
 import org.w3c.dom.Element;
@@ -31,7 +31,7 @@ public class 			SinkItem
 	 *   connection_string
 	 *   copy_to_source
 	 */
-	public SinkItem(Element e, DTESPConfigObj co) 
+	public SinkItem(Element e, ConfigObj co) 
 	{
 		name= 				e.getAttribute("name");
 		client=				e.getAttribute("client");
@@ -50,12 +50,12 @@ public class 			SinkItem
 	{
 		channel_item_list.add(sci);
 	}
-	String					name;
-	String					client;
-	Sink          			sink;
-    String					connection_string;
-    ChannelMap				cmap;
-    List<SinkChannelItem>	channel_item_list= new LinkedList<SinkChannelItem>();
-    SourceItem 				copy_to_source;
+	public String					name;
+	public String					client;
+	public Sink          			sink;
+	public String					connection_string;
+    public ChannelMap				cmap;
+    public List<SinkChannelItem>	channel_item_list= new LinkedList<SinkChannelItem>();
+    public SourceItem 				copy_to_source;
 };
 

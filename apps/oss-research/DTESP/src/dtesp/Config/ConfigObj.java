@@ -1,4 +1,4 @@
-package dtesp;
+package dtesp.Config;
 
 
 
@@ -24,32 +24,32 @@ public class ConfigObj {
 	/**
 	 * List of source configuration(SourceItem)
 	 */
-	HashMap<String, SourceItem> 		hmap_source_item			= new HashMap<String, SourceItem>();
+	public HashMap<String, SourceItem> 		hmap_source_item			= new HashMap<String, SourceItem>();
 	/**
 	 * List of sink configuration(SinkItem)
 	 */
-	HashMap<String, SinkItem> 			hmap_sink_item				= new HashMap<String, SinkItem>();			
+	public HashMap<String, SinkItem> 			hmap_sink_item				= new HashMap<String, SinkItem>();			
 	/**
 	 * List of source channel configuration(SourceChannelItem)
 	 */
-	HashMap<String, SourceChannelItem> 	hmap_source_channel_item	= new HashMap<String, SourceChannelItem>();
+	public HashMap<String, SourceChannelItem> 	hmap_source_channel_item	= new HashMap<String, SourceChannelItem>();
 	/**
 	 * List of sink channel configuration(SinkChannelItem)
 	 */
-	HashMap<String, SinkChannelItem> 	hmap_sink_channel_item		= new HashMap<String, SinkChannelItem>();
+	public HashMap<String, SinkChannelItem> 	hmap_sink_channel_item		= new HashMap<String, SinkChannelItem>();
 	/**
 	 * List of event configuration(EventItem)
 	 */
-	HashMap<String, EventItem>			hmap_event_item				= new HashMap<String, EventItem>();
+	public HashMap<String, EventItem>			hmap_event_item				= new HashMap<String, EventItem>();
 	/**
 	 * List of query configuration(QueryItem)
 	 */
-	List<QueryItem>						list_query_item				= new LinkedList<QueryItem>();
+	public List<QueryItem>						list_query_item				= new LinkedList<QueryItem>();
 
 	/**
 	 * List of SaveData (save data to DT before running)
 	 */
-	LinkedList<SaveDataItem>			list_save_data_item			= new LinkedList<SaveDataItem>();
+	public LinkedList<SaveDataItem>			list_save_data_item			= new LinkedList<SaveDataItem>();
 
 	
 	/**
@@ -144,16 +144,16 @@ public class ConfigObj {
     /** 
      *  Start time of the request
      */	
-	double request_start=0;
+	public double request_start=0;
     /** 
      *  Data duration for one fetch
      */	
-	double request_duration=1200000; // 20 min
+	public double request_duration=1200000; // 20 min
 	
     /** 
      * Time of end request 
      */		
-	double end_time=-1;
+	public double end_time=-1;
     /**
      * <pre> 
      * maximum of time advancement for esper
@@ -162,7 +162,7 @@ public class ConfigObj {
      *   Current esper time is 0 sec. maximum_time_granuality is .5 sec. Next data came at 2 sec. 
      *   Then, esper time will be set at .5 sec, 1 sec, 1.5 sec, and 2 sec.
      */	
-	long maximum_time_granuality=60000; // 1 min
+	public long maximum_time_granuality=60000; // 1 min
 	
     /** 
      * <pre>
@@ -173,7 +173,7 @@ public class ConfigObj {
      * 3 - no input & output
      * 4 - none
      */	
-	int	output_level=1;
+	public int	output_level=1;
 	
 	
 }

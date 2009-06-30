@@ -1,4 +1,4 @@
-package dtesp;
+package dtesp.Config;
 
 import org.w3c.dom.Element;
 
@@ -23,6 +23,6 @@ public class 			EventItem
 		name	=name_;
 		field	=field_;
 	}
-	String				name;
-	String				field;
+	public String				name;
+	public String				field;
 };	

@@ -1,4 +1,4 @@
-package dtesp;
+package dtesp.Config;
 import org.w3c.dom.Element;
 
 /**
@@ -16,7 +16,7 @@ public class 			QueryItem
 	 * attributes of xml:
 	 * name, query_string, and source_channel
 	 */
-	public QueryItem(Element e,DTESPConfigObj co) 
+	public QueryItem(Element e,ConfigObj co) 
 	{
 		name						=						e.getAttribute("name");
 		query_string				=						e.getAttribute("query_string");
@@ -29,7 +29,7 @@ public class 			QueryItem
 		query_string		=query_string_;
 		source_channel_item	=source_channel_item_;
 	}    
-	String				name;
-	String 				query_string;
-	SourceChannelItem 	source_channel_item;
+	public String				name;
+	public String 				query_string;
+	public SourceChannelItem 	source_channel_item;
 };		

@@ -1,4 +1,4 @@
-package dtesp;
+package dtesp.Config;
 
 
 	import org.w3c.dom.Element;
@@ -26,7 +26,7 @@ package dtesp;
 		 * name, channel_string, source, event, and is_zero_one_graph
 		 */
 		
-		public SourceChannelItem(Element e, DTESPConfigObj co) 
+		public SourceChannelItem(Element e, ConfigObj co) 
 		{
 			name				=				e.getAttribute("name");
 			channel_string		=				e.getAttribute("channel_string");
@@ -51,12 +51,12 @@ package dtesp;
 			
 			is_zero_one_graph=is_zero_one_graph_;
 		}
-		String				name;
-		String				channel_string;
+		public String				name;
+		public String				channel_string;
 	
-	    EventItem	 		event_item;
-	    SourceItem         	source_item;	  
-    	Boolean				is_zero_one_graph;
-	    int					channel_index;
+		public EventItem	 		event_item;
+	    public SourceItem         	source_item;	  
+	    public Boolean				is_zero_one_graph;
+    	public int					channel_index;
 	};	
 

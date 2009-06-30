@@ -1,5 +1,5 @@
 package dtesp;
-
+import dtesp.Config.*;
 import com.rbnb.sapi.*;
 import com.espertech.esper.client.*;
 
@@ -10,9 +10,9 @@ import com.espertech.esper.client.*;
     public class EsperEventListener implements UpdateListener
     {
     	SourceChannelItem 	source_channel_item;
-    	DTESPReceiver dtr;
+    	EsperStub dtr;
 
-        public EsperEventListener(SourceChannelItem sci, DTESPReceiver r)
+        public EsperEventListener(SourceChannelItem sci, EsperStub r)
         {
         	source_channel_item=sci;
         	dtr=r;

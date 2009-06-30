@@ -1,4 +1,5 @@
 package dtesp;
+import dtesp.Config.*;
 
 
 
@@ -10,7 +11,7 @@ package dtesp;
  */
 public class ReceivedDataFromChannel
 {
-	SinkChannelItem		sink_channel;
+	public SinkChannelItem		sink_channel;
 	double[] data;						// data received from one fetch in a channel
 	double[] data_time;					// time stamp associated with it
 	int index=0;						// how many data has been sent?
@@ -22,7 +23,7 @@ public class ReceivedDataFromChannel
 		return false;
 	}
 	
-	SinkChannelItem GetSink()		{return sink_channel;}
+	public SinkChannelItem GetSink()		{return sink_channel;}
 	double	GetLastTime()			{return data_time[data_time.length-1];}
 	
 	double 	GetData()       		{return data[index];}
