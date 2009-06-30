@@ -12,7 +12,7 @@ import java.util.*;
 
 
 
-public class DTESPConfigObj {
+public class ConfigObj {
 
 
 	/**
@@ -148,7 +148,7 @@ public class DTESPConfigObj {
     /** 
      *  Data duration for one fetch
      */	
-	double request_duration=1200*2; // 20 min
+	double request_duration=1200000; // 20 min
 	
     /** 
      * Time of end request 
@@ -174,6 +174,7 @@ public class DTESPConfigObj {
      * 4 - none
      */	
 	int	output_level=1;
+	
 	
 }
 

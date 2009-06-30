@@ -36,16 +36,14 @@ public class 			SinkItem
 		name= 				e.getAttribute("name");
 		client=				e.getAttribute("client");
 		connection_string=	e.getAttribute("connection_string");
-
-		copy_to_source =	co.GetSource(e.getAttribute("copy_to_source"));		
+		copy_to_source=		co.GetSource(e.getAttribute("copy_to_source"));
 	}		
 	
-	public SinkItem(String name_, String client_, String connection_string_, SourceItem si)
+	public SinkItem(String name_, String client_, String connection_string_)
 	{
 		name= name_;
 		client=client_;
 		connection_string=connection_string_;
-		copy_to_source=si;
 	}
 	
 	public void AddChannel(SinkChannelItem sci)
@@ -56,8 +54,8 @@ public class 			SinkItem
 	String					client;
 	Sink          			sink;
     String					connection_string;
-    SourceItem				copy_to_source;
     ChannelMap				cmap;
     List<SinkChannelItem>	channel_item_list= new LinkedList<SinkChannelItem>();
+    SourceItem 				copy_to_source;
 };
 

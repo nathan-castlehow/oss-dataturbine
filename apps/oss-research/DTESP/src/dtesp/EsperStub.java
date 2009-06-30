@@ -1,5 +1,5 @@
 package dtesp;
-
+import dtesp.Config.*;
 
 
 import java.util.*;
@@ -14,7 +14,7 @@ import com.espertech.esper.client.time.TimerControlEvent;
 
 
 
-public class DTESPReceiver {
+public class EsperStub {
 
 
 	
@@ -22,17 +22,17 @@ public class DTESPReceiver {
 	/**
 	 * Configuration obj
 	 */
-	DTESPConfigObj config_obj;
+	ConfigObj config_obj;
 	
 
 	
-	public void SetConfigObj(DTESPConfigObj co)
+	public void SetConfigObj(ConfigObj co)
 	{
 		config_obj=co;
 	}
 	 
 	
-	public void Init(DTESPConfigObj co)
+	public void Init(ConfigObj co)
 	{
 		sorted_rd_list=new ReceivedDataSortedByTime();
 		
@@ -43,7 +43,10 @@ public class DTESPReceiver {
 	}
     
   
-        
+	/**
+	 * list of esper event listener
+	 */
+	public Vector<EsperEventListener>	list_event_listener=new Vector<EsperEventListener>();
 
 
     
@@ -91,9 +94,12 @@ public class DTESPReceiver {
 
 			
 			// esper time = time of requested data 
-			last_saved_esper_time=new Double(config_obj.request_start).longValue();
 			if (config_obj.request_start!=0 && config_obj.request_start!=-1)
-				epRuntime.sendEvent(new CurrentTimeEvent(last_saved_esper_time));
+				last_saved_esper_time=0;
+			else
+				last_saved_esper_time=new Double(config_obj.request_start*1000).longValue();
+			epRuntime.sendEvent(new CurrentTimeEvent(last_saved_esper_time));
+				
 			
 		}
 
@@ -115,7 +121,11 @@ public class DTESPReceiver {
 			
 			// if we are going to sent to some source
 			if (qi.source_channel_item!=null)
-				statement.addListener(new EsperEventListener(qi.source_channel_item,this));			
+			{
+				EsperEventListener eel=new EsperEventListener(qi.source_channel_item,this);
+				statement.addListener(eel);
+				list_event_listener.add(eel);
+			}
 		}
 		
     }
@@ -123,6 +133,9 @@ public class DTESPReceiver {
 
     	
 
+    /*
+     * saving last time data is received for each channel
+     */
     
     public HashMap<String, Double> 	hashmap_channel_last_timestamp;
     
@@ -148,6 +161,8 @@ public class DTESPReceiver {
     protected Boolean Process(ReceivedDataSortedByTime  sorted_rd_list_)
     {
     	
+    	double last_time=-1;
+    	
     	if (sorted_rd_list.IsEmpty())
     		sorted_rd_list=sorted_rd_list_;
     	else
@@ -166,13 +181,17 @@ public class DTESPReceiver {
     		double data_time=rd.GetTime();
     		SinkChannelItem c=rd.sink_channel;
     		
-            if (data_time>sorted_rd_list.GetMinTimeOfLastTimeOfAllChannels())// && config_obj.bSubscribe)
+            if (data_time>sorted_rd_list.GetMinTimeOfLastTimeOfAllChannels() && config_obj.bSubscribe)
             {
             	if (config_obj.output_level<3)
             		System.out.println("!declined DT "+ c.name +" : " + data+ " @ " + data_time);
             	return true;
             }
 
+            
+            
+            
+            
             
             sorted_rd_list.RemoveFirstElementAndSort();
             
@@ -187,20 +206,18 @@ public class DTESPReceiver {
             }
             else
             	hashmap_channel_last_timestamp.put(rd.sink_channel.name, data_time);
-            
-
-    		//to eliminate duplicated data from last request  (*) we might not need this because adjustment of duration 
-//            if (data_time==current_request_start && !b_first_request)       continue;
-            
 
             
-//            //if copy to
-//            if (c.copy_to_source_channel!=null)
-//            {
-//            	double []d={data};
-//            	double []t={data_time};
-//            	SendToDT(d, t, c.copy_to_source_channel);
-//            }
+            
+            // Send to DT only time has actually advanced
+            if (last_time!=data_time)
+            	for (EsperEventListener e:list_event_listener)
+            		e.SendToDT();
+
+            
+            last_time=data_time;
+            
+
 
 
             
@@ -212,7 +229,7 @@ public class DTESPReceiver {
             // send new time to esper 
             
             
-            long l_data_time=new Double(data_time).longValue();
+            long l_data_time=new Double(data_time*1000).longValue();
             if (last_saved_esper_time<l_data_time)
             {
             	// to make time advancement less than maximum time granuality 
@@ -244,6 +261,15 @@ public class DTESPReceiver {
             
             // if the channel has more data, push it into list so that rest of the data can be processed
     	}    
+    	
+    	
+
+    	// send to DT just in case something has not been sent
+    	for (EsperEventListener e:list_event_listener)
+    		e.SendToDT();
+    	
+    	
+    	
         return true;
   }
     

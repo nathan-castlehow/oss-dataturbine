@@ -6,6 +6,8 @@ import java.util.LinkedList;
 
 /**
  * This class is list of  ReceivedDataFromChannel
+ * Contains received data for same channel (not over difference channel)
+ * Assumes added in time order because we retrieve data from data turbine with a time order  
  */
 public class ReceivedDataListFromChannel extends LinkedList<ReceivedDataFromChannel>
 {

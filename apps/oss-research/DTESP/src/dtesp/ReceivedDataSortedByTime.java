@@ -54,6 +54,7 @@ public class ReceivedDataSortedByTime
 		ReceivedDataListFromChannel l=new ReceivedDataListFromChannel();
 		l.add(rd);
 		Add(l);
+		channel_hash_map.put(rd.sink_channel.name, l);
 	}
 
 	/**
@@ -74,7 +75,7 @@ public class ReceivedDataSortedByTime
 	 * 
 	 * Doesn't assume that the ReceivedDataListFromChannel for the channel already exists
 	 */
-	public void Add(ReceivedDataListFromChannel rl)
+	protected void Add(ReceivedDataListFromChannel rl)
 	{
 		double time=rl.GetFirstTime();
 		int index=0;
@@ -144,4 +145,47 @@ public class ReceivedDataSortedByTime
 	{
 		return time_list.isEmpty();
 	}
+	
+	
+//	static public void Test()
+//	{
+//		ReceivedDataFromChannel 	[] r	= new ReceivedDataFromChannel[8];
+//		ReceivedDataListFromChannel [] rl	= new ReceivedDataListFromChannel [4];
+//		ReceivedDataSortedByTime 	[] sl	= new ReceivedDataSortedByTime[2];
+//		
+//		SinkChannelItem []sci= new SinkChannelItem[2];
+//		SinkItem si=new SinkItem("","","",null);
+//		
+//		int i;
+//		for (i=0;i<8;i++) r[i]=new ReceivedDataFromChannel();
+//		for (i=0;i<4;i++) rl[i]=new ReceivedDataListFromChannel();
+//		for (i=0;i<2;i++) sl[i]=new ReceivedDataSortedByTime();
+//		for (i=0;i<2;i++) sci[i]=new SinkChannelItem(Integer.toString(i),si,"",null);
+//		
+//		
+//		
+//		sci[0].name="1";
+//		sci[1].name="2";
+//
+//		
+//		for (i=0;i<8;i++)
+//		{
+//			r[i].data		=new double []{i};
+//			r[i].data_time	=new double []{i};
+//			
+//			r[i].sink_channel=sci[i%2];
+//			
+//			sl[i/4].Add(r[i].GetTime(), r[i]);
+//		}
+//		
+//		
+//		
+//		sl[0].Add(sl[1]);
+//		
+//		while (!sl[0].IsEmpty())
+//		{
+//	        System.out.println(""+sl[0].GetFirstRd().GetData()+" "+sl[0].GetFirstRd().GetTime());
+//	        sl[0].RemoveFirstElementAndSort();
+//		}	
+//	}
 };

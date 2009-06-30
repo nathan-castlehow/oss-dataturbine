@@ -1,5 +1,7 @@
 package dtesp;
 
+import java.util.Random;
+
 import org.w3c.dom.Element;
 
 
@@ -30,6 +32,14 @@ public class 			SaveDataItem
 		time_to_insert=time_to_insert_;
 	}
 	
+	public SaveDataItem(int duration, double hertz, int max, int time_to_insert_, SourceChannelItem	sci_) 
+	{
+		sci=sci_;
+		time_to_insert=time_to_insert_;
+		MakeData(duration, hertz, max);
+	}		
+
+	
 	/**
 	 * Parse xml string to data format. format data1@time1;data2@time2
 	 */
@@ -58,6 +68,36 @@ public class 			SaveDataItem
 	     }
 	}
 	
+	
+	/**
+	 * Make random data with specific duration, hertz, and maximum
+	 */
+	
+	void MakeData(int duration, double hertz, int max)
+	{
+		int i;
+		
+		
+		double t=0,T=1/hertz;
+		Random r=new Random();
+		int n;
+		n=(int)(duration*hertz);
+
+		list_data = new double[n];
+		list_time = new double[n];
+		
+		
+		
+		
+		for (i=0;i<n;i++)
+		{
+			int d=r.nextInt(max);
+			list_data[i]=(double)d;
+	    	list_time[i]=t;
+			
+			t+=T;
+		}
+	}	
 	SourceChannelItem				sci;
 	long							time_to_insert=-1;
 	double [] 						list_data;

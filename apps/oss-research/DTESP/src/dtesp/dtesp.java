@@ -1,41 +1,50 @@
 package dtesp;
+import dtesp.Config.*;
 
 
 
 
 
-public class dtesp {
-
-
+public class dtesp
+{
 	/**
-	 * 	Main method to start dtesp
+	 * 	Main- load config and run
 	 */
+
 	public static void main(String args[])
 	{
 		
-
-		
-		
-		
-		DTESPConfigObjCreator coc=new DTESPConfigObjCreator();
-		DTESPConfigObj co;
+		ConfigObjCreator coc=new ConfigObjCreator();
+		ConfigObj co;
 		
 		if (args.length==0)
 			co=coc.CreateFromXml("setting.xml");
 		else
 			co=coc.CreateFromXml(args[0]);
 		
-		DTESPForwarder f=new DTESPForwarder();
+		
+		run(co);
+
+	}
+	
+	/**
+	 * 	Start dtesp
+	 */
+
+	public static void run(ConfigObj co)
+	{
+		
+		Forwarder f=new Forwarder();
 		
 		f.Init(co);
 		
-		DTESPReceiver r=new DTESPReceiver();
+		Receiver r=new Receiver();
 		r.Init(co);
 
 
 		
 		f.StartMeasure();
-		f.SetTimeAllChannelReceived();
+		if (!co.bSubscribe) f.SetTimeAllChannelReceived();
         System.out.println("start fetching data...");
 
 		
@@ -46,9 +55,10 @@ public class dtesp {
 			if (!rds.IsEmpty()) 
 				if (!r.Process(rds)) 
 					return;
-		}
+		
+		}	
 	}
-	
+
 	
 }
 

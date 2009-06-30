@@ -1,5 +1,5 @@
 package dtesp;
-
+import dtesp.Config.*;
 
 
 import java.text.DateFormat;
@@ -12,7 +12,7 @@ import com.rbnb.sapi.*;
 
 
 
-public class DTESPForwarder {
+public class SinkStub {
 
 
 	
@@ -21,9 +21,9 @@ public class DTESPForwarder {
 	/**
 	 * Configuration obj
 	 */
-	DTESPConfigObj config_obj;
+	ConfigObj config_obj;
 
-	public void SetConfigObj(DTESPConfigObj co)
+	public void SetConfigObj(ConfigObj co)
 	{
 		config_obj=co;
 	}
@@ -34,7 +34,7 @@ public class DTESPForwarder {
 	 * 
 	 */
 	
-	public void Init(DTESPConfigObj co)
+	public void Init(ConfigObj co)
 	{
 		SetConfigObj(co);
 		Init_DT();
@@ -56,10 +56,10 @@ public class DTESPForwarder {
         // Create source
         for (SourceItem s : config_obj.hmap_source_item.values())
         {
-        	System.out.println("Connecting Source "+s.name+": "+s.connection_string);
+        	System.out.println("Connecting Source "+s.name+": "+s.connection_string+" ("+s.cacheSize+","+s.archiveMode+","+s.archiveSize+")");
 	        try
 	        {
-	            s.source = new Source(); 	// Default source is 100-frame cache, no archive
+	            s.source = new Source(s.cacheSize,s.archiveMode,s.archiveSize); 	
 	            
 	            // connect!
 	            s.source.OpenRBNBConnection(s.connection_string, s.client);
@@ -152,57 +152,11 @@ public class DTESPForwarder {
         
 
         // not using subscribe
-//		if (!config_obj.bSubscribe)
+		if (!config_obj.bSubscribe)
 		{
 	        // load start time if we need to fetch from the start
 			if (config_obj.request_start==-1)
-			{
-				double oldest_time=-1;
-		        try 
-		        {
-			        for (SinkItem s : config_obj.hmap_sink_item.values())
-				        if (!s.channel_item_list.isEmpty())
-					        s.sink.Request(s.cmap, 0,0, "oldest");
-				        
-					
-					// fetch from all the channel
-					for (SinkItem s:config_obj.hmap_sink_item.values())
-					{
-						ChannelMap outmap = s.sink.Fetch(1000);
-				
-						if (outmap.GetIfFetchTimedOut())	continue;
-				    
-						for (SinkChannelItem c:s.channel_item_list)
-						{
-				            int chanIdx = outmap.GetIndex(c.channel_string);
-				           
-				            if(chanIdx >= 0)
-				            {
-				                double[] data_time = outmap.GetTimes(chanIdx);
-				                
-				                
-				                // set to lastest time
-				                if (oldest_time>=data_time[0] || oldest_time==-1)
-				                	oldest_time=data_time[0];
-				            }
-						}
-					}
-						
-		        }
-		        catch (SAPIException se) {
-		            System.out.println("Error finding oldest time");
-		            return;
-		        }
-		        
-		        config_obj.request_start=oldest_time;
-		        
-				DateFormat df=DateFormat.getInstance();
-				Calendar c=Calendar.getInstance();
-				c.setTimeInMillis((long)oldest_time*1000);
-				
-				System.out.println("Requested time "+df.format(c.getTime()));
-		        
-			}
+		        config_obj.request_start=FindOldestTime();
 		}
         
         
@@ -243,6 +197,57 @@ public class DTESPForwarder {
      
 
     }
+    
+    
+    public double FindOldestTime()
+    {
+		double oldest_time=-1;
+        try 
+        {
+	        for (SinkItem s : config_obj.hmap_sink_item.values())
+		        if (!s.channel_item_list.isEmpty())
+			        s.sink.Request(s.cmap, 0,0, "oldest");
+		        
+			
+			// fetch from all the channel
+			for (SinkItem s:config_obj.hmap_sink_item.values())
+			{
+				ChannelMap outmap = s.sink.Fetch(1000);
+		
+				if (outmap.GetIfFetchTimedOut())	continue;
+		    
+				for (SinkChannelItem c:s.channel_item_list)
+				{
+		            int chanIdx = outmap.GetIndex(c.channel_string);
+		           
+		            if(chanIdx >= 0)
+		            {
+		                double[] data_time = outmap.GetTimes(chanIdx);
+		                
+		                
+		                // set to lastest time
+		                if (oldest_time>=data_time[0] || oldest_time==-1)
+		                	oldest_time=data_time[0];
+		            }
+				}
+			}
+				
+        }
+        catch (SAPIException se) {
+            System.out.println("Error finding oldest time");
+            return -1;
+        }
+        
+        
+		DateFormat df=DateFormat.getInstance();
+		Calendar c=Calendar.getInstance();
+		c.setTimeInMillis((long)oldest_time*1000);
+		
+		System.out.println("Requested time "+df.format(c.getTime()));
+     
+		return oldest_time;
+    }
+
 
         
         
@@ -346,15 +351,7 @@ public class DTESPForwarder {
 			
 
 			
-			
-//			if (time_all_channel_received!=-1)
-//			{
-//				DateFormat df=DateFormat.getInstance();
-//				Calendar c=Calendar.getInstance();
-//				c.setTimeInMillis((long)time_all_channel_received*1000);
-//				
-//				System.out.println("Last time of data "+df.format(c.getTime()));
-//			}
+
 		}
 		catch (SAPIException e)
 		{

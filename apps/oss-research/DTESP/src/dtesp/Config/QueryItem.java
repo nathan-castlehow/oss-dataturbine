@@ -7,7 +7,6 @@ import org.w3c.dom.Element;
  * fields
  *   name- name of the channel
  *   query_string- esper query string
- *   event_item- output event of query 
  */		
 public class 			QueryItem
 {
@@ -24,7 +23,7 @@ public class 			QueryItem
 		source_channel_item			=co.GetSourceChannel(	e.getAttribute("source_channel"));
 	}	
 	
-	public QueryItem(String name_,String query_string_, EventItem event_item_, SourceChannelItem source_channel_item_)
+	public QueryItem(String name_,String query_string_, SourceChannelItem source_channel_item_)
 	{
 		name				=name_;
 		query_string		=query_string_;

@@ -35,6 +35,8 @@ package dtesp;
 			event_item			=co.GetEvent(	e.getAttribute("event"));
 			
 			is_zero_one_graph	=				e.getAttribute("zero_one_graph").compareTo("1")==0;
+			
+	
 		}		
 				
 		/**
@@ -51,6 +53,7 @@ package dtesp;
 		}
 		String				name;
 		String				channel_string;
+	
 	    EventItem	 		event_item;
 	    SourceItem         	source_item;	  
     	Boolean				is_zero_one_graph;

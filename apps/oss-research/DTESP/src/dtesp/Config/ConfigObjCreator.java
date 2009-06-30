@@ -17,16 +17,16 @@ import org.xml.sax.SAXException;
 
 
 
-public class DTESPConfigObjCreator
+public class ConfigObjCreator
 {
 	/**
 	 * Load XML setting file
 	 * 	 * @param fn - filename
 	 * 
 	 */
-	public DTESPConfigObj CreateFromXml(String fn)
+	public ConfigObj CreateFromXml(String fn)
 	{
-		DTESPConfigObj co=new DTESPConfigObj();
+		ConfigObj co=new ConfigObj();
 		co.config_name=fn;
 		
 		Document dom=null;
@@ -120,7 +120,7 @@ public class DTESPConfigObjCreator
 	 *   
 	 *   subscribe:						use subscribe to receive data from DT
 	 */
-	protected void SetEnvironment(DTESPConfigObj co, Element e)
+	protected void SetEnvironment(ConfigObj co, Element e)
 	{
 		if (e.hasAttribute("esper_time_granuality_minute"))
 			co.maximum_time_granuality=new Integer(e.getAttribute("esper_time_granuality_minute"))*60*1000;
@@ -144,7 +144,7 @@ public class DTESPConfigObjCreator
 	 *  mode					:	if mode=="start", this will start fetching data from the start
 	 *  request_time_window_min	: length of data window to be requested for one fetch instruction in minutes   
 	 */
-	protected void SetRequestTime(DTESPConfigObj co, Element e)
+	protected void SetRequestTime(ConfigObj co, Element e)
 	{
 
 		String mode=e.getAttribute("mode");
@@ -171,7 +171,7 @@ public class DTESPConfigObjCreator
 		co.request_start=r;
 	}
 
-	protected void SetEndTime(DTESPConfigObj co, Element e)
+	protected void SetEndTime(ConfigObj co, Element e)
 	{
 
 		
