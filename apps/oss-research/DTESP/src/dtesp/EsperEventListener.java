@@ -9,12 +9,16 @@ import com.espertech.esper.client.*;
      */
     public class EsperEventListener implements UpdateListener
     {
-    	SourceChannelItem 	source_channel_item;
-    	EsperStub dtr;
+    	SourceChannelItem	source_channel_item;
+    	String				field_name;
+    	SourceStub			source;
+    	EsperStub 			dtr;
 
-        public EsperEventListener(SourceChannelItem sci, EsperStub r)
+        public EsperEventListener(SourceChannelItem	source_channel_item_, String	field_name_, SourceStub source_, EsperStub r)
         {
-        	source_channel_item=sci;
+        	source_channel_item=source_channel_item_;
+        	field_name=field_name_;
+        	source=source_;
         	dtr=r;
         }
         
@@ -22,27 +26,8 @@ import com.espertech.esper.client.*;
         {
         	if (has_data)
         	{
-        	    ChannelMap 	output_cmap		=source_channel_item.source_item.cmap;
-        	    Source 		source			=source_channel_item.source_item.source;
-        	    int			channel_index	=source_channel_item.channel_index;
 
-        	    try
-        	    {
-        	    	output_cmap.PutTimes(time);				    	
-    	    	    
-    	    	    // On nees, we assume that octet-stream data is double-precision float
-    	    	    output_cmap.PutMime(channel_index, "application/octet-stream");
-    	    	    output_cmap.PutDataAsFloat64(channel_index, data);
-    	    	    
-    	    	    source.Flush(output_cmap, false);
-    	    	}
-        	    catch (SAPIException mse) 
-    	    	{
-    	    	    System.out.println("Error saving data!");
-    	    	}
-        	    catch (Exception mse) 
-    	    	{
-    	    	}  
+        		source.SendToDT(data, time, source_channel_item.name);
 
         	    int index=0;
         	    if (data.length==2) index=1;
@@ -73,7 +58,7 @@ import com.espertech.esper.client.*;
 	    	
 	    	
 
-	    	double v=Double.parseDouble(event.get(source_channel_item.event_item.field).toString());
+	    	double v=Double.parseDouble(event.get(field_name).toString());
     	    
     	    if (dtr.config_obj.output_level<3)
     	    	System.out.println("E "+source_channel_item.name+" : " + v);

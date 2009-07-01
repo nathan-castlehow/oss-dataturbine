@@ -37,7 +37,7 @@ public class ReceivedDataListFromChannel extends LinkedList<ReceivedDataFromChan
 	
 	String GetChannelName()
 	{
-		return getFirst().sink_channel.name;
+		return getFirst().sink_channel_name;
 	}
 
 };    

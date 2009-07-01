@@ -1,9 +1,6 @@
 package dtesp.Config;
-
-
-import com.rbnb.sapi.ChannelMap;
-import com.rbnb.sapi.Source;
 import org.w3c.dom.Element;
+
 
 	/**
 	 * <pre>
@@ -51,9 +48,7 @@ import org.w3c.dom.Element;
 		}
 		public String				name;
 		public String				client;
-		public Source      	    	source;
 		public String				connection_string;
-		public ChannelMap			cmap;
 	    
 		public int					cacheSize=100;
 		public String				archiveMode="none";

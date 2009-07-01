@@ -20,36 +20,37 @@ public class 			SaveDataItem
 {
 	public SaveDataItem(Element e, ConfigObj co) 
 	{
-		sci=co.GetSourceChannel(e.getAttribute("source_channel"));
+		source_channel_name=e.getAttribute("source_channel");
 		time_to_insert=Long.parseLong(e.getAttribute("after"));
-		ParseData(e.getTextContent().trim());
+		text=e.getTextContent().trim();
 	}		
 					
-	public SaveDataItem(SourceChannelItem sci_, String data_, long time_to_insert_)
+	public SaveDataItem(String sci_, String text_, long time_to_insert_)
 	{
-		sci=sci_;
-		ParseData(data_);
+		source_channel_name=sci_;
+		text=text_;
 		time_to_insert=time_to_insert_;
 	}
 	
-	public SaveDataItem(int duration, double hertz, int max, int time_to_insert_, SourceChannelItem	sci_) 
-	{
-		sci=sci_;
-		time_to_insert=time_to_insert_;
-		MakeData(duration, hertz, max);
-	}		
-
+//	public SaveDataItem(int duration, double hertz, int max, int time_to_insert_, String	sci_) 
+//	{
+//		source_channel_name=sci_;
+//		time_to_insert=time_to_insert_;
+//		MakeData(duration, hertz, max);
+//	}		
+	
 	
 	/**
 	 * Parse xml string to data format. format data1@time1;data2@time2
 	 */
 	
-	void ParseData(String s)
+	public SaveDataRuntime ParseData(String s)
 	{
+		SaveDataRuntime sd=new SaveDataRuntime();
 		String []st=s.trim().split(";");
 
-		list_data = new double[st.length];
-		list_time = new double[st.length];
+		sd.data = new double[st.length];
+		sd.time = new double[st.length];
 		
 		int i=0;
 	     for (String s_:st) 
@@ -61,11 +62,14 @@ public class 			SaveDataItem
 	    	 else
 	    		 d=Double.parseDouble(r[0]);
 	    	
-	    	 list_data[i]=d;
-	    	 list_time[i]=t;
+	    	 sd.data[i]=d;
+	    	 sd.time[i]=t;
 	    	
 	    	 i++;
 	     }
+	     
+	     sd.conf=this;
+	     return sd;
 	}
 	
 	
@@ -73,8 +77,9 @@ public class 			SaveDataItem
 	 * Make random data with specific duration, hertz, and maximum
 	 */
 	
-	void MakeData(int duration, double hertz, int max)
+	public SaveDataRuntime MakeData(int duration, double hertz, int max)
 	{
+		SaveDataRuntime sd=new SaveDataRuntime();
 		int i;
 		
 		
@@ -83,8 +88,8 @@ public class 			SaveDataItem
 		int n;
 		n=(int)(duration*hertz);
 
-		list_data = new double[n];
-		list_time = new double[n];
+		sd.data = new double[n];
+		sd._time = new double[n];
 		
 		
 		
@@ -92,16 +97,19 @@ public class 			SaveDataItem
 		for (i=0;i<n;i++)
 		{
 			int d=r.nextInt(max);
-			list_data[i]=(double)d;
-	    	list_time[i]=t;
+			sd.data[i]=(double)d;
+			sd.time[i]=t;
 			
 			t+=T;
 		}
+		
+	
+		
+		return sd;
 	}	
-	public SourceChannelItem				sci;
+	public String							source_channel_name;
+	public String							text;
 	public long								time_to_insert=-1;
-	public double [] 						list_data;
-	public double [] 						list_time;
 	
 	
 };	

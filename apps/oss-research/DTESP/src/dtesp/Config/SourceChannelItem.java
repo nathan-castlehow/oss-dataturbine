@@ -12,7 +12,6 @@ package dtesp.Config;
 	 *   name- name of the channel
 	 *   source_item- the source configuration class (initialized with string id)
 	 *   channel_string- string to connect this channel 
-	 *   channel_index- channel index associated with source (initialized when connected)
 	 *   event_item - configuration of an event associated with this channel (initialized with string id)
 	 *   is_zero_one_graph - This channel is 0 or 1. Save this channel as a form of a bar graph
 	 */		
@@ -31,8 +30,8 @@ package dtesp.Config;
 			name				=				e.getAttribute("name");
 			channel_string		=				e.getAttribute("channel_string");
 			
-			source_item			=co.GetSource(	e.getAttribute("source"));
-			event_item			=co.GetEvent(	e.getAttribute("event"));
+			event_name			=				e.getAttribute("source");
+			source_name			=				e.getAttribute("event");
 			
 			is_zero_one_graph	=				e.getAttribute("zero_one_graph").compareTo("1")==0;
 			
@@ -42,21 +41,20 @@ package dtesp.Config;
 		/**
 		 * Create explicitly
 		 */
-		public SourceChannelItem(String name_, SourceItem source_item_, String channel_string_, EventItem event_item_, Boolean is_zero_one_graph_)
+		public SourceChannelItem(String name_, String source_item_, String channel_string_, String event_item_, Boolean is_zero_one_graph_)
 		{
 			name= name_;
 			channel_string	=channel_string_;
-			source_item		=source_item_;
-			event_item		=event_item_;
+			event_name		=source_item_;
+			source_name		=event_item_;
 			
 			is_zero_one_graph=is_zero_one_graph_;
 		}
 		public String				name;
 		public String				channel_string;
 	
-		public EventItem	 		event_item;
-	    public SourceItem         	source_item;	  
+		public String	 			event_name;
+	    public String     	    	source_name;	  
 	    public Boolean				is_zero_one_graph;
-    	public int					channel_index;
 	};	
 

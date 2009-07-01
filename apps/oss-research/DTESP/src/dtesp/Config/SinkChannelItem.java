@@ -9,7 +9,7 @@ import org.w3c.dom.Element;
  * Data structure to save a configuration of a sink channel
  * fields
  *   name- name of the channel
- *   sink- sink class owns this channel (initialized with string id of sink)
+ *   sink- sink name who owns this channel (initialized with string id of sink)
  *   channel_string- name of channel to be used for connection 
  *   event- name of esper event associated with the channel 
  *   
@@ -31,30 +31,23 @@ public class 			SinkChannelItem
 	{
 		name				=				e.getAttribute("name");
 		channel_string		=				e.getAttribute("channel_string");
-		
-		SinkItem si			=co.GetSink(	e.getAttribute("sink"));
-		si.AddChannel(this);
-		sink_item=si;
-		event_item			=co.GetEvent(	e.getAttribute("event"));
+
+		sink_name			=				e.getAttribute("sink");
+		event_name			=				e.getAttribute("event");
 	}		
 	
 	/**
 	 * Creating explicitly specifying parameters
 	 */
-	public SinkChannelItem(String name_, SinkItem si, String channel_string_, EventItem event_item_)
+	public SinkChannelItem(String name_, String si, String channel_string_, String event_item_)
 	{
 		name= name_;
-		si.AddChannel(this);
-		sink_item=si;
+		sink_name=si;
 		channel_string	=channel_string_;
-		event_item		=event_item_;
+		event_name		=event_item_;
 	}
 	public String			name;
 	public String			channel_string;
-	public SinkItem		sink_item;
-	public EventItem 		event_item;
-    public double			last_data_time=-1;
-    
-    
-    public SourceChannelItem	copy_to_source_channel;    
+	public String			sink_name;
+	public String	 		event_name;
 };

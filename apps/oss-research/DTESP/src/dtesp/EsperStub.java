@@ -48,7 +48,20 @@ public class EsperStub {
 	 */
 	public Vector<EsperEventListener>	list_event_listener=new Vector<EsperEventListener>();
 
-
+	/**
+	 * Source Stub to save result;
+	 */
+	public SourceStub source_stub;
+	
+	
+	/**
+	 * Initialize source stub 
+	 */
+	public void SetSourceStub(SourceStub st)
+	{
+		source_stub=st;
+	}
+	
     
     /** 
      *  Esper service object
@@ -120,9 +133,15 @@ public class EsperStub {
 			EPStatement statement = epService.getEPAdministrator().createEPL(qi.query_string);
 			
 			// if we are going to sent to some source
-			if (qi.source_channel_item!=null)
+			if (qi.source_channel_name.isEmpty())
 			{
-				EsperEventListener eel=new EsperEventListener(qi.source_channel_item,this);
+		        SourceChannelItem sci=config_obj.hmap_source_channel_item.get(qi.source_channel_name);
+				EsperEventListener eel
+					=new EsperEventListener(
+							sci
+							,config_obj.hmap_event_item.get(sci.event_name).field
+							,source_stub
+							,this);
 				statement.addListener(eel);
 				list_event_listener.add(eel);
 			}
@@ -179,12 +198,12 @@ public class EsperStub {
     		// get the data out
     		double data=rd.GetData();
     		double data_time=rd.GetTime();
-    		SinkChannelItem c=rd.sink_channel;
+    		String event_name=rd.event_name;
     		
             if (data_time>sorted_rd_list.GetMinTimeOfLastTimeOfAllChannels() && config_obj.bSubscribe)
             {
             	if (config_obj.output_level<3)
-            		System.out.println("!declined DT "+ c.name +" : " + data+ " @ " + data_time);
+            		System.out.println("!declined DT "+ event_name +" : " + data+ " @ " + data_time);
             	return true;
             }
 
@@ -197,15 +216,15 @@ public class EsperStub {
             
             
             
-            if (hashmap_channel_last_timestamp.containsKey(rd.sink_channel.name))
+            if (hashmap_channel_last_timestamp.containsKey(rd.sink_channel_name))
             {
-        		Double lt=hashmap_channel_last_timestamp.get(rd.sink_channel.name);
+        		Double lt=hashmap_channel_last_timestamp.get(rd.sink_channel_name);
             	if (data_time==lt)       
             		continue;
             	hashmap_channel_last_timestamp.remove(lt);
             }
             else
-            	hashmap_channel_last_timestamp.put(rd.sink_channel.name, data_time);
+            	hashmap_channel_last_timestamp.put(rd.sink_channel_name, data_time);
 
             
             
@@ -224,7 +243,7 @@ public class EsperStub {
                                 
             
         	if (config_obj.output_level<2)
-        		System.out.println("DT "+ c.name +" : " + data+ " @ " + data_time);
+        		System.out.println("DT "+ event_name +" : " + data+ " @ " + data_time);
 
             // send new time to esper 
             
@@ -252,9 +271,9 @@ public class EsperStub {
             
             // send data to esper
             Map<String, Object> data_ = new LinkedHashMap<String, Object>();
-            data_.put(c.event_item.field, data);
+            data_.put(config_obj.hmap_event_item.get(event_name).field, data);
             
-            epService.getEPRuntime().sendEvent(data_, c.event_item.name);                        
+            epService.getEPRuntime().sendEvent(data_, rd.event_name);                        
 
             
 

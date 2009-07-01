@@ -43,10 +43,10 @@ public class ReceivedDataSortedByTime
 	 */
 	public void Add(double time, ReceivedDataFromChannel rd)
 	{
-		if (channel_hash_map.containsKey(rd.sink_channel.name))
+		if (channel_hash_map.containsKey(rd.sink_channel_name))
 		{
 			// the channel is already in the list, append to it in the end
-			channel_hash_map.get(rd.sink_channel.name).add(rd);
+			channel_hash_map.get(rd.sink_channel_name).add(rd);
 			return;
 		}
 		
@@ -54,7 +54,7 @@ public class ReceivedDataSortedByTime
 		ReceivedDataListFromChannel l=new ReceivedDataListFromChannel();
 		l.add(rd);
 		Add(l);
-		channel_hash_map.put(rd.sink_channel.name, l);
+		channel_hash_map.put(rd.sink_channel_name, l);
 	}
 
 	/**

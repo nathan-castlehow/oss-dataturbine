@@ -1,10 +1,10 @@
 package dtesp;
 import dtesp.Config.*;
-import dtesp.Config.SourceItem;
 
 
 import java.text.DateFormat;
 import java.util.*;
+
 import com.rbnb.sapi.*;
 
 
@@ -41,8 +41,14 @@ public class SinkStub {
 		Init_DT();
 	}
 	 
+
+	/**
+	 * Runtime list
+	 */
+	public HashMap<String, SinkRuntime> 			list_sink					= new HashMap<String, SinkRuntime>();
+	public HashMap<String, SinkChannelRuntime> 		list_sink_channel			= new HashMap<String, SinkChannelRuntime>();
 	
-    
+
     
     /**
      * <pre>
@@ -54,84 +60,58 @@ public class SinkStub {
     {
     	
         
-        // Create source
-        for (SourceItem s : config_obj.hmap_source_item.values())
-        {
-        	System.out.println("Connecting Source "+s.name+": "+s.connection_string+" ("+s.cacheSize+","+s.archiveMode+","+s.archiveSize+")");
-	        try
-	        {
-	            s.source = new Source(s.cacheSize,s.archiveMode,s.archiveSize); 	
-	            
-	            // connect!
-	            s.source.OpenRBNBConnection(s.connection_string, s.client);
-	        
-	            s.cmap= new ChannelMap();
-	        
-	        } catch (SAPIException se) {
-	            System.out.println("Error on Turbine - not connected");
-	            return;
-	        }
-        }
-
-        
-        
-
-        // Attach source channel
-        for (SourceChannelItem c:config_obj.hmap_source_channel_item.values())
-        {
-        	System.out.println("Adding SourceChannel "+c.name+": "+c.channel_string);        	
-	        try 
-	        {
-	            c.channel_index = c.source_item.cmap.Add(c.channel_string);
-	        }catch (SAPIException se) {
-	            System.out.println("Error adding to channel map!");
-	            return;
-	        }
-        }
-
-     
         // Create sink        
         for (SinkItem s : config_obj.hmap_sink_item.values())
         {
+        	SinkRuntime sr= new SinkRuntime();
+        	sr.conf=s;
+        	
         	System.out.println("Connecting Sink "+s.name+": "+s.connection_string);
 	        try
 	        {
-	            s.sink = new Sink(); 	// Default sink is 100-frame cache, no archive
+	            sr.sink = new Sink(); 	// Default sink is 100-frame cache, no archive
 	            // connect!
-	            s.sink.OpenRBNBConnection(s.connection_string, s.client);
+	            sr.sink.OpenRBNBConnection(s.connection_string, s.client);
 	        
-	            s.cmap= new ChannelMap();
+	            sr.cmap= new ChannelMap();
+	            
+	            list_sink.put(s.name,sr);
+	        
+	        
+
+		        for (SinkChannelItem sci: config_obj.hmap_sink_channel_item.values())
+		        {
+		        	if (sci.sink_name.compareTo(s.name)==0)
+			        {
+			            // Create sink channel		        	
+			        	System.out.println(" Adding SinkChannel "+sci.name+": "+sci.channel_string);
+			        	SinkChannelRuntime scr= new SinkChannelRuntime();
+			        	scr.conf=sci;
+			        	scr.sink=sr;
+			        			        	
+			        	
+			        	sr.cmap.Add(scr.conf.channel_string);
+			        	sr.channel_list.add(scr);
+	
+			            list_sink_channel.put(sci.name,scr);
+			        }
+		        }
+	        	// if subscribe
+		        if (config_obj.bSubscribe)
+		        	sr.sink.Subscribe(sr.cmap);
 	        
 	        } catch (SAPIException se) {
 	            System.out.println("Error on Turbine - not connected");
 	            return;
 	        }
-	        
-	        if (!s.channel_item_list.isEmpty())
-	        {
-		        try 
-		        {
-		            // Create sink channel		        	
-			        for (SinkChannelItem c:s.channel_item_list)
-			        {
-			        	System.out.println("Adding SinkChannel"+c.name+": "+c.channel_string);
-			        	s.cmap.Add(c.channel_string);
-			        }
-			        if (config_obj.bSubscribe)
-			        	// if realtime subscribe
-			        	s.sink.Subscribe(s.cmap);
 
-		        }
-		        catch (SAPIException se) {
-		            System.out.println("Error adding to channel map!");
-		            return;
-		        }
-	        }
+	        
 	        
         }
         
         
         // save sample data
+        for (SaveDataItem s:config_obj.list_save_data_item)
         {
         
 	        Iterator<SaveDataItem> i=config_obj.list_save_data_item.iterator();
@@ -152,49 +132,54 @@ public class SinkStub {
         
         
 
+        current_request_start=-1;
         // not using subscribe
 		if (!config_obj.bSubscribe)
 		{
 	        // load start time if we need to fetch from the start
 			if (config_obj.request_start==-1)
-		        config_obj.request_start=FindOldestTime();
+				current_request_start=FindOldestTime();
+			else
+				current_request_start=config_obj.request_start;
 		}
         
         
 		
 		
-        // if we need to copy sink to a source
-        // Create sink        
-        for (SinkItem s : config_obj.hmap_sink_item.values())
-        {
-        	if (s.copy_to_source==null) continue;
-        	
-	        
-        	// Create sink channel		        	
-	        for (SinkChannelItem c:s.channel_item_list)
-	        {
-	        	System.out.println("Adding Copy to SourceChannel"+c.name+": "+c.channel_string);
-	        	
-	        	SourceChannelItem src_c=new SourceChannelItem("Copy_"+c.name,s.copy_to_source,c.channel_string,null,false);
-	        	c.copy_to_source_channel=src_c;
-		        try 
-		        {
-		            src_c.channel_index = src_c.source_item.cmap.Add(src_c.channel_string);
-		        }catch (SAPIException se) {
-		            System.out.println("Error adding to channel map!");
-		            return;
-		        }
-	        }
-	        
-        }		
+//        // if we need to copy sink to a source
+//        // Create sink        
+//        for (SinkItem s : config_obj.hmap_sink_item.values())
+//        {
+//        	if (s.copy_to_source.isEmpty()) continue;
+//        	
+//        	SinkRuntime sr=list_sink.get(s.copy_to_source);
+//	        
+//        	// Create sink channel		        	
+//	        for (SinkChannelRuntime cr:sr.channel_list)
+//	        {
+//	        	System.out.println("Adding Copy to SourceChannel"+cr.conf.name+": "+cr.conf.channel_string);
+//	        	
+//	        	cr.copy_to_source_id=
+//	        	
+//	        	SourceChannelItem src_c=new SourceChannelItem("Copy__"+cr.conf.name,s.copy_to_source,cr.conf.channel_string,"",false);
+//	        	
+//	        	cr.copy_to_source_channel=src_c;
+//		        try 
+//		        {
+//		            src_c.channel_index = src_c.source_item.cmap.Add(src_c.channel_string);
+//		        }catch (SAPIException se) {
+//		            System.out.println("Error adding to channel map!");
+//		            return;
+//		        }
+//	        }
+//	        
+//        }		
 
         
         
 
 
-        
-		if (!config_obj.bSubscribe)
-			current_request_start=config_obj.request_start;
+      
      
 
     }
@@ -205,28 +190,28 @@ public class SinkStub {
 		double oldest_time=-1;
         try 
         {
-	        for (SinkItem s : config_obj.hmap_sink_item.values())
-		        if (!s.channel_item_list.isEmpty())
-			        s.sink.Request(s.cmap, 0,0, "oldest");
+	        for (SinkRuntime sr : list_sink.values())
+		        if (!sr.channel_list.isEmpty())
+			        sr.sink.Request(sr.cmap, 0,0, "oldest");
 		        
 			
 			// fetch from all the channel
-			for (SinkItem s:config_obj.hmap_sink_item.values())
+			for (SinkRuntime sr:list_sink.values())
 			{
-				ChannelMap outmap = s.sink.Fetch(1000);
+				ChannelMap outmap = sr.sink.Fetch(1000);
 		
 				if (outmap.GetIfFetchTimedOut())	continue;
 		    
-				for (SinkChannelItem c:s.channel_item_list)
+				for (SinkChannelRuntime cr:sr.channel_list)
 				{
-		            int chanIdx = outmap.GetIndex(c.channel_string);
+		            int chanIdx = outmap.GetIndex(cr.conf.channel_string);
 		           
 		            if(chanIdx >= 0)
 		            {
 		                double[] data_time = outmap.GetTimes(chanIdx);
 		                
 		                
-		                // set to lastest time
+		                // set to latest time
 		                if (oldest_time>=data_time[0] || oldest_time==-1)
 		                	oldest_time=data_time[0];
 		            }
@@ -251,41 +236,7 @@ public class SinkStub {
 
 
         
-        
-    /**
-     * Send data to Data Turbine 
-     * @param data			array of data (double[])
-     * @param time			array of time (double[])
-     * @param source_channel_item	source channel object(SourceChannelItem)
-     */
-
-    void SendToDT(double []data, double []time, SourceChannelItem source_channel_item)
-    {
-       	ChannelMap 	output_cmap		=source_channel_item.source_item.cmap;
-	    Source 		source			=source_channel_item.source_item.source;
-	    int			channel_index	=source_channel_item.channel_index;
-	    try
-	    {
-    	    
-    	    // On nees, we assume that octet-stream data is double-precision float
- 	    	output_cmap.PutTimes(time);
-    	    output_cmap.PutMime(channel_index, "application/octet-stream");
-    	    output_cmap.PutDataAsFloat64(channel_index, data);
-    	    
-    	    source.Flush(output_cmap, false);
-    	}
-	    catch (SAPIException mse) 
-    	{
-    	    System.out.println("Error saving data!");
-    	}
-	    
-    }
-        
-        
-        
-
-
-    
+  
 
 	
 	/** 
@@ -306,15 +257,15 @@ public class SinkStub {
 
 		try
 		{
-	        for (SinkItem s : config_obj.hmap_sink_item.values())
-		        if (!s.channel_item_list.isEmpty())
+	        for (SinkRuntime s : list_sink.values())
+		        if (!s.channel_list.isEmpty())
 			        s.sink.Request(s.cmap, 0,0, "newest");
 		        
 			
 		    time_all_channel_received=-1;
 		    Boolean received_from_all_channel=true;
 			// fetch from all the channel
-			for (SinkItem s:config_obj.hmap_sink_item.values())
+			for (SinkRuntime s:list_sink.values())
 			{
 				ChannelMap outmap = s.sink.Fetch(1000);
 		
@@ -324,9 +275,9 @@ public class SinkStub {
 		        	continue;
 				}
 		    
-				for (SinkChannelItem c:s.channel_item_list)
+				for (SinkChannelRuntime c:s.channel_list)
 				{
-		            int chanIdx = outmap.GetIndex(c.channel_string);
+		            int chanIdx = outmap.GetIndex(c.conf.channel_string);
 		           
 		            if(chanIdx >= 0)
 		            {
@@ -334,7 +285,7 @@ public class SinkStub {
 		                data_time = outmap.GetTimes(chanIdx);
 		                
 		                
-		                // set to lastest time
+		                // set to last time
 		                if (c.last_data_time<=data_time[0])
 		                	c.last_data_time=data_time[0];
 		
@@ -431,23 +382,23 @@ public class SinkStub {
 
 
 
-            	// if time_to_insert ms is passed, insert sample data
-            	{
-	                Iterator<SaveDataItem> i=config_obj.list_save_data_item.iterator();
-	                
-	                while (i.hasNext())
-	                {
-	                	SaveDataItem s=i.next();
-	                	
-	                	if (s.time_to_insert>current_tick-start_tick) continue;
-	                	
-	                	// send sample data to DT
-	                	SendToDT(s.list_data,s.list_time,s.sci);
-	                	
-	                	// remove it from list
-	                	i.remove();
-	                }
-            	}
+//            	// if time_to_insert ms is passed, insert sample data
+//            	{
+//	                Iterator<SaveDataRuntime> i=config_obj.list_save_data_item.iterator();
+//	                
+//	                while (i.hasNext())
+//	                {
+//	                	SaveDataRuntime s=i.next();
+//	                	
+//	                	if (s.time_to_insert>current_tick-start_tick) continue;
+//	                	
+//	                	// send sample data to DT
+//	                	SendToDT(s.list_data,s.list_time,s.sci);
+//	                	
+//	                	// remove it from list
+//	                	i.remove();
+//	                }
+//            	}
             	// don't include time for sending the sample data
             	duration_not_to_include+=System.currentTimeMillis()-current_tick;
             	
@@ -519,8 +470,8 @@ public class SinkStub {
 		        	// duration smaller by very little amount to eliminate getting duplicated data   
 //		        	double duration_=Double.longBitsToDouble(Double.doubleToLongBits(duration)-1);
 		        	// we request data
-	                for (SinkItem s : config_obj.hmap_sink_item.values())
-	        	        if (!s.channel_item_list.isEmpty())
+	                for (SinkRuntime s : list_sink.values())
+	        	        if (!s.channel_list.isEmpty())
        			        	s.sink.Request(s.cmap, current_request_start,duration, "absolute");
 	        	        
             	}
@@ -528,15 +479,15 @@ public class SinkStub {
             	
             	
             	// fetch all the data
-            	for (SinkItem s:config_obj.hmap_sink_item.values())
+            	for (SinkRuntime s:list_sink.values())
             	{
             		ChannelMap outmap = s.sink.Fetch(1000);
             		
                 
-            		for (SinkChannelItem c:s.channel_item_list)
+            		for (SinkChannelRuntime c:s.channel_list)
             		{
     	                // Look up channel index
-    	                int chanIdx = outmap.GetIndex(c.channel_string);
+    	                int chanIdx = outmap.GetIndex(c.conf.channel_string);
     	               
     	                // If channel index is less than zero, then no data in the fetch                
     	                if(chanIdx >= 0)
@@ -549,7 +500,8 @@ public class SinkStub {
     	                    
     	                    ReceivedDataFromChannel rd= new ReceivedDataFromChannel();
     	                    
-    	                    rd.sink_channel=c;
+    	                    rd.sink_channel_name=c.conf.name;
+    	                    rd.event_name=c.conf.event_name;
     	                    rd.data=data;
     	                    rd.data_time=data_time;
     	                    
@@ -562,12 +514,12 @@ public class SinkStub {
     	                    
     	                    
     	                    
-    	                    // copy to source
-    	                    
-    	                    if (c.copy_to_source_channel!=null)
-    	                    {
-    	                    	SendToDT(data,data_time,c.copy_to_source_channel);
-    	                    }
+//    	                    // copy to source
+//    	                    
+//    	                    if (c.copy_to_source_channel!=null)
+//    	                    {
+//    	                    	SendToDT(data,data_time,c.copy_to_source_channel);
+//    	                    }
 
     	                }
     	               
@@ -603,12 +555,8 @@ public class SinkStub {
     void DT_CleanUp()
     {
         // close connection
-        for (SourceItem si:config_obj.hmap_source_item.values())
-        {
-        	if (si.source.VerifyConnection())
-        		si.source.CloseRBNBConnection();
-        }
-        for (SinkItem si:config_obj.hmap_sink_item.values())
+
+        for (SinkRuntime si:list_sink.values())
         {
         	if (si.sink.VerifyConnection())
         		si.sink.CloseRBNBConnection();

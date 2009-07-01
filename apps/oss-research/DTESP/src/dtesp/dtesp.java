@@ -33,27 +33,32 @@ public class dtesp
 
 	public static void run(ConfigObj co)
 	{
-		
-		SinkStub f=new SinkStub();
-		
-		f.Init(co);
-		
-		EsperStub r=new EsperStub();
-		r.Init(co);
 
+		SourceStub source=new SourceStub();
+		source.Init(co);
+		
+		
+		SinkStub sink=new SinkStub();
+		sink.Init(co);
 
 		
-		f.StartMeasure();
-		if (!co.bSubscribe) f.SetTimeAllChannelReceived();
+		EsperStub e=new EsperStub();
+		e.Init(co);
+		e.SetSourceStub(source);
+		
+
+		
+		sink.StartMeasure();
+		if (!co.bSubscribe) sink.SetTimeAllChannelReceived();
         System.out.println("start fetching data...");
 
 		
 		while (true)
 		{
-			ReceivedDataSortedByTime rds=f.Fetch();
-			if (f==null) return;
+			ReceivedDataSortedByTime rds=sink.Fetch();
+			if (rds==null) return;
 			if (!rds.IsEmpty()) 
-				if (!r.Process(rds)) 
+				if (!e.Process(rds)) 
 					return;
 		
 		}	

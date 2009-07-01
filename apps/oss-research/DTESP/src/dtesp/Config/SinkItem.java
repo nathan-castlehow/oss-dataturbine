@@ -2,8 +2,6 @@ package dtesp.Config;
 
 
 import org.w3c.dom.Element;
-import java.util.*;
-import com.rbnb.sapi.*;
 
 
 
@@ -13,9 +11,7 @@ import com.rbnb.sapi.*;
  * Data structure to save a configuration of a sink (DT server)
  * fields
  *   name- name of the sink
- *   sink- sink class created for this sink
  *   connection_string- string used for connection
- *   channel_item_list- list of sink channel configurations 
  *   copy_to_source- copy current sink to a source
  */	
 public class 			SinkItem
@@ -36,7 +32,7 @@ public class 			SinkItem
 		name= 				e.getAttribute("name");
 		client=				e.getAttribute("client");
 		connection_string=	e.getAttribute("connection_string");
-		copy_to_source=		co.GetSource(e.getAttribute("copy_to_source"));
+		copy_to_source	=	e.getAttribute("copy_to_source");
 	}		
 	
 	public SinkItem(String name_, String client_, String connection_string_)
@@ -46,16 +42,9 @@ public class 			SinkItem
 		connection_string=connection_string_;
 	}
 	
-	public void AddChannel(SinkChannelItem sci)
-	{
-		channel_item_list.add(sci);
-	}
 	public String					name;
 	public String					client;
-	public Sink          			sink;
 	public String					connection_string;
-    public ChannelMap				cmap;
-    public List<SinkChannelItem>	channel_item_list= new LinkedList<SinkChannelItem>();
-    public SourceItem 				copy_to_source;
+    public String 					copy_to_source;
 };
 
