@@ -31,8 +31,10 @@ public class EsperStub {
 		config_obj=co;
 	}
 	 
+	Dtesp dtesp;
 	
-	public void Init(ConfigObj co)
+	
+	public void Init(ConfigObj co, Dtesp d)
 	{
 		sorted_rd_list=new ReceivedDataSortedByTime();
 		
@@ -40,6 +42,7 @@ public class EsperStub {
 		Init_Esper();
 		
 		hashmap_channel_last_timestamp=new HashMap<String, Double> ();
+		dtesp=d;
 	}
     
   

@@ -29,16 +29,18 @@ public class SinkStub {
 		config_obj=co;
 	}
 	
+	Dtesp dtesp;
 
 	/**
 	 * Initialization
 	 * 
 	 */
 	
-	public void Init(ConfigObj co)
+	public void Init(ConfigObj co, Dtesp d)
 	{
 		SetConfigObj(co);
 		Init_DT();
+		dtesp=d;
 	}
 	 
 
@@ -110,25 +112,7 @@ public class SinkStub {
         }
         
         
-        // save sample data
-        for (SaveDataItem s:config_obj.list_save_data_item)
-        {
-        
-	        Iterator<SaveDataItem> i=config_obj.list_save_data_item.iterator();
-	        
-	        while (i.hasNext())
-	        {
-	        	SaveDataItem s=i.next();
-	        	
-	        	if (s.time_to_insert>0) continue;
-	        	
-	        	// send sample data to DT
-	        	SendToDT(s.list_data,s.list_time,s.sci);
-	        	
-	        	// remove it from list
-	        	i.remove();
-	        }
-        }
+
         
         
 
@@ -316,13 +300,7 @@ public class SinkStub {
     
     
     
-    void StartMeasure()
-    {
-    	start_tick=System.currentTimeMillis();
-    }
     
-	long start_tick;
-	long duration_not_to_include=0;
 	
 
     
@@ -382,25 +360,7 @@ public class SinkStub {
 
 
 
-//            	// if time_to_insert ms is passed, insert sample data
-//            	{
-//	                Iterator<SaveDataRuntime> i=config_obj.list_save_data_item.iterator();
-//	                
-//	                while (i.hasNext())
-//	                {
-//	                	SaveDataRuntime s=i.next();
-//	                	
-//	                	if (s.time_to_insert>current_tick-start_tick) continue;
-//	                	
-//	                	// send sample data to DT
-//	                	SendToDT(s.list_data,s.list_time,s.sci);
-//	                	
-//	                	// remove it from list
-//	                	i.remove();
-//	                }
-//            	}
-            	// don't include time for sending the sample data
-            	duration_not_to_include+=System.currentTimeMillis()-current_tick;
+
             	
             	
 
@@ -437,7 +397,7 @@ public class SinkStub {
 		        		}
 		        		
 		        		if (retry_times==0 && config_obj.output_level<4)
-                    		System.out.println("waiting for data .. Duration of operation "+ 	(current_tick-start_tick-duration_not_to_include)/1000);	        				
+                    		System.out.println("waiting for data .. Duration of operation "+dtesp.GetRunningTime());	        				
 		        		
 		            	current_tick=System.currentTimeMillis();
 
@@ -458,7 +418,7 @@ public class SinkStub {
 		        		SetTimeAllChannelReceived();
 
 		        		if (retry_times!=0)
-		                	duration_not_to_include+=System.currentTimeMillis()-current_tick;
+		                	dtesp.AddWaitDuration(System.currentTimeMillis()-current_tick);
 		        		
 		        		retry_times++;
 		        		continue;

@@ -31,26 +31,19 @@ public class 			SaveDataItem
 		text=text_;
 		time_to_insert=time_to_insert_;
 	}
-	
-//	public SaveDataItem(int duration, double hertz, int max, int time_to_insert_, String	sci_) 
-//	{
-//		source_channel_name=sci_;
-//		time_to_insert=time_to_insert_;
-//		MakeData(duration, hertz, max);
-//	}		
+		
 	
 	
 	/**
 	 * Parse xml string to data format. format data1@time1;data2@time2
 	 */
 	
-	public SaveDataRuntime ParseData(String s)
+	public double[][] ParseData()
 	{
-		SaveDataRuntime sd=new SaveDataRuntime();
-		String []st=s.trim().split(";");
+		String []st=text.trim().split(";");
 
-		sd.data = new double[st.length];
-		sd.time = new double[st.length];
+		double []data = new double[st.length];
+		double []time = new double[st.length];
 		
 		int i=0;
 	     for (String s_:st) 
@@ -62,25 +55,25 @@ public class 			SaveDataItem
 	    	 else
 	    		 d=Double.parseDouble(r[0]);
 	    	
-	    	 sd.data[i]=d;
-	    	 sd.time[i]=t;
+	    	 data[i]=d;
+	    	 time[i]=t;
 	    	
 	    	 i++;
 	     }
 	     
-	     sd.conf=this;
-	     return sd;
-	}
+	     
+	     return new double [][]{data,time};
+	     }
 	
 	
 	/**
 	 * Make random data with specific duration, hertz, and maximum
 	 */
 	
-	public SaveDataRuntime MakeData(int duration, double hertz, int max)
+	public double[][] MakeData(int duration, double hertz, int max)
 	{
-		SaveDataRuntime sd=new SaveDataRuntime();
 		int i;
+
 		
 		
 		double t=0,T=1/hertz;
@@ -88,24 +81,24 @@ public class 			SaveDataItem
 		int n;
 		n=(int)(duration*hertz);
 
-		sd.data = new double[n];
-		sd._time = new double[n];
-		
+	
+		double []data = new double[n];
+		double []time = new double[n];
 		
 		
 		
 		for (i=0;i<n;i++)
 		{
 			int d=r.nextInt(max);
-			sd.data[i]=(double)d;
-			sd.time[i]=t;
+			data[i]=(double)d;
+			time[i]=t;
 			
 			t+=T;
 		}
 		
 	
 		
-		return sd;
+		return new double [][]{data,time};
 	}	
 	public String							source_channel_name;
 	public String							text;

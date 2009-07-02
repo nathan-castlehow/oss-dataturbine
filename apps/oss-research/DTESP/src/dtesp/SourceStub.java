@@ -28,16 +28,20 @@ public class SourceStub {
 		config_obj=co;
 	}
 	
+	
+	Dtesp dtesp;
+	
 
 	/**
 	 * Initialization
 	 * 
 	 */
 	
-	public void Init(ConfigObj co)
+	public void Init(ConfigObj co, Dtesp d)
 	{
 		SetConfigObj(co);
 		Init_DT();
+		dtesp=d;
 	}
 	 
 	/**
@@ -45,7 +49,7 @@ public class SourceStub {
 	 */
 	public HashMap<String, SourceRuntime> 			list_source					= new HashMap<String, SourceRuntime>();
 	public HashMap<String, SourceChannelRuntime> 	list_source_channel			= new HashMap<String, SourceChannelRuntime>();
-	
+	public LinkedList<SaveDataRuntime>				list_save_data				= new LinkedList<SaveDataRuntime>();
     
     
     /**
@@ -109,11 +113,40 @@ public class SourceStub {
 
      
         
-        
+        // save sample data
+        for (SaveDataItem s:config_obj.list_save_data_item)
+        {
+        	SaveDataRuntime sdr=new SaveDataRuntime(s);
+        	
+        	list_save_data.add(sdr);
+        }
 
 
           
 
+    }
+    
+    
+    Boolean Process()
+    {
+
+        
+      Iterator<SaveDataRuntime> i=list_save_data.iterator();
+      
+      while (i.hasNext())
+      {
+    	SaveDataRuntime s=i.next();
+      	
+      	if (s.conf.time_to_insert>dtesp.GetTime()) continue;
+      	// send sample data to DT
+      	SendToDT(s.data,s.time,s.conf.source_channel_name);
+      	
+      	// remove it from list
+      	i.remove();
+      }
+          	
+      
+      return true;
     }
     
     
