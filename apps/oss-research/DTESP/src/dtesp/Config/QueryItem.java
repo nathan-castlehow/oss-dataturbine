@@ -5,7 +5,7 @@ import org.w3c.dom.Element;
  * <pre>
  * Data structure to save a configuration of a esper query
  * fields
- *   name					- name of the channel
+ *   name					- name of the query (not required)
  *   query_string			- esper query string
  *   source_channel_name 	- name of channel where result of query is saved
  */		

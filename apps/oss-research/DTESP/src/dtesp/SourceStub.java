@@ -93,13 +93,19 @@ public class SourceStub {
         // Attach source channel
         for (SourceChannelItem c:config_obj.hmap_source_channel_item.values())
         {
+        	System.out.println(" Adding SourceChannel "+c.name+": "+c.channel_string);        	
         	SourceChannelRuntime cr=new SourceChannelRuntime();
         	
         	SourceRuntime sr=list_source.get(c.source_name);
+        	if (sr==null)
+        	{
+            	System.out.println(" Source not found!");
+            	continue;
+        	}
+        	
         	cr.source=sr;
         	cr.conf=c;
 
-        	System.out.println("Adding SourceChannel "+c.name+": "+c.channel_string);        	
 	        try 
 	        {
 	            cr.channel_index = sr.cmap.Add(c.channel_string);
@@ -118,33 +124,82 @@ public class SourceStub {
         {
         	SaveDataRuntime sdr=new SaveDataRuntime(s);
         	
-        	list_save_data.add(sdr);
+        	if (s.time_to_insert<=0)
+        		SendToDT(sdr.data,sdr.time,sdr.conf.source_channel_name);
+        	else
+        		list_save_data.add(sdr);
         }
 
 
-          
+        
+        
+      // if we need to copy sink to a source
+      // Create sink        
+      for (SinkItem s : config_obj.hmap_sink_item.values())
+      {
+      	if (s.copy_to_source==null || s.copy_to_source.isEmpty()) continue;
+      	
+        for (SinkChannelItem c : config_obj.hmap_sink_channel_item.values())
+        {
+        	if (s.name.compareTo(c.sink_name)!=0) return;
+        	System.out.println(" Adding Copy to SourceChannel"+c.name+": "+c.channel_string);
+       	
+        	
+        	SourceChannelRuntime cr=new SourceChannelRuntime();
+        	if (cr==null)
+        	{
+            	System.out.println(" Source not found!");
+            	continue;
+        	}
+        	
+        	SourceRuntime sr=list_source.get(s.copy_to_source);
+        	cr.source=sr;
+        	
+        	SourceChannelItem n_config=new SourceChannelItem(c.name,s.copy_to_source,c.channel_string,"",false);
+        	cr.conf=n_config;
 
+        	try 
+	        {
+	            cr.channel_index = sr.cmap.Add(c.channel_string);
+	        }catch (SAPIException se) {
+	            System.out.println("Error adding to channel map!");
+	            return;
+	        }
+	        
+	        list_source_channel.put(n_config.name,cr);
+        }
+      }
+	        
+      
+      
+
+    }
+    
+    
+    void ProcessSaveData()
+    {
+
+        Iterator<SaveDataRuntime> i=list_save_data.iterator();
+        
+        while (i.hasNext())
+        {
+      	SaveDataRuntime s=i.next();
+        	
+        	if (s.conf.time_to_insert>dtesp.GetTime()) continue;
+        	// send sample data to DT
+        	SendToDT(s.data,s.time,s.conf.source_channel_name);
+        	
+        	// remove it from list
+        	i.remove();
+        }
+            	
     }
     
     
     Boolean Process()
     {
 
-        
-      Iterator<SaveDataRuntime> i=list_save_data.iterator();
-      
-      while (i.hasNext())
-      {
-    	SaveDataRuntime s=i.next();
-      	
-      	if (s.conf.time_to_insert>dtesp.GetTime()) continue;
-      	// send sample data to DT
-      	SendToDT(s.data,s.time,s.conf.source_channel_name);
-      	
-      	// remove it from list
-      	i.remove();
-      }
-          	
+    	ProcessSaveData(); 
       
       return true;
     }
@@ -176,6 +231,29 @@ public class SourceStub {
        	ChannelMap 	output_cmap		=cr.source.cmap;
 	    Source 		source			=cr.source.source;
 	    int			channel_index	=cr.channel_index;
+	    
+	    
+	    if (cr.conf.is_bar_graph && cr.last_data!=data[0] && !cr.first_write)
+	    {
+	    	double []data_=new double[data.length+1];
+	    	double []time_=new double[data.length+1];
+	    	
+	    	int i;
+	    	for (i=1;i<data.length+1;i++)
+	    	{
+	    		data_[i]=data[i-1];
+	    		time_[i]=time[i-1];
+	    	}
+	    	
+	    	data_[0]=cr.last_data;
+	    	time_[0]=Double.longBitsToDouble(Double.doubleToLongBits(time[0])-1);
+	    	
+	    	data=data_;
+	    	time=time_;
+	    	
+	    }
+	    
+	    
 	    try
 	    {
     	    
@@ -191,6 +269,9 @@ public class SourceStub {
     	    System.out.println("Error saving data!");
     	}
 	    
+	    
+	    cr.first_write=false;
+	    cr.last_data=data[data.length-1];
     }
         
         

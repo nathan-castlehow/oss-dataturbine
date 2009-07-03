@@ -29,7 +29,8 @@ public class SinkStub {
 		config_obj=co;
 	}
 	
-	Dtesp dtesp;
+	Dtesp 		dtesp;
+	SourceStub 	source_stub;
 
 	/**
 	 * Initialization
@@ -38,9 +39,15 @@ public class SinkStub {
 	
 	public void Init(ConfigObj co, Dtesp d)
 	{
+		Init(co,d, null);
+	}
+	
+	public void Init(ConfigObj co, Dtesp d, SourceStub st)
+	{
 		SetConfigObj(co);
 		Init_DT();
 		dtesp=d;
+		source_stub=st;
 	}
 	 
 
@@ -111,10 +118,6 @@ public class SinkStub {
 	        
         }
         
-        
-
-        
-        
 
         current_request_start=-1;
         // not using subscribe
@@ -126,45 +129,6 @@ public class SinkStub {
 			else
 				current_request_start=config_obj.request_start;
 		}
-        
-        
-		
-		
-//        // if we need to copy sink to a source
-//        // Create sink        
-//        for (SinkItem s : config_obj.hmap_sink_item.values())
-//        {
-//        	if (s.copy_to_source.isEmpty()) continue;
-//        	
-//        	SinkRuntime sr=list_sink.get(s.copy_to_source);
-//	        
-//        	// Create sink channel		        	
-//	        for (SinkChannelRuntime cr:sr.channel_list)
-//	        {
-//	        	System.out.println("Adding Copy to SourceChannel"+cr.conf.name+": "+cr.conf.channel_string);
-//	        	
-//	        	cr.copy_to_source_id=
-//	        	
-//	        	SourceChannelItem src_c=new SourceChannelItem("Copy__"+cr.conf.name,s.copy_to_source,cr.conf.channel_string,"",false);
-//	        	
-//	        	cr.copy_to_source_channel=src_c;
-//		        try 
-//		        {
-//		            src_c.channel_index = src_c.source_item.cmap.Add(src_c.channel_string);
-//		        }catch (SAPIException se) {
-//		            System.out.println("Error adding to channel map!");
-//		            return;
-//		        }
-//	        }
-//	        
-//        }		
-
-        
-        
-
-
-      
-     
 
     }
     
@@ -236,7 +200,7 @@ public class SinkStub {
 
         
 
-	public    void SetTimeAllChannelReceived() 
+	public    void UpdateTimeAllChannelReceived() 
     {
 
 		try
@@ -291,16 +255,66 @@ public class SinkStub {
 		}
 		catch (SAPIException e)
 		{
-		
+			System.out.println("Error UpdateTimeAllChannelReceived");
 		}
 			
 	}
     	
 
+	Boolean IsEndOfTheRequest()
+	{
+		return current_request_start>=config_obj.end_time && config_obj.end_time!=-1;		
+	}
     
     
     
+	double	GetRequestDuration()
+	{
+    	//fetch only until all the data is received and not after the end time from the configuration (config_obj.end_time)
+    	double duration=config_obj.request_duration;
+    	if (current_request_start+config_obj.request_duration>time_all_channel_received)
+    	{
+    		duration=time_all_channel_received-current_request_start;
+    	}
+    	
+    	if (current_request_start+duration>config_obj.end_time && config_obj.end_time!=-1)
+    	{
+    		duration=config_obj.end_time-current_request_start;
+    	}
+
+    	return duration;
+	}
     
+	Boolean IsDataExistToFetch()
+	{
+    	double duration=GetRequestDuration();
+		
+		if (config_obj.bSubscribe) return true;
+		if (duration<=0) return false;
+		
+    	
+    	
+		try 
+		{
+	    	// we request data
+	        for (SinkRuntime s : list_sink.values())
+		        if (!s.channel_list.isEmpty())
+		        	s.sink.Request(s.cmap, current_request_start,duration, "absolute");
+		}
+		catch (SAPIException e)
+		{
+			System.out.println("Error @IsDataExistToFetch, requsting new data");
+		}
+		
+		
+		// advance start time of request 
+
+    	current_request_start=current_request_start+duration;
+        
+        
+        return true;
+	        
+	}
 	
 
     
@@ -329,186 +343,70 @@ public class SinkStub {
      
     protected ReceivedDataSortedByTime Fetch()
     {
-
-
-    	
-    	
-        try 
-        {
-            
-  
-            
-        	
-            
-        	ReceivedDataSortedByTime sorted_rd_list			= new ReceivedDataSortedByTime();
-        	
-        	
-
-
-
-        	int retry_times=0;
-        	double next_request_start=0;
-        	
-        	
-        	
-        	
-        	
-        	// main loop starts
-            while (true) 
-            {
-            	long current_tick=System.currentTimeMillis();
-
-
-
-
-            	
-            	
-
-          	
-            	// request data for next window if not subscribe
-            	if (!config_obj.bSubscribe)
-            	{
-		        	//fetch only until all the data is received
-		        	double duration=config_obj.request_duration;
-		        	if (current_request_start+config_obj.request_duration>time_all_channel_received)
-		        	{
-		        		duration=time_all_channel_received-current_request_start;
-		        	}
-		        	
-		        	if (current_request_start+duration>config_obj.end_time && config_obj.end_time!=-1)
-		        	{
-		        		duration=config_obj.end_time-current_request_start;
-		        	}
-		        	
-	        		next_request_start=current_request_start+duration;
-		        	
-		        	
-		        	// if no data to fetch
-		        	if (duration<=0)
-		        	{
-		        		if (current_request_start+duration>=config_obj.end_time && config_obj.end_time!=-1)
-		        		{
-                    		System.out.println("End of request range");
-                    		while (true)
-                    		{
-                    			try {Thread.sleep(1000);} catch (Exception e) {}
-                    		}
-		        			
-		        		}
-		        		
-		        		if (retry_times==0 && config_obj.output_level<4)
-                    		System.out.println("waiting for data .. Duration of operation "+dtesp.GetRunningTime());	        				
-		        		
-		            	current_tick=System.currentTimeMillis();
-
-		        		if (retry_times>0)
-		        		{
-		        			// sleep 100 ms before finding out the last time of all channels again
-		        			retry_times=1;
-		        			try
-		        			{
-		        				Thread.sleep(100);
-		        			}
-		        			catch (Exception e)
-		        			{
-		        			}
-		        		}
-		        		
-		        		// finding out the last time of all channels
-		        		SetTimeAllChannelReceived();
-
-		        		if (retry_times!=0)
-		                	dtesp.AddWaitDuration(System.currentTimeMillis()-current_tick);
-		        		
-		        		retry_times++;
-		        		continue;
-		        	}
-		        	else
-		        		retry_times=0;
-
-      	
-		        	// duration smaller by very little amount to eliminate getting duplicated data   
-//		        	double duration_=Double.longBitsToDouble(Double.doubleToLongBits(duration)-1);
-		        	// we request data
-	                for (SinkRuntime s : list_sink.values())
-	        	        if (!s.channel_list.isEmpty())
-       			        	s.sink.Request(s.cmap, current_request_start,duration, "absolute");
-	        	        
-            	}
-        		sorted_rd_list.Clear();
-            	
-            	
-            	// fetch all the data
-            	for (SinkRuntime s:list_sink.values())
-            	{
-            		ChannelMap outmap = s.sink.Fetch(1000);
-            		
-                
-            		for (SinkChannelRuntime c:s.channel_list)
-            		{
-    	                // Look up channel index
-    	                int chanIdx = outmap.GetIndex(c.conf.channel_string);
-    	               
-    	                // If channel index is less than zero, then no data in the fetch                
-    	                if(chanIdx >= 0)
-    	                {
-    	                    double[] data;
-    	                    double[] data_time;
-    	                    // Note that we have to know how to parse the data type!
-    	                    data = outmap.GetDataAsFloat64(chanIdx);
-    	                    data_time = outmap.GetTimes(chanIdx);
-    	                    
-    	                    ReceivedDataFromChannel rd= new ReceivedDataFromChannel();
-    	                    
-    	                    rd.sink_channel_name=c.conf.name;
-    	                    rd.event_name=c.conf.event_name;
-    	                    rd.data=data;
-    	                    rd.data_time=data_time;
-    	                    
-    	                    // add the earliest time of data of the channel and data
-    	                    sorted_rd_list.Add(rd.GetTime(), rd);
-    	                    
-    	                    
-    	                    if (c.last_data_time<=rd.GetLastTime())
-    	                    	c.last_data_time=rd.GetLastTime();
-    	                    
-    	                    
-    	                    
-//    	                    // copy to source
-//    	                    
-//    	                    if (c.copy_to_source_channel!=null)
-//    	                    {
-//    	                    	SendToDT(data,data_time,c.copy_to_source_channel);
-//    	                    }
-
-    	                }
-    	               
-            		}
-            		
-            	}
-
-            	if (!config_obj.bSubscribe)
-            	{
-            		current_request_start=next_request_start;
-            	}
-    			try
-    			{
-    				Thread.sleep(100);
-    			}
-    			catch (Exception e)
-    			{
-    			}            		
-              	
-            	
-            	return sorted_rd_list;
-
-            		
-            }
-        }catch (SAPIException mse) 
-        {
-            System.out.println("Error reading data!");
-        }
-		return null;
+	
+    	ReceivedDataSortedByTime sorted_rd_list			= new ReceivedDataSortedByTime();
+	
+		
+		// fetch all the data
+		for (SinkRuntime s:list_sink.values())
+		{
+			ChannelMap outmap;
+			try
+			{
+				outmap = s.sink.Fetch(1000);
+			}
+			catch (SAPIException e)
+			{	
+				System.out.println("Error fetching at SinkStub.Fetch()");
+				return null;
+			}
+			
+	    
+			for (SinkChannelRuntime c:s.channel_list)
+			{
+	            // Look up channel index
+	            int chanIdx = outmap.GetIndex(c.conf.channel_string);
+	           
+	            // If channel index is less than zero, then no data in the fetch                
+	            if(chanIdx >= 0)
+	            {
+	                double[] data;
+	                double[] data_time;
+	                // Note that we have to know how to parse the data type!
+	                data = outmap.GetDataAsFloat64(chanIdx);
+	                data_time = outmap.GetTimes(chanIdx);
+	                
+	                ReceivedDataFromChannel rd= new ReceivedDataFromChannel();
+	                
+	                rd.sink_channel_name=c.conf.name;
+	                rd.event_name=c.conf.event_name;
+	                rd.data=data;
+	                rd.data_time=data_time;
+	                
+	                // add the earliest time of data of the channel and data
+	                sorted_rd_list.Add(rd.GetTime(), rd);
+	                
+	                
+	                if (c.last_data_time<=rd.GetLastTime())
+	                	c.last_data_time=rd.GetLastTime();
+	                
+	                
+	                
+                    // copy to source
+                    
+                    if (s.conf.copy_to_source!=null && !s.conf.copy_to_source.isEmpty())
+                    {
+                    	source_stub.SendToDT(data,data_time,c.conf.name);
+                    }
+	
+	            }
+	           
+			}
+			
+		}
+	
+		
+		return sorted_rd_list;
     }
 
 

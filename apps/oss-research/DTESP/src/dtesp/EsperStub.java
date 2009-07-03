@@ -34,15 +34,17 @@ public class EsperStub {
 	Dtesp dtesp;
 	
 	
-	public void Init(ConfigObj co, Dtesp d)
+	public void Init(ConfigObj co, Dtesp d, SourceStub st)
 	{
 		sorted_rd_list=new ReceivedDataSortedByTime();
+		dtesp=d;
+		source_stub=st;
+
 		
 		SetConfigObj(co);
 		Init_Esper();
 		
 		hashmap_channel_last_timestamp=new HashMap<String, Double> ();
-		dtesp=d;
 	}
     
   
@@ -57,13 +59,7 @@ public class EsperStub {
 	public SourceStub source_stub;
 	
 	
-	/**
-	 * Initialize source stub 
-	 */
-	public void SetSourceStub(SourceStub st)
-	{
-		source_stub=st;
-	}
+
 	
     
     /** 
@@ -136,7 +132,7 @@ public class EsperStub {
 			EPStatement statement = epService.getEPAdministrator().createEPL(qi.query_string);
 			
 			// if we are going to sent to some source
-			if (qi.source_channel_name.isEmpty())
+			if (!qi.source_channel_name.isEmpty())
 			{
 		        SourceChannelItem sci=config_obj.hmap_source_channel_item.get(qi.source_channel_name);
 				EsperEventListener eel

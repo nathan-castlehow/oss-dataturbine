@@ -33,76 +33,21 @@ public class 			SaveDataItem
 	}
 		
 	
-	
-	/**
-	 * Parse xml string to data format. format data1@time1;data2@time2
-	 */
-	
-	public double[][] ParseData()
+	public SaveDataItem(int duration_, int hertz_, int max_, long time_to_insert_, String sci_)
 	{
-		String []st=text.trim().split(";");
+		duration=duration_;
+		hertz=hertz_;
+		max=max_;
+		
+		source_channel_name=sci_;
+		time_to_insert=time_to_insert_;		
+	}
 
-		double []data = new double[st.length];
-		double []time = new double[st.length];
-		
-		int i=0;
-	     for (String s_:st) 
-	     {
-	    	 String []r=s_.split("@");
-	    	 double d=0,t=Double.parseDouble(r[1]);
-	    	 if (r[0].isEmpty())
-	    		 d=t;
-	    	 else
-	    		 d=Double.parseDouble(r[0]);
-	    	
-	    	 data[i]=d;
-	    	 time[i]=t;
-	    	
-	    	 i++;
-	     }
-	     
-	     
-	     return new double [][]{data,time};
-	     }
-	
-	
-	/**
-	 * Make random data with specific duration, hertz, and maximum
-	 */
-	
-	public double[][] MakeData(int duration, double hertz, int max)
-	{
-		int i;
-
-		
-		
-		double t=0,T=1/hertz;
-		Random r=new Random();
-		int n;
-		n=(int)(duration*hertz);
-
-	
-		double []data = new double[n];
-		double []time = new double[n];
-		
-		
-		
-		for (i=0;i<n;i++)
-		{
-			int d=r.nextInt(max);
-			data[i]=(double)d;
-			time[i]=t;
-			
-			t+=T;
-		}
-		
-	
-		
-		return new double [][]{data,time};
-	}	
 	public String							source_channel_name;
 	public String							text;
 	public long								time_to_insert=-1;
-	
+	public int duration;
+	public int hertz;
+	public int max;
 	
 };	

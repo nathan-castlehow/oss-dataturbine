@@ -18,7 +18,7 @@ public class ConfigObj {
 	/**
 	 * Name of the xml file loaded
 	 */
-	String config_name;
+	public String config_name;
 
 	
 	/**
@@ -176,6 +176,11 @@ public class ConfigObj {
 	public int	output_level=1;
 	
 	
+	/**
+	 * if set, dtesp waits for new data 
+	 * else dtesp exits
+	 */
+	public Boolean wait_for_new_data=true;
 }
 
 
