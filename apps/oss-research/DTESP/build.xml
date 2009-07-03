@@ -95,7 +95,9 @@
 
 <!-- Run the client -->
 <target name="run" depends="jar" description="Run dtesp">
- <java classpathref="classpath" classname="dtesp" />
+ <java classpathref="classpath" classname="dtesp">
+ <arg line="${args}"/>
+ </java>
 </target>
 
 
