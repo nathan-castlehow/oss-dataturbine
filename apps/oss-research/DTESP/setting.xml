@@ -2,7 +2,7 @@
 <Setting>
 
 
-<RequestTime year="2009" month="6" date="10" hour="1" minute="0" second="0"/>
+<RequestTime mode="start"/>
 
 <Event name="Rain" field="rain"></Event>
 <Event name="Conductivity" field="conductivity"></Event>
@@ -11,19 +11,20 @@
 
 <Event name="Update" field="status"></Event>
 
-<Sink name="MCR" client="client" connection_string="iguassu.sdsc.edu:3333"/>
+<Sink name="MCR" client="client" connection_string="iguassu.sdsc.edu:3333" copy_to_source="MCRCopySource"/>
 <SinkChannel name="Conductivity" 	sink="MCR" channel_string="New_Seacat_CTD_16plus/Conductivity" 	event="Conductivity"/>
 <SinkChannel name="Salinity" 		sink="MCR" channel_string="New_Seacat_CTD_16plus/Salinity" 		event="Salinity"/>
 <SinkChannel name="Temperature" 	sink="MCR" channel_string="New_Seacat_CTD_16plus/Temperature" 	event="Temperature"	/>
 <SinkChannel name="Rain" 		sink="MCR" channel_string="Weather_Station/Rain_mm_Tot" 	event="Rain"		/>
 
 
+<Source name="MCRCopySource" client="MCRCopy" connection_string="localhost" cache_size="100" archive_mode="create" archive_size="10000"/>
 
-<Source name="source" client="client" connection_string="localhost" cache_size="100" archive_mode="create" archive_size="10000"/>
-<SourceChannel name="LowSalinityRain" source="source" channel_string="MCR_Seacat_16plus_Event/LowSalinityRain" 	event="Update" is_bar_graph="1"/>
-<SourceChannel name="LowSalityHighTotalRain" source="source" channel_string="MCR_Seacat_16plus_Event/LowSalityHighTotalRain" 	event="Update" is_bar_graph="1"/>
-<SourceChannel name="SalinityQAQC1" source="source" 	channel_string="MCR_Seacat_16plus_Event/SalinityQAQC1" 		event="Update" is_bar_graph="1"/>
-<SourceChannel name="SalinityQAQC2" source="source" 	channel_string="MCR_Seacat_16plus_Event/SalinityQAQC2" 		event="Update"  is_bar_graph="1"/>
+<Source name="source" client="Event" connection_string="localhost" cache_size="100" archive_mode="create" archive_size="10000"/>
+<SourceChannel name="LowSalinityRain" source="source" channel_string="LowSalinityRain" 	event="Update" is_bar_graph="1"/>
+<SourceChannel name="LowSalityHighTotalRain" source="source" channel_string="LowSalityHighTotalRain" 	event="Update" is_bar_graph="1"/>
+<SourceChannel name="SalinityQAQC1" source="source" 	channel_string="SalinityQAQC1" 		event="Update" is_bar_graph="1"/>
+<SourceChannel name="SalinityQAQC2" source="source" 	channel_string="SalinityQAQC2" 		event="Update"  is_bar_graph="1"/>
 
 
 <Query query_string='insert into LowSalinityEvent select 36.5>salinity as status from Salinity'/>
