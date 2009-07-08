@@ -13,7 +13,6 @@ import org.w3c.dom.Element;
  *   channel_string- name of channel to be used for connection 
  *   event- name of esper event associated with the channel 
  *   
- *   copy_to_source_channel- source channel to copy sink channel to
  */	
 public class 			SinkChannelItem
 {

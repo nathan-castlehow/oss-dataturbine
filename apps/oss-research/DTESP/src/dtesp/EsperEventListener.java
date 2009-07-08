@@ -1,27 +1,51 @@
 package dtesp;
 import dtesp.Config.*;
-import com.rbnb.sapi.*;
 import com.espertech.esper.client.*;
 
 
     /**
-     * <pre> Listener that listens to an esper event and sends to dt
+     * <pre> Wait for an esper event and sends to data turbine
      */
     public class EsperEventListener implements UpdateListener
     {
+    	/**
+    	 * Configuration of source channel
+    	 */
     	SourceChannelItem	source_channel_item;
+    	/**
+    	 * Name of the field to pass to data turbime 
+    	 */
     	String				field_name;
+    	/**
+    	 * SourceStub to send data to data turbine
+    	 */
     	SourceStub			source;
-    	EsperStub 			dtr;
+    	/**
+    	 * Esperstub to find out current esper time
+    	 */
+    	EsperStub 			esper_stub;
+    	
+    	
+    	/**
+    	 * Creator
+    	 * @param source_channel_item_				Configuration of source channel
+    	 * @param field_name_						Name of the field to pass to data turbime
+    	 * @param source_							SourceStub to send data to data turbine
+    	 * @param r									Esperstub to find out current esper time
+    	 */
 
         public EsperEventListener(SourceChannelItem	source_channel_item_, String	field_name_, SourceStub source_, EsperStub r)
         {
         	source_channel_item=source_channel_item_;
         	field_name=field_name_;
         	source=source_;
-        	dtr=r;
+        	esper_stub=r;
         }
         
+        
+        /**
+         * Sends data to data turbine using SourceSub
+         */
         public void SendToDT()
         {
         	if (has_data)
@@ -30,22 +54,28 @@ import com.espertech.esper.client.*;
         		source.SendToDT(data, time, source_channel_item.name);
 
 	    		
-	    		last_data=data[data.length-1];
 	    		has_data=false;
         	}
         }
         
         
-        Boolean 			has_data=false;
+        public Boolean 				has_data=false;
+        
+        /**
+         * is added to send data list
+         */
+        public Boolean				is_added=false;
 
 	    double[]          	data;
     	double[] 			time;
     	
-    	double last_time=-1;			// save last time and data for bar graph form
-    	double last_data=0;
-
     	
         
+    	/**
+    	 * <PRE>
+    	 * This function is called if there is new result of the query.
+    	 * Get the desired field out and keep it to send in the future
+    	 */
     	public void update(EventBean[] newEvents, EventBean[] oldEvents) 
     	{
     	    EventBean event=newEvents[0];		// just first event because DT can only save one value not multiple values
@@ -56,7 +86,7 @@ import com.espertech.esper.client.*;
 
 	    	double v=Double.parseDouble(event.get(field_name).toString());
     	    
-    	    if (dtr.config_obj.output_level<3)
+    	    if (esper_stub.config_obj.output_level<3)
     	    	System.out.println("E "+source_channel_item.name+" : " + v);
 
 
@@ -66,12 +96,20 @@ import com.espertech.esper.client.*;
     		time=new double[1];
     		
     	    data[0] = v ;
-    	    time[0]=((double)dtr.last_saved_esper_time)/1000;
+    	    time[0]=((double)esper_stub.esper_time)/1000;
     	    
     	    
     	    
 
 	    	has_data=true;
+	    	
+	    	
+	    	// if not added, add to send sata list
+	    	if (!is_added)
+	    	{
+	    		esper_stub.list_event_listener_send_data.add(this);
+	    		is_added=true;
+	    	}
     	    
     	}    	
     }

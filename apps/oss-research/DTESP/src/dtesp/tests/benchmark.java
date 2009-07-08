@@ -21,9 +21,6 @@ public class benchmark
 	{
 		String r;
 
-//		r="select 1 as result from C"+Integer.toString(channel_n); return r;
-		
-//		r="select select C"+Integer.toString(channel_n)+".data as result from ";
 		r="select count(*) as result from ";
 		
 		int i;
@@ -107,13 +104,14 @@ public class benchmark
 		
 		Vector<Long> v=new Vector<Long>();
 		
-		int []hertz				={10		,20			,10			,10			,10				,10};
-		int []channels			={2			,2			,2			,4			,8				,2};
-		int []window_time_size	={1			,1			,2			,1			,1				,1};
-		int []duration			={600		,600		,600		,600		,600			,1200};
+		int []hertz				={10		,20			,10			,10						,10};
+		int []channels			={2			,2			,2			,4						,2};
+		int []window_time_size	={1			,1			,2			,1						,1};
+		int []duration			={600		,600		,600		,600					,1200};
 	
 		int i;
-		for (i=0;i<hertz.length;i++)
+		for (i=0;i<3;i++)
+//		for (i=3;i<hertz.length;i++)
 		{
 			
 			Dtesp d=new Dtesp();
@@ -125,6 +123,7 @@ public class benchmark
 			d.run(MakeConfiguration(i, h, c, w, du));
 //			out.println(" "+h+"\t"+c+"\t"+w+"\t"+du+"\trt:\t"+d.GetRunningTime());
 			v.add(d.GetRunningTime());
+			System.out.println(" running time:"+d.GetRunningTime());
 		}
 		
 		

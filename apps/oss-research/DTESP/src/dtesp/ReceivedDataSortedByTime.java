@@ -7,27 +7,23 @@ import java.util.*;
 
 /**
 * <pre>
- * 
  * Temporary class needed for processing data in time order
- * This implements a sorted linked list of time and ReceivedDataFromChannel pair in time order.
- * So first node will be ReceivedDataFromChannel class with earliest data.
- * We add all the first data and ReceivedDataFromChannel class into the sorted linked list. 
- * And we process data in the channel whose index is first node in the sorted linked list. 
- * 
+ * This implements a sorted linked list of time and ReceivedDataListFromChannel pair in time order.
+ * So first node will be ReceivedDataListFromChannel with earliest data.
  */
 
 public class ReceivedDataSortedByTime
 {
-	// sorted linked list of time in ascending order of time
+	// sorted linked list of time of each ReceivedDataListFromChannel in ascending time order
 	LinkedList<Double>					time_list	=new LinkedList<Double>();						
 	
 	
 
-	// hashmap to access list of ReceivedDataFromChannel by its channel name
+	// hashmap to access list of ReceivedDataListFromChannel by its channel name
 	HashMap<String, ReceivedDataListFromChannel>	channel_hash_map=new HashMap<String, ReceivedDataListFromChannel>();		 
 	
-	// sorted linked list of ReceivedDataFromChannel in ascending order of time
-	// one node of LinkedList contains List of ReceivedDataFromChannel for one channel
+	// sorted linked list of ReceivedDataListFromChannel in ascending time order
+	// one node of LinkedList contains List of ReceivedDataFromChannel(ReceivedDataListFromChannel) for one channel
 	LinkedList<ReceivedDataListFromChannel>			rd_list			=new LinkedList<ReceivedDataListFromChannel>();		 
 	
 		
@@ -38,10 +34,9 @@ public class ReceivedDataSortedByTime
 	}
 	
 	/**
-	 * <pre>
 	 * Add time and index. List will be sorted in time order
 	 */
-	public void Add(double time, ReceivedDataFromChannel rd)
+	public void Add(ReceivedDataFromChannel rd)
 	{
 		if (channel_hash_map.containsKey(rd.sink_channel_name))
 		{
@@ -61,19 +56,19 @@ public class ReceivedDataSortedByTime
 	 * <pre>
 	 * Add ReceivedDataSortedByTime
 	 * 
-	 * (*) Assumes ReceivedDataSortedByTime has at most one ReceivedData for each channel ( one fetch )
+	 * (*) Assumes ReceivedDataSortedByTime has at most one ReceivedData for each channel ( one fetch, not over multiple fetches )
 	 */
 	public void Add(ReceivedDataSortedByTime rsl)
 	{
 		for (ReceivedDataListFromChannel rl: rsl.rd_list)
-			Add(rl.GetFirstTime(),rl.getFirst());
+			Add(rl.getFirst());
 	}
 	
 	/**
 	 * <pre>
 	 * Add ReceivedDataListFromChannel
 	 * 
-	 * Doesn't assume that the ReceivedDataListFromChannel for the channel already exists
+	 * Assume that the ReceivedDataListFromChannel for the channel doesn't already exists
 	 */
 	protected void Add(ReceivedDataListFromChannel rl)
 	{
@@ -81,11 +76,14 @@ public class ReceivedDataSortedByTime
 		int index=0;
 		ListIterator<Double> iter							=time_list.listIterator();
 		ListIterator<ReceivedDataListFromChannel> iter_rd	=rd_list.listIterator();
+		
+		// iterate through list
 		for (;iter.hasNext();)
 		{
 			iter_rd.next();
 			if (time<iter.next())
 			{
+				// if correct spot has been found, add here
 				iter.previous();
 				iter_rd.previous();
 				
@@ -95,6 +93,7 @@ public class ReceivedDataSortedByTime
 			}
 		index++;
 		}
+		// add at last
 		time_list.addLast(time);
 		rd_list.addLast(rl);
 		}
@@ -112,11 +111,16 @@ public class ReceivedDataSortedByTime
 		return rd;
 	}
 	
-	public void RemoveFirstElementAndSort()
+	/**
+	 * Move to next data. Remove first data and sort
+	 */
+	public void Next()
 	{
+		// get first channel
 		ReceivedDataListFromChannel rl=rd_list.getFirst();
 
 		
+		// remove first channel
 		time_list.removeFirst();
 		
 		channel_hash_map.remove(channel_hash_map.get(rl.GetChannelName()));
@@ -124,14 +128,14 @@ public class ReceivedDataSortedByTime
 		rl.RemoveFirstData();
 		rd_list.removeFirst();
 		
+		// add the channel with ascending sorted order 
 		if (!rl.isEmpty()) Add(rl);
 	}
 
 	/**
-	 * return min time of last data received time of all channels
+	 * return min time of last time when data received over all channels
 	 */
-	
-	public double GetMinTimeOfLastTimeOfAllChannels()
+	public double GetLastTimeAllChannelIsReceived()
 	{
 		double lasttime=-1;
 		for (ReceivedDataListFromChannel rl: rd_list)

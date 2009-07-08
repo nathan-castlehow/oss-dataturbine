@@ -3,9 +3,9 @@ package dtesp;
 
 
 /**
- * 
+ * <pre>
  * Temporary class needed for processing data in time order
- * This represents time stamped data received from a channel. 
+ * This represents time stamped data received from a channel with one fetch 
  * 
  */
 public class ReceivedDataFromChannel

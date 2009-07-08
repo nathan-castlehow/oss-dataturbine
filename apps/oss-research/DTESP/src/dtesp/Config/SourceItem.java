@@ -11,7 +11,7 @@ import org.w3c.dom.Element;
 	 *   source- source class (initialized with string id of source)
 	 *   connection_string- connection string to be used for connection 
 	 *   cmap- channel map class to be used with this source 
-	 *   cache_size
+	 *   cache_size			see documentation of data turbine 
 	 *   archive_mode
 	 *   archive_size
 	 */	

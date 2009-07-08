@@ -5,17 +5,22 @@ import java.util.LinkedList;
 
 
 /**
+ * <pre>
  * This class is list of  ReceivedDataFromChannel
- * Contains received data for same channel (not over difference channel)
- * Assumes added in time order because we retrieve data from data turbine with a time order  
+ * Contains received data list for a channel (not over different channels)
+ * Assumes ReceivedDataFromChannel are added in ascending time order because we always fetch data ascending time order   
  */
 public class ReceivedDataListFromChannel extends LinkedList<ReceivedDataFromChannel>
 {
 	void RemoveFirstData()
 	{
+		// get earliest fetched data (ReceivedDataFromChannel)
 		ReceivedDataFromChannel rd=this.getFirst();
+		
+		// move to next data 
 		rd.Next();
 		
+		// if there is no more data from first ReceivedDataFromChannel, remove it   
 		if (rd.IsEmpty())
 			this.removeFirst();		
 	}

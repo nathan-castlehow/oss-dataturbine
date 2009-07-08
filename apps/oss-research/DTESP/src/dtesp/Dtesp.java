@@ -3,12 +3,16 @@ import dtesp.Config.*;
 
 
 
-
+/**
+ * <pre>
+ * Main Dtesp class
+ */
 
 public class Dtesp
 {
 	/**
-	 * 	Main- load config and run
+	 * 	Main function
+	 *  Load configuration file(default "setting.xml") and run.
 	 */
 
 	public static void main(String args[])
@@ -38,20 +42,34 @@ public class Dtesp
 	long GetWaitDuration()			{return waiting_duration;};
 	void AddWaitDuration(long n)	{waiting_duration+=n;}
 	
+	/**
+	 * <pre>
+	 * Millisec of time dtesp ran.
+	 * GetTimeFromStart() - time spend waiting for data
+	 */
 	
 	public long GetRunningTime() 
 	{
 		return System.currentTimeMillis()-start_time-waiting_duration;
 	}
 	
-	public long GetTime() 
+	/**
+	 * Millisec spend from start
+	 * @return
+	 */
+	
+	public long GetTimeFromStart() 
 	{
 		return System.currentTimeMillis()-start_time;
 	}
 	
 	
 	/**
-	 * 	Start dtesp
+	 * <pre>
+	 * 	Start dtesp 
+	 *  Create & Initialize SourceStub, SinkStub, and EsperStub.
+ 	 *  Run
+	 * 
 	 */
 
 	public void run(ConfigObj co)
@@ -72,22 +90,22 @@ public class Dtesp
 
 
 		
-		if (!co.bSubscribe) 
-		{
-			sink.UpdateTimeAllChannelReceived();
-		}
+
         System.out.println("start fetching data...");
 
 		
         
         
-        
+        // set start time
     	start_time=System.currentTimeMillis();
     	
     	int retry_count=0;
 		while (true)
 		{
+			// save data including test data(SaveDataItem) to source if necessary. 
 			if (!source.Process()) return;
+			
+			// check if there is data to fetch
 			if (!sink.IsDataExistToFetch())
 			{
         		if (!co.wait_for_new_data) 
@@ -97,12 +115,14 @@ public class Dtesp
         		}
 
 				long current_tick=System.currentTimeMillis();
+				// if all the data requested is done, sleep infinitely
 				if (sink.IsEndOfTheRequest())
 				{
 		        		System.out.println("End of request range");
 		        		while (true) { try {Thread.sleep(1000);} catch (Exception e_) {}}
 				}
 				
+				// sleep 100 millisec and wait for new data
 				if (retry_count%100==0)
 					System.out.println("Waiting for data...."+sink.current_request_start+" time of run:"+GetRunningTime());
 				retry_count++;
@@ -113,21 +133,30 @@ public class Dtesp
 	    		// finding out the last time of all channels
 	    		sink.UpdateTimeAllChannelReceived();
 
+	    		// subtract time waited
 	            AddWaitDuration(System.currentTimeMillis()-current_tick);
 			}
 			else
 			{
 				retry_count=0;
+				
+				// fetch data
 				ReceivedDataSortedByTime rds=sink.Fetch();
-				if (rds==null) return;
-				if (!rds.IsEmpty()) 
+				if (rds==null) break;
+				
+				if (!rds.IsEmpty())
+					// send data to esper stub
 					if (!e.Process(rds)) 
-						return;
+						break;
 			}
 			
 			
 		
 		}	
+				
+		source.CleanUp();
+		sink.CleanUp();
+		
 	}
 
 	

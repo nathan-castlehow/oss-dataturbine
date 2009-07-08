@@ -9,6 +9,9 @@ import dtesp.Config.*;
 
 
 /**
+ * <pre>
+ * Runtime information of sink  
+ * 
  *   sink- sink class created for this sink
  *   channel_list- list of sink channel configurations 
  */

@@ -6,14 +6,14 @@ import dtesp.Config.*;
 
 
 /**
+ * Runtime information of temporary/Sample data to be saved in source
  */
-
 class SaveDataRuntime
 {
 	public SaveDataRuntime(SaveDataItem sd)
 	{
 		if (sd.text==null || sd.text.isEmpty())
-			ParseData(sd.duration,sd.hertz,sd.max);
+			CreateData(sd.duration,sd.hertz,sd.max);
 		else
 			ParseData(sd.text);
 		conf=sd;
@@ -58,7 +58,13 @@ class SaveDataRuntime
 	
 	
 	
-	public void ParseData(int duration, int hertz, int max)
+	/**
+	 * Create random data 
+	 * @param duration		
+	 * @param hertz
+	 * @param max
+	 */
+	public void CreateData(int duration, int hertz, int max)
 	{
 		int i;
 

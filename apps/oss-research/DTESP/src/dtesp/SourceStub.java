@@ -11,6 +11,9 @@ import com.rbnb.sapi.*;
 
 
 
+/**
+ * SourceStub class for saving data to data turbine
+ */
 
 public class SourceStub {
 
@@ -54,7 +57,8 @@ public class SourceStub {
     
     /**
      * <pre>
-     * Prepare DT connection. Create and connect source, source channel
+     * Prepare DT connection. Create and connect source, and source channel.
+     * Prepare source for copy_to_source option and sample/temporary data to save(SaveDataItem)
      */
     
     public void Init_DT()
@@ -133,28 +137,35 @@ public class SourceStub {
 
         
         
-      // if we need to copy sink to a source
-      // Create sink        
+      // Prepare source for copy_to_source option 
       for (SinkItem s : config_obj.hmap_sink_item.values())
       {
+    	  // check if the sink has copy_to_source option
       	if (s.copy_to_source==null || s.copy_to_source.isEmpty()) continue;
       	
         for (SinkChannelItem c : config_obj.hmap_sink_channel_item.values())
         {
-        	if (s.name.compareTo(c.sink_name)!=0) return;
+        	// check for sink channel attached to the sink
+        	if (s.name.compareTo(c.sink_name)!=0) continue;
+        	
+        	// if found
         	System.out.println(" Adding Copy to SourceChannel"+c.name+": "+c.channel_string);
        	
         	
         	SourceChannelRuntime cr=new SourceChannelRuntime();
-        	if (cr==null)
+        	
+        	// find source runtime 
+        	SourceRuntime sr=list_source.get(s.copy_to_source);
+        	cr.source=sr;
+
+        	if (sr==null)
         	{
+        		// not found
             	System.out.println(" Source not found!");
             	continue;
         	}
         	
-        	SourceRuntime sr=list_source.get(s.copy_to_source);
-        	cr.source=sr;
-        	
+        	// create & copy configuration from source channel configuration
         	SourceChannelItem n_config=new SourceChannelItem(c.name,s.copy_to_source,c.channel_string,"",false);
         	cr.conf=n_config;
 
@@ -176,6 +187,9 @@ public class SourceStub {
     }
     
     
+    /**
+     * Save temporary/sample data at time defined by configuration
+     */
     void ProcessSaveData()
     {
 
@@ -183,9 +197,10 @@ public class SourceStub {
         
         while (i.hasNext())
         {
-      	SaveDataRuntime s=i.next();
+        	SaveDataRuntime s=i.next();
         	
-        	if (s.conf.time_to_insert>dtesp.GetTime()) continue;
+        	// check time
+        	if (s.conf.time_to_insert>dtesp.GetTimeFromStart()) continue;
         	// send sample data to DT
         	SendToDT(s.data,s.time,s.conf.source_channel_name);
         	
@@ -195,11 +210,16 @@ public class SourceStub {
             	
     }
     
-    
+
+    /**
+     * <pre>
+     * Main function
+     * Save temporary/sample data
+     */
     Boolean Process()
     {
 
-    	ProcessSaveData(); 
+      ProcessSaveData(); 
       
       return true;
     }
@@ -218,9 +238,15 @@ public class SourceStub {
     }
     
 
+    /**
+     * minimum time interval between two data need for making a bar graph form
+     */
+    final double BAR_GRAPH_PRECISION=0.00001;
     
     /**
-     * Send data to Data Turbine 
+     * <pre>
+     * Send data to Data Turbine
+     * If bar graph option is set, write in bar graph form 
      * @param data			array of data (double[])
      * @param time			array of time (double[])
      * @param cr			SourceChannelRuntime
@@ -242,11 +268,13 @@ public class SourceStub {
 	    	for (i=1;i<data.length+1;i++)
 	    	{
 	    		data_[i]=data[i-1];
+//	    		time_[i]=Double.longBitsToDouble(Double.doubleToLongBits(time[i-1])+1);
 	    		time_[i]=time[i-1];
 	    	}
 	    	
 	    	data_[0]=cr.last_data;
-	    	time_[0]=Double.longBitsToDouble(Double.doubleToLongBits(time[0])-1);
+	    	time_[0]=time[0]-BAR_GRAPH_PRECISION;
+//	    	time_[0]=Double.longBitsToDouble(Double.doubleToLongBits(time[0])+1);
 	    	
 	    	data=data_;
 	    	time=time_;
@@ -279,10 +307,11 @@ public class SourceStub {
 
     
     
-    
+    /**
+     * CleanUp:closes connection
+     */
 
-
-    void DT_CleanUp()
+    void CleanUp()
     {
         // close connection
         for (SourceRuntime sr:list_source.values())
@@ -290,8 +319,8 @@ public class SourceStub {
         	if (sr.source.VerifyConnection())
         		sr.source.CloseRBNBConnection();
         }
-        System.out.println("Done, exiting.");
         
+        list_source.clear();
         return;
     }
 }

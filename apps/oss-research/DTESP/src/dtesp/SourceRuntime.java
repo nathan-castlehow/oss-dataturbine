@@ -8,6 +8,10 @@ import dtesp.Config.*;
 
 import com.rbnb.sapi.ChannelMap;
 import com.rbnb.sapi.Source;
+/**
+ * <pre>
+ *  Runtime information for source
+ */		
 
 class SourceRuntime
 {

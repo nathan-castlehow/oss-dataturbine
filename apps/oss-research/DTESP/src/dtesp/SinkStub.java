@@ -10,6 +10,11 @@ import com.rbnb.sapi.*;
 
 
 
+/**
+ * <pre>
+ * Initialize sink connection. Initialize start and end time of fetch.
+ * Request and fetch data. If not using subscribe, only fetch until all data is received.
+ */
 
 
 
@@ -61,8 +66,8 @@ public class SinkStub {
     
     /**
      * <pre>
-     * Prepare DT connection. Create and connect source, source channel, sink, and sink channel
-     * Data will be saved in DT by <SaveData> node.  
+     * Prepare DT connection. Create and connect sink, and sink channel
+     * Set time to start request. If not subscribe, set when all data has been received.  
      */
     
     public void Init_DT()
@@ -119,19 +124,30 @@ public class SinkStub {
         }
         
 
-        current_request_start=-1;
-        // not using subscribe
+        // set start time of the request 
 		if (!config_obj.bSubscribe)
 		{
-	        // load start time if we need to fetch from the start
+	        // not using subscribe
 			if (config_obj.request_start==-1)
+		        // set start time to oldest time of input data
 				current_request_start=FindOldestTime();
 			else
 				current_request_start=config_obj.request_start;
 		}
+		else
+	        current_request_start=-1;
 
+		
+		// if using subscribe, we don't need last time of data to proceed. We just proceed as we get the data
+		if (!config_obj.bSubscribe) 
+		{
+			UpdateTimeAllChannelReceived();
+		}		
     }
     
+    /**
+     * Find oldest time of all channels
+     */
     
     public double FindOldestTime()
     {
@@ -200,6 +216,10 @@ public class SinkStub {
 
         
 
+	/**
+	 * Find last time of channel over all channels
+	 */
+	
 	public    void UpdateTimeAllChannelReceived() 
     {
 
@@ -229,18 +249,17 @@ public class SinkStub {
 		           
 		            if(chanIdx >= 0)
 		            {
+		            	// if data exist
 		                double[] data_time;
 		                data_time = outmap.GetTimes(chanIdx);
 		                
 		                
-		                // set to last time
-		                if (c.last_data_time<=data_time[0])
-		                	c.last_data_time=data_time[0];
 		
 		                if (time_all_channel_received>=data_time[0] || time_all_channel_received==-1)
 		                	time_all_channel_received=data_time[0];                
 		            }
 		            else
+		            	// no data, fail
 		            	received_from_all_channel=false;
 				}
 			}
@@ -261,12 +280,18 @@ public class SinkStub {
 	}
     	
 
+	/**
+	 * last time of the request
+	 */
 	Boolean IsEndOfTheRequest()
 	{
 		return current_request_start>=config_obj.end_time && config_obj.end_time!=-1;		
 	}
     
     
+	/**
+	 * get valid request duration 
+	 */
     
 	double	GetRequestDuration()
 	{
@@ -291,8 +316,16 @@ public class SinkStub {
 		
 		if (config_obj.bSubscribe) return true;
 		if (duration<=0) return false;
-		
-    	
+		return true;
+	}
+	
+	/**
+	 * Request data
+	 */
+	void Request()
+	{
+    	double duration=GetRequestDuration();
+   	
     	
 		try 
 		{
@@ -311,28 +344,16 @@ public class SinkStub {
 
     	current_request_start=current_request_start+duration;
         
-        
-        return true;
-	        
+        	        
 	}
 	
 
     
     /** 
-     * <pre>Main loop for fetching data\n
+     * <pre>
+     * Fetch data and save in ReceivedDataSortedByTime.
+     * If copy_to_source option set, save to source. 
      * 
-     * 1. (Only if you are requesting data at certain time (replaying old data)) For each sink channel request data
-     * 
-     * 2. Fetch data for each channel, and save it in a array
-     * 
-     * 3. We have to send to esper in time order. Data within a channel is in time order, but we don't know time order of data over all channels. So insert earliest data from each channel to sorted list. 
-     * 
-     * 4. Before setting esper time to the data time, check if time difference between last esper time is greater than maximum_time_granuality.
-     * If so, time is advancing too much at once. We traverse intermediate time and set it to esper time to the data time.
-     * 
-     * 5. Send the earliest data in the sorted list to esper, and remove it. Add next data of the channel to the sorted list. Repeat from 4 until all the data is sent to esper. 
-     * </pre> 
-     * @return 
      */ 
     
     
@@ -343,6 +364,7 @@ public class SinkStub {
      
     protected ReceivedDataSortedByTime Fetch()
     {
+		if (!config_obj.bSubscribe) Request();
 	
     	ReceivedDataSortedByTime sorted_rd_list			= new ReceivedDataSortedByTime();
 	
@@ -383,12 +405,10 @@ public class SinkStub {
 	                rd.data=data;
 	                rd.data_time=data_time;
 	                
-	                // add the earliest time of data of the channel and data
-	                sorted_rd_list.Add(rd.GetTime(), rd);
+	                // add data
+	                sorted_rd_list.Add(rd);
 	                
 	                
-	                if (c.last_data_time<=rd.GetLastTime())
-	                	c.last_data_time=rd.GetLastTime();
 	                
 	                
 	                
@@ -410,7 +430,11 @@ public class SinkStub {
     }
 
 
-    void DT_CleanUp()
+    /**
+     * CleanUp: Closes connection
+     */
+    
+    void CleanUp()
     {
         // close connection
 
@@ -419,7 +443,8 @@ public class SinkStub {
         	if (si.sink.VerifyConnection())
         		si.sink.CloseRBNBConnection();
         }
-        System.out.println("Done, exiting.");
+        
+        list_sink.clear();
         
         return;
     }

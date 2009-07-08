@@ -128,8 +128,8 @@ public class ConfigObjCreator
 			co.maximum_time_granuality=new Integer(e.getAttribute("esper_time_granuality_sec"))*1000;
 		if (e.hasAttribute("output_level"))
 			co.output_level=new Integer(e.getAttribute("output_level"));
-//		if (e.hasAttribute("subscribe"))
-//			co.bSubscribe=new Integer(e.getAttribute("subscribe"))==1;
+		if (e.hasAttribute("subscribe"))
+			co.bSubscribe=new Integer(e.getAttribute("subscribe"))==1;
 	}
 	
 	/**
