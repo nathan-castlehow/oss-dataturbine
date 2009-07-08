@@ -18,7 +18,6 @@
 <!-- temp build dir -->
 <property name="build.dir" value="compile"/>
 <property name="build.classes" value="${build.dir}/classes"/>
-<property name="build.lib" value="${build.dir}/lib"/>
 <property name="lib.dir" value="${basedir}/lib"/>
 
 	
@@ -28,6 +27,11 @@
 <path id="classpath">
  <pathelement location="${java.home}/../lib/tools.jar"/>
  <pathelement location="."/>
+
+ <pathelement location="${build.dir}"/>
+ <pathelement location="${build.classes}"/>
+ <pathelement location="${build.classes}/dtesp"/>
+ <pathelement location="${build.classes}/dtesp/config"/>
  
 
 
@@ -38,6 +42,11 @@
 
 
  <pathelement path="${java.class.path}"/>
+
+ <fileset dir="${lib.dir}">
+   <include name="*.jar"/>
+ </fileset>
+
 </path>
  
 <!-- target to make temp dirs -->
@@ -76,24 +85,12 @@
         use="true" />
 </target>
 
-<!-- Package (jar) target -->
-<target name="jar" depends="compile" description="Build dtesp.jar">
-  <jar jarfile="${build.lib}/${package.name}.jar" basedir="${build.classes}">
-    <include name="org/**" />
-    <include name="ts*"/>
-    <include name="*.xml" />
-    <include name="*.wsdd" />
-    <include name="*.class" />
-  </jar>
-</target>
 
 
 
 <!-- Run the client -->
-<target name="run" depends="jar" description="Run dtesp">
- <java classpathref="classpath" classname="dtesp">
- <arg line="${args}"/>
- </java>
+<target name="run" depends="compile" description="Run dtesp">
+ <java classpathref="classpath" classname="dtesp.Dtesp"/>
 </target>
 
 
