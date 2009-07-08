@@ -321,6 +321,7 @@ public class SourceStub {
         }
         
         list_source.clear();
+        list_source_channel.clear();
         return;
     }
 }

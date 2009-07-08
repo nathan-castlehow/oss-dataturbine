@@ -146,7 +146,7 @@ public class SinkStub {
     }
     
     /**
-     * Find oldest time of all channels
+     * Find first time of all channels is received 
      */
     
     public double FindOldestTime()
@@ -176,7 +176,7 @@ public class SinkStub {
 		                
 		                
 		                // set to latest time
-		                if (oldest_time>=data_time[0] || oldest_time==-1)
+		                if (oldest_time<=data_time[0] || oldest_time==-1)
 		                	oldest_time=data_time[0];
 		            }
 				}
@@ -445,6 +445,7 @@ public class SinkStub {
         }
         
         list_sink.clear();
+        list_sink_channel.clear();
         
         return;
     }

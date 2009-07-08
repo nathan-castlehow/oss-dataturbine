@@ -148,7 +148,7 @@ public class ConfigObj {
     /** 
      *  Data duration for one fetch
      */	
-	public double request_duration=1200000; // 20 min
+	public double request_duration=60*60*24*2; // in sec
 	
     /** 
      * Time of end request 
