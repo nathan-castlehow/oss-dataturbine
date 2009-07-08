@@ -53,7 +53,6 @@
 <target name="prepare" description="Make directories">
   <mkdir dir="${build.dir}"/>
   <mkdir dir="${build.classes}"/>
-  <mkdir dir="${build.lib}"/>
   <mkdir dir="${doc.dir}"/>
 </target>
 
