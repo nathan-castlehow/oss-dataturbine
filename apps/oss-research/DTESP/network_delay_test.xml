@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Setting>
+<RequestTime mode="start"></RequestTime>
+
+
+<Event name="Update" field="status"></Event>
+
+<Sink name="SNK" client="S1sink" connection_string="localhost:3333"></Sink>
+<SinkChannel name="C1" 	sink="SNK" channel_string="S1/C1" 	event="Update"></SinkChannel>
+<SinkChannel name="C2" 	sink="SNK" channel_string="S1/C2" 	event="Update"></SinkChannel>
+
+<Source name="SRC" client="S1" connection_string="localhost:3333"></Source>
+<SourceChannel name="S1" 	source="SRC" channel_string="C1" 	event="Update"></SourceChannel>
+<SourceChannel name="S2" 	source="SRC" channel_string="C2" 	event="Update"></SourceChannel>
+
+<SaveData source_channel='S1' after='0'>@1000;@2000;@3000</SaveData>
+<SaveData source_channel='S2' after='0'>@1000</SaveData>
+<SaveData source_channel='S2' after='3000'>@2000;@3000</SaveData>
+
+
+
+</Setting>
