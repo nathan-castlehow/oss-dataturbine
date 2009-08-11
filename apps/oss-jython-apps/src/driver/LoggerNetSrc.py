@@ -169,6 +169,8 @@ class DTSrc:
         chIndex = 0
         for dataVal in dataVals:
             if dataVal != 'NAN':
+                if dataVal == '-INF':
+                    dataVal = -99999
                 dataVal = float(dataVal)
                 dVal = array([dataVal], 'd')
                 self.chMap.PutDataAsFloat64 (chIndex, dVal)
