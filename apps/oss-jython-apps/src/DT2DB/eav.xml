@@ -1,0 +1,51 @@
+<?xml version="1.0"?>
+<!--
+    Sample config file
+-->
+<config>
+	<!-- Key-Value params -->
+	<!-- DT params -->
+	<param name="DTServerAddress" value="movebank.ucsd.edu"/>
+	<param name="DTServerPort" value="3333"/>
+	<param name="DTSinkName" value = "DT2DBClient" />
+	<param name="DTJarPath" value = "/Applications/RBNB/bin/rbnb.jar" />
+	
+	<!-- DB params-->
+	<param name="dbServerName" value = "jdbc:postgresql://localhost/shared" />
+	<param name="jdbcDriverName" value = "org.postgresql.Driver" />
+	<param name="dbName" value = "shared" />
+	<param name="dbUserName" value = "petershin" />
+	<param name="dbPassword" value = "petershin" />
+
+
+	<!--SinkClientManger params -->
+	<param name="startTimeFilePath" value = "/Users/petershin/Documents/workspace/startTime.txt" />
+	<param name="durationSeconds" value = "10.0" />
+	
+	<param name="stopAtError" value = "NO"/>
+	<param name="continueFlagFile" value ="/Users/petershin/Documents/workspace/continue.txt" />
+	<param name="emailContact" value = "pshin@sdsc.edu" />
+	
+	<param name="sysLogServerName" value = "niagara.sdsc.edu" />
+
+	
+	<!-- Mapping params -->
+	<param name="dataModel" value="EAVModel" />
+	<param name="DBTimeFormat" value = "yyyy-MM-dd HH:mm:ss.SSS"/>
+
+
+	<!-- For EAV model, notice all the IDs are hard coded since they do not change with the channel names-->
+
+	<query chName = "FakeDAQ/ch0">
+	  INSERT INTO test2 (dtime, object_id, name, grade) values (%%%%%, 5, 10 , $$$$$);
+	  SELECT count(*) FROM test;
+	</query>
+
+
+	<query chName = "FakeDAQ/ch1">
+	  INSERT INTO test (valueID, siteID, sensorID, DataValue) values ("hum", 3, 10 , $$$$$);
+	</query>
+
+</config>
+
+

@@ -1,0 +1,67 @@
+<?xml version="1.0"?>
+<!--
+    Sample config file
+-->
+<config>
+	<!-- Key-Value params -->
+	<!-- rbnb params -->
+	<param name="rbnbServerAddress" value="niagara-dev.sdsc.edu"/>
+	<param name="rbnbServerPort" value="3333"/>
+	<param name="DTSinkName" value = "DT2DBClient" />
+	<param name="DTJarPath" value = "/Applications/RBNB/bin/rbnb.jar" />
+	
+	<param name="sysLoggerServerName" value="niagara-dev.sdsc.edu"/>
+	
+	<!-- DB params-->
+	<param name="dbServerName" value = "jdbc:postgresql://localhost/shared" />
+	<param name="jdbcDriverName" value = "org.postgresql.Driver" />
+	<param name="dbName" value = "shared" />
+	<param name="dbUserName" value = "petershin" />
+	<param name="dbPassword" value = "petershin" />
+
+
+	<!--SinkClientManger params -->
+	<param name="startTimeFilePath" value = "/Users/petershin/Documents/workspace/startTime.txt" />
+	<param name="durationSeconds" value = "60.0" />
+	
+	<param name="stopAtError" value = "NO"/>
+	<param name="continueFlagFile" value ="/Users/petershin/Documents/workspace/continue.txt" />
+	<param name="emailContact" value = "pshin@sdsc.edu" />
+	
+
+	
+	<!-- Mapping params -->
+	<param name="dataModel" value="RowModel" />
+	<param name="DBTimeFormat" value = "yyyy-MM-dd HH:mm:ss.SSS"/>
+	<!-- Channel name "TimeStampForDB" is reserved and it will be used as a first column name -->
+	<query>
+	  INSERT INTO test (#####) Values ($$$$$)  
+	  <column name="time_tag" channelMapping="TimeStampForDB"/>
+	  <column name="ch0" channelMapping="FakeDAQ/0" />
+	  <column name="ch1" channelMapping="FakeDAQ/1"/>
+	</query>
+
+	<query>
+	  INSERT INTO test2 (#####) Values ($$$$$)  
+	  <column name="time_tag" channelMapping="TimeStampForDB"/>
+	  <column name="ch0" channelMapping="FakeDAQ/0" />
+	  <column name="ch1" channelMapping="FakeDAQ/1"/>
+	</query>
+
+
+	<!--
+	    <column name="utc_time_tag" channelMapping="UTCTimeStamp" type="-8"/> 
+	-->
+
+	<!--
+	    Special hard coded values are used.
+	    ##### will be replaced by the column names 
+	    $$$$$ will be replaced by the values from RBBN channels
+	-->
+
+	<!-- One may easily add hard coded id values:
+	     INSERT INTO TableName (#####, hardCodedID ) Values ($$$$$, "HardCodedValue") 
+	-->
+</config>
+
+
