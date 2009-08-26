@@ -1,4 +1,4 @@
-import configReader
+import configReader, DBOperator
 import sched, time
 import os.path as path
 
@@ -30,6 +30,9 @@ class DT2DB:
         self.dtName = cfg.paramDict["DTSinkName"]        
 
         self.dataModel = cfg.DataModel
+        self.dbop = DBOperator(cfg)
+        
+        
     
 
     def run (self, cfg, sapi):
@@ -62,6 +65,7 @@ class DT2DB:
             self.connectToDT (cfg, sapi)
     
     def connectToDB (self, cfg, sapi):
+        self.dbop.connect()
         
     
     def saveLastTimestamp (self, cfg, sapi):
