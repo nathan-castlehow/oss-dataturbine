@@ -5,7 +5,7 @@ import os.path as path
 from jarray import array
 from jreload import makeLoadSet
 
-class SinkClientManager:
+class DT2DBManager:
 
     def __init__ (self, cfg):
         # load the rbnb.jar 
@@ -140,4 +140,4 @@ class DT2DB:
 if __name__ == '__main__':
     cf = configReader.configReader("eav.xml")
     cf.parseParams()
-    sc = SinkClientManager(cf)
+    sc = DT2DBManager(cf)
