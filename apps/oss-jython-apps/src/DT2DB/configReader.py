@@ -53,7 +53,7 @@ class configReader:
                 RowMap[chName] = colName
             self.RowQueries[qStr] = RowMap    
         
-                
-cr = configReader("row.xml")
-cr.parseParams()
-print cr.RowQueries
+if __name__=='__main__':                
+    cr = configReader("row.xml")
+    cr.parseParams()
+    print cr.RowQueries
