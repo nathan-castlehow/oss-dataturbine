@@ -33,12 +33,88 @@ class DT2DB:
         self.dbop = DBOperator(cfg)
         
         
-    
-
     def run (self, cfg, sapi):
 
         self.connectToDT(cfg, sapi)
+        # create a channel map
+        self.createChannelMap(cfg, sapi)
+        self.durationSeconds = cfg.paramDict["durationSeconds"]
+        # create a channel tree
+        # this function also finds the start time of each channel
+        self.createChannelTree(cfg, sapi)
+        # either start from the file or the start of the channel
+        self.findStartTime (cfg, sapi)
+        # connect to the DB
+        self.connectToDB(cfg, sapi)
+        # subscribe to the channel map using runStartTime
+        self.subscribeToDT(cfg, sapi)
+        self.runInLoop (cfg, sapi)
+    
+    
+    def runInLoop (self, cfg, sapi):
+        
+        fetchingDT = True
+        operateDB = True
+        
+        interval = float (cfg.paramDict.durationSeconds)
 
+        # keep fetching and inserting the data into DB
+        while fetchingDT:
+            fetchingDT = True
+            operateDB = True
+
+            try:
+                # fetch the data from the channel
+                self.fetchData(self, cfg, sapi)
+            except:
+                fetchingDT = False
+                self.run(cfg, sapi)
+        
+            if fetchingDT:
+                # translate the fetched values to the DB queries
+                self.translateDT2DB (self, cfg, sapi)
+                # keep trying to insert the DB queries
+                while operateDB:
+                    try:
+                        # execute the DB queries
+                        self.executeDBQueries(cfg, sapi)
+                        # move the start subscription time for the next point
+                        self.recordStartTime(cfg, sapi)
+                        operateDB = False
+                    except:
+                        operateDB = True
+                        time.sleep(interval)
+                        self.connectToDB(cfg, sapi)
+
+                # wait and loop back
+                time.sleep(interval)
+        return
+
+    def translateDT2DB (self, cfg, sapi):
+        if cfg.paramDict['dataModel'] == 'EAVModel':
+            self.execEAVDBQueries(cfg, sapi)
+        elif cfg.paramDict['dataModel'] == 'RowModel':
+            self.execRowDBQueries(cfg, sapi)
+        return
+
+    def fetchData (self, cfg, sapi):
+        blockTimeOut = 10000L
+        self.DT2DBSink.Fetch(self.chMap, blockTimeOut)
+    
+    def createChannelMap (self, cfg, sapi):
+        #create channel map
+        self.chMap = sapi.ChannelMap ()
+
+        # add channels
+        # Define channels by name, via ChannelMap.Add(java.lang.String)
+        chNames = cfg.chNames
+        for chIndex in range(len(chNames)):
+            self.chMap.Add(chNames[chIndex])
+        # Register the channelMap
+        self.src.Register (self.chMap)
+        
+
+    def findStartTime (self, cfg, sapi):
         # start time
         startFStr = cfg.paramDict["startTimeFilePath"]
         
@@ -47,12 +123,14 @@ class DT2DB:
             startTimeLine = startTimeFH.readline()
             self.startTime = float(startTimeLine.strip())
         else:
-            # TODO: infer from the DT server
-            print 'please specify the start time file'
-            
-        self.durationSeconds = cfg.paramDict["durationSeconds"]
-        self.createChannelTree(cfg, sapi)
-
+            minST = "noInit"
+            for chST in self.chStartTimes:
+                thisST = chST
+                if minST == "noInit":
+                     minST = thisST
+                elif thisST < minST:
+                    minST = thisST
+            self.startTime = minST
 
     def connectToDT (self, cfg, sapi):
         # connect to DT server persistently
@@ -64,6 +142,7 @@ class DT2DB:
             time.sleep (60)
             self.connectToDT (cfg, sapi)
     
+    
     def connectToDB (self, cfg, sapi):
         self.dbop.connect()
         
@@ -72,23 +151,71 @@ class DT2DB:
         self.startTimeFilePath = cfg.paramDict['startTimeFilePath']
         #todo save the last timestamp to a file
 
-    
+    def recordStartTime (self, cfg, sapi):
+        return
+
+    # sink client continuously receives the data
+    # pre: create channel map with the start times
+    # post: the fetch is ready
     def subscribeToDT (self, cfg, sapi):
-        # sink client continuously receives the data
+        duration = 0.0
+        self.DT2DBSink.Subscribe (self.chMap, self.startTime, duration, "absolute" )
         return
 
-    def createEAVDBQuery (self, cfg, sapi):
-        # get one reading at a time
-        # create a DB query
-        # map the channel names to DB query
+    # each channel maps onto one query
+    # pre:  the channels are fetched 
+    # post: creates the query strings
+    def execEAVDBQueries (self, cfg, sapi):
+        listOfCh = self.chMap.GetChannelList()
+        self.chMap.NumberOfChannels()
+        for chName in listOfCh:
+            chInd = self.chMap.GetIndex(chName)
+            data = self.chMap.GetDataAsFloat64(chInd)
+            tStamps = self.chMap.GetTimes(chInd)
+            
+            for tsInd in range(len(tStamps)):
+                self.dbop.execEAVQuery(self, cfg, chName, tStamps[tsInd], data[tsInd])
         return
 
-    def createRowDBQuery (self, cfg, sapi):
-        # organize the insert query 
+    def execRowDBQueries (self, cfg, sapi):
+        # align the channel names for each DB table and synchronize them
+        listOfCh = self.chMap.GetChannelList()
+        numCh = self.chMap.NumberOfChannels()
+        
+        rowQs = cfg.RowQueries.keys()
+        # deal one row table at a time
+        for rowQ in rowQs:
+            chDict = cfg.RowQueries[rowQ]
+            chNamesForQ = chDict.keys()
+            
+            # save time and data to create queries for one table
+            colsTableTS = {}
+            colsTableData = {}
+            indOffset = {}
+            for chName in chNamesForQ:
+                if chName != "TimeStampForDB":
+                    # get the index using the chName
+                    chInd = self.chMap.GetIndex(chName)
+                    # get the times and values
+                    colsTableTS[chName] = self.chMap.GetTimes(chInd)
+                    colsTableData[chName] = self.chMap.GetDataAsFloat64(chInd)
+                    indOffset[chName] = len(self.chMap.GetTimes(chInd))
+            # given the data and their timestamps
+            # synchronize them accordingly
+            #   1. save current indices across channels
+            #   2. find the min time
+            #   3. find channels with min time
+            #   4. create a query using the channels
+            #   5. move the current index for the inserted channels
+            if len(colsTableTS) >0:
+                moreQuries=True
+                while moreQueries:
+                    # find min time
+                    colsTableTS
+            
         return
     
-    def executDBQuery (self, cfg, sapi):
-        return
+    
 
 
     def createChannelTree (self, cfg, sapi):
@@ -112,12 +239,12 @@ class DT2DB:
         self.DT2DBSink.Fetch (1500, self.chMapTree)
         self.chTree = sapi.ChannelTree.createFromChannelMap (self.chMapTree)
         print self.chTree
-        self.findStartTime(cfg, sapi)
+        self.findChStartTimes(cfg, sapi)
         
         print "start times: ", self.chStartTimes
         
 
-    def findStartTime (self, cfg, sapi):
+    def findChStartTimes (self, cfg, sapi):
         self.chNodes = self.chTree.iterator()
         
         self.chTimeNames = []

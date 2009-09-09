@@ -9,6 +9,7 @@ class configReader:
         self.DataModel = "RowModel"
         self.EAVqueries={}
         self.RowQueries ={}
+        self.chNames = []
 
     def parseParams (self):
         params = self.doc.getElementsByTagName("param")
@@ -34,6 +35,7 @@ class configReader:
             oneMap.normalize()
             qStr = oneMap.firstChild.data
             qStr = qStr.strip()
+            self.chNames.append(chName)
             self.EAVqueries[chName] = qStr
 
     def parseRow (self):
@@ -51,9 +53,13 @@ class configReader:
                 chName = param.getAttribute("channelMapping")
                 print colName,":  ", chName
                 RowMap[chName] = colName
+                self.chNames.append(chName)
             self.RowQueries[qStr] = RowMap    
         
 if __name__=='__main__':                
     cr = configReader("row.xml")
     cr.parseParams()
     print cr.RowQueries
+    print cr.paramDict
+    print cr.chNames
+    print cr.RowQueries['INSERT INTO test (#####) Values ($$$$$)']

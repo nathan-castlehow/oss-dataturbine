@@ -16,6 +16,7 @@ class DBOperator:
             self.db = sql.zxJDBC.connect(self.dbURL, self.user, self.pw, self.drv)
         
         except:
+            print 'trying to connect'
             time.sleep(10)
             self.connect()
 
@@ -39,8 +40,7 @@ class DBOperator:
             q1 = q1.replace ("$$$$$", val)
             q1 = q1.replace ("%%%%%", "'" + (self.convertTime(cfg.paramDict['DBTimeFormat'], tStamp))+"'")
             print q1
-            self.execQuery(q1)
-    
+            return q1
     
     def convertTime(self, timeFormatStr, ts):
         # from milliseconds to seconds
