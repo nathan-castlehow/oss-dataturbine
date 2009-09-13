@@ -216,6 +216,7 @@ class DT2DB:
             print 'columns for TSs ', colsTableTS
             if len(colsTableTS) >0:
                 moreQueries=True
+                print 'more query loop beings'
                 while moreQueries:
                     # 2. find min time
                     tempCounter = 0 # for initialization
@@ -249,9 +250,9 @@ class DT2DB:
                                 # 5. move the cursor one up
                                 indOffset[TSchName] = indOffset[TSchName] -1
                     # 4. create a query using all the channel info
-#                    print 'query string', rowQ
-#                    print 'min Time chans', minTimeChans
-#                    print 'min TS', minTS
+                    print 'query string', rowQ
+                    print 'min Time chans', minTimeChans
+                    print 'min TS', minTS
                     self.dbop.execRowQuery (cfg, rowQ, minTimeChans, minTS, minTimeChanVals)
                     
                     # check if all indices are maxed out
