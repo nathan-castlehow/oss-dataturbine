@@ -13,9 +13,6 @@ class DBOperator:
 
     def connect (self):
         try:
-            print self.dbURL
-            print self.user, self.pw
-            print self.drv
             self.db = sql.zxJDBC.connect(self.dbURL, self.user, self.pw, self.drv)
         
         except:
