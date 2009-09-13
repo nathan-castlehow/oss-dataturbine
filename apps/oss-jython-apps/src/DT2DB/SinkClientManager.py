@@ -239,7 +239,9 @@ class DT2DB:
                             currTS = chTSs[currInd]
                             if currTS == minTS:
                                 minTimeChans.append(TSchName)
-                                minTimeChanVals.append(colsTableData[TSchName])
+                                currDataArr = colsTableData[TSchName]
+                                currData = currDataArr[currInd]
+                                minTimeChanVals.append(currData)
                                 # 5. move the cursor one up
                                 indOffset[TSchName] = currInd -1
                     # 4. create a query using all the channel info
