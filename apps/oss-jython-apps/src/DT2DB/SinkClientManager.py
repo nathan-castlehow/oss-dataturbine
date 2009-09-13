@@ -111,6 +111,8 @@ class DT2DB:
         for chIndex in range(len(chNames)):
             self.chMap.Add(chNames[chIndex])
         # Register the channelMap
+        print self.chMap
+        print 'registering the channel map above'
         self.DT2DBSink.RequestRegistration (self.chMap)
         
 
