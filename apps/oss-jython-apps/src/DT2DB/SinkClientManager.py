@@ -53,7 +53,7 @@ class DT2DB:
     def runInLoop (self, cfg, sapi):
         
         fetchingDT = True
-        interval = 20
+        interval = 3
 
         # keep fetching and inserting the data into DB
         while fetchingDT:
