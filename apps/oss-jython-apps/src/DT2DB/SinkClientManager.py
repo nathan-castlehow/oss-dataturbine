@@ -186,6 +186,7 @@ class DT2DB:
         rowQs = cfg.RowQueries.keys()
         # deal one table at a time
         for rowQ in rowQs:
+            print 'curr row query = ', rowQ
             chDict = cfg.RowQueries[rowQ]
             chNamesForQ = chDict.keys()
             
@@ -257,7 +258,7 @@ class DT2DB:
                     for TSchName in colsTableTS.keys():
                         if allMaxed:
                             if indOffset[TSchName] > 0:
-                                print TSchName, 'not maxed,  offset = ', indOffset[TSchName]
+                                #print TSchName, 'not maxed,  offset = ', indOffset[TSchName]
                                 allMaxed=False
                     moreQueries=not allMaxed
             
