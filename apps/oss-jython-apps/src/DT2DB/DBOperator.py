@@ -58,7 +58,7 @@ class DBOperator:
         return formattedDate
         
     def execRowQuery (self, cfg, chNames, tStamp, vals):
-        queries = cfg.RowQuery
+        queries = cfg.RowQueries
 
         # just in case for multi-line queries
         queries = queries.split(";")
