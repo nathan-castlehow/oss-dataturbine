@@ -244,9 +244,18 @@ class DT2DB:
                                 minTimeChans.append(TSchName)
                                 minTimeChanVals.append(colsTableData[TSchName])
                                 # 5. move the cursor one up
-                                indOffset[TSchName] = currInd +1
+                                indOffset[TSchName] = currInd -1
                     # 4. create a query using all the channel info
                     self.dbop.execRowQuery (cfg, minTimeChans, minTS, minTimeChanVals)
+                    
+                    # check if all indices are maxed out
+                    allMaxed=True
+                    for TSchName in colsTableTS.keys():
+                        if allMaxed:
+                            if indOffset[TSchName] >= 0:
+                                allMaxed=False
+                    moreQueries=not allMaxed
+            
         return
     
     
