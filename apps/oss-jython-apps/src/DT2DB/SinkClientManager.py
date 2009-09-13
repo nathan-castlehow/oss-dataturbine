@@ -55,7 +55,7 @@ class DT2DB:
         fetchingDT = True
         operateDB = True
         
-        interval = 2
+        interval = 1
 
         # keep fetching and inserting the data into DB
         while fetchingDT:
@@ -213,6 +213,7 @@ class DT2DB:
             #   3. find channels with min time
             #   4. create a query using the channels
             #   5. move the current index for the inserted channels
+            print 'columns for TSs ', colsTableTS
             if len(colsTableTS) >0:
                 moreQueries=True
                 while moreQueries:
