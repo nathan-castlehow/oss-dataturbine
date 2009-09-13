@@ -290,8 +290,9 @@ class DT2DB:
             tempChNode = self.chNodes.next()
             print tempChNode.getType()
             if tempChNode.getType() == self.chTree.CHANNEL:
-                print 'found a node type'
+                print 'node name', tempChNode.getFullName()
                 self.chTimeNames.append(tempChNode.getFullName())
+                print 'start time', tempChNode.getStart()
                 self.chStartTimes.append(tempChNode.getStart())
                 self.chDurationTimes.append(tempChNode.getDuration())
                 self.chEndTimes.append(tempChNode.getStart() + tempChNode.getDuration())
