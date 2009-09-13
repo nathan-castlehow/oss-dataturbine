@@ -113,8 +113,8 @@ class DT2DB:
             if chNames[chIndex] != "TimeStampForDB":
                 self.chMap.Add(chNames[chIndex])
         # Register the channelMap
-        print self.chMap
-        print 'registering the channel map above'
+        #print self.chMap
+        #print 'registering the channel map above'
         
 
     def findStartTime (self, cfg, sapi):
@@ -186,7 +186,7 @@ class DT2DB:
         rowQs = cfg.RowQueries.keys()
         # deal one table at a time
         for rowQ in rowQs:
-            print 'curr row query = ', rowQ
+            #print 'curr row query = ', rowQ
             chDict = cfg.RowQueries[rowQ]
             chNamesForQ = chDict.keys()
             
@@ -200,7 +200,7 @@ class DT2DB:
                     # get the index using the chName
                     chInd = self.chMap.GetIndex(chName)
                     # get the times and values
-                    print 'ch name = ', chName, 'ch ind = ', chInd
+                    #print 'ch name = ', chName, 'ch ind = ', chInd
                     if chInd >0:
                         colsTableTS[chName] = self.chMap.GetTimes(chInd)
                         colsTableData[chName] = self.chMap.GetDataAsFloat64(chInd)
@@ -213,10 +213,10 @@ class DT2DB:
             #   3. find channels with min time
             #   4. create a query using the channels
             #   5. move the current index for the inserted channels
-            print 'columns for TSs ', colsTableTS
+            #print 'columns for TSs ', colsTableTS
             if len(colsTableTS) >0:
                 moreQueries=True
-                print 'more query loop beings'
+                #print 'more query loop beings'
                 while moreQueries:
                     # 2. find min time
                     tempCounter = 0 # for initialization
@@ -250,9 +250,9 @@ class DT2DB:
                                 # 5. move the cursor one up
                                 indOffset[TSchName] = indOffset[TSchName] -1
                     # 4. create a query using all the channel info
-                    print 'query string', rowQ
-                    print 'min Time chans', minTimeChans
-                    print 'min TS', minTS
+                    #print 'query string', rowQ
+                    #print 'min Time chans', minTimeChans
+                    #print 'min TS', minTS
                     self.dbop.execRowQuery (cfg, rowQ, minTimeChans, minTS, minTimeChanVals)
                     
                     # check if all indices are maxed out
@@ -286,12 +286,12 @@ class DT2DB:
             if chName != "TimeStampForDB":
                 self.chMapTree.Add(chName)
         
-        print self.chMapTree
+        #print self.chMapTree
         # Request registration
         self.DT2DBSink.RequestRegistration(self.chMapTree)
         self.DT2DBSink.Fetch (150000, self.chMapTree)
         self.chTree = sapi.ChannelTree.createFromChannelMap (self.chMapTree)
-        print self.chTree
+        #print self.chTree
         self.findChStartTimes(cfg, sapi)
         
         print "start times: ", self.chStartTimes

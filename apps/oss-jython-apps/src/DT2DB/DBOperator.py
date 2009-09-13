@@ -56,7 +56,7 @@ class DBOperator:
         
     def execRowQuery (self, cfg, oneDataRowQ, chNames, tStamp, vals):
 
-        print 'execRowQuery'
+        #print 'execRowQuery'
         # just in case for multi-line queries
         queries = oneDataRowQ.split(";")
         
@@ -70,10 +70,10 @@ class DBOperator:
             #   and a list of values 
             for chN in chNames:
                 colNames = colNames + ", " + chMapping[chN]
-                print colNames
+                #print colNames
             for v1 in vals:
                 values = values + " ," + str(v1)
-                print values
+                #print values
                     
             q1 = q1.replace ("#####", colNames)
             q1 = q1.replace ("$$$$$", values)
