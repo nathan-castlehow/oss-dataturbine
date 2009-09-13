@@ -62,11 +62,11 @@ class DT2DB:
             fetchingDT = True
             operateDB = True
 
-            self.fetchData(cfg, sapi)
             
             try:
                 # fetch the data from the channel
                 print "Fetching data"
+                self.fetchData(cfg, sapi)
             except:
                 print "Fetching failed"
                 fetchingDT = False
@@ -77,9 +77,10 @@ class DT2DB:
                 self.translateDT2DB (cfg, sapi)
                 # keep trying to insert the DB queries
                 while operateDB:
+                    self.executeDBQueries(cfg, sapi)
+
                     try:
                         # execute the DB queries
-                        self.executeDBQueries(cfg, sapi)
                         # move the start subscription time for the next point
                         self.recordStartTime(cfg, sapi)
                         operateDB = False
