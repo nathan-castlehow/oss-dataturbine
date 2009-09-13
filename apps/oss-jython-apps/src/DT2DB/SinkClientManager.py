@@ -219,7 +219,7 @@ class DT2DB:
                     # 2. find min time
                     tempCounter = 0 # for initialization
                     for TSchName in colsTableTS:
-                        chTSs = colTableTS[TSchName]
+                        chTSs = colsTableTS[TSchName]
                         currInd = maxInd[TSchName] - indOffset[TSchName]
                         if tempCounter == 0:
                             if currInd <= maxInd[TSchName]:
