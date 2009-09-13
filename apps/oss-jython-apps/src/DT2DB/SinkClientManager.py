@@ -200,10 +200,11 @@ class DT2DB:
                     chInd = self.chMap.GetIndex(chName)
                     # get the times and values
                     print 'ch name = ', chName, 'ch ind = ', chInd
-                    colsTableTS[chName] = self.chMap.GetTimes(chInd)
-                    colsTableData[chName] = self.chMap.GetDataAsFloat64(chInd)
-                    indOffset[chName] = len(self.chMap.GetTimes(chInd))
-                    maxInd [chName] = len(self.chMap.GetTimes(chInd))
+                    if chInd >0:
+                        colsTableTS[chName] = self.chMap.GetTimes(chInd)
+                        colsTableData[chName] = self.chMap.GetDataAsFloat64(chInd)
+                        indOffset[chName] = len(self.chMap.GetTimes(chInd))
+                        maxInd [chName] = len(self.chMap.GetTimes(chInd))
             # given the data and their timestamps
             # synchronize them accordingly
             #   1. save current indices across channels
