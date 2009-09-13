@@ -243,7 +243,7 @@ class DT2DB:
                                 currData = currDataArr[currInd]
                                 minTimeChanVals.append(currData)
                                 # 5. move the cursor one up
-                                indOffset[TSchName] = currInd -1
+                                indOffset[TSchName] = indOffset[TSchName] -1
                     # 4. create a query using all the channel info
                     print 'query string', rowQ
                     print 'min Time chans', minTimeChans
