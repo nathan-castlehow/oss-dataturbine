@@ -98,7 +98,7 @@ class DT2DB:
         return
 
     def fetchData (self, cfg, sapi):
-        blockTimeOut = 10000L
+        blockTimeOut = 100000L
         self.DT2DBSink.Fetch(self.chMap, blockTimeOut)
     
     def createChannelMap (self, cfg, sapi):
@@ -264,7 +264,8 @@ class DT2DB:
             print 'please specify the correct data modle name'
         
         for chName in self.chNames:
-            self.chMapTree.Add(chName)
+            if chName != "TimeStampForDB":
+                self.chMapTree.Add(chName)
             
         # Request registration
         self.DT2DBSink.RequestRegistration(self.chMapTree)
