@@ -62,13 +62,14 @@ class DBOperator:
         
         for q1 in queries:
             # start with the time stamp
-            colNames = cfg.RowMap["TimeStampForDB"]
+            chMapping = cfg.RowQueries[oneDataRowQ]
+            colNames = chMapping ["TimeStampForDB"]
             values = str( self.convertTime(cfg.paramDict['DBTimeFormat'], tStamp))
             
             # build a list of column names
             #   and a list of values 
             for chN in chNames:
-                colNames = colNames + ", " + cfg.RowMap[chN]
+                colNames = colNames + ", " + chMapping[chN]
                 print colNames
             for v1 in vals:
                 values = values + " ," + str(v1)
