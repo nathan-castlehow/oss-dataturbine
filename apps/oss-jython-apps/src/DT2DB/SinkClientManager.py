@@ -53,14 +53,12 @@ class DT2DB:
     def runInLoop (self, cfg, sapi):
         
         fetchingDT = True
-        operateDB = True
-        
-        interval = 1
+        interval = 20
 
         # keep fetching and inserting the data into DB
         while fetchingDT:
             fetchingDT = True
-            operateDB = True
+            dbConnOn = True
 
             
             try:
@@ -75,16 +73,16 @@ class DT2DB:
             if fetchingDT:
                 # translate the fetched values to the DB queries
                 # keep trying to insert the DB queries
-                while operateDB:
+                while dbConnOn:
 
                     try:
                         # execute the DB queries
                         # move the start subscription time for the next point
                         self.translateDT2DB (cfg, sapi)
                         self.recordStartTime(cfg, sapi)
-                        operateDB = False
+                        dbConnOn = False
                     except:
-                        operateDB = True
+                        dbConnOn = True
                         time.sleep(interval)
                         self.connectToDB(cfg, sapi)
                 # wait and loop back
@@ -162,7 +160,7 @@ class DT2DB:
     # pre: create channel map with the start times
     # post: the fetch is ready
     def subscribeToDT (self, cfg, sapi):
-        duration = 1000.0
+        duration = 10000.0
         self.DT2DBSink.Subscribe (self.chMap, self.startTime, duration, "absolute" )
         return
 
