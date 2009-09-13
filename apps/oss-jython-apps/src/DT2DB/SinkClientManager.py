@@ -254,7 +254,7 @@ class DT2DB:
                     allMaxed=True
                     for TSchName in colsTableTS.keys():
                         if allMaxed:
-                            if indOffset[TSchName] >= 0:
+                            if indOffset[TSchName] > 0:
                                 print TSchName, 'not maxed,  offset = ', indOffset[TSchName]
                                 allMaxed=False
                     moreQueries=not allMaxed
