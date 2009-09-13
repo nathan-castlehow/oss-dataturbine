@@ -40,13 +40,13 @@ class configReader:
 
     def parseRow (self):
         qs = self.doc.getElementsByTagName("query")
-        self.RowMap = {}
         for q1 in qs:
             q1.firstChild.normalize()
             qStr = q1.firstChild.data
             qStr = qStr.strip()
             print qStr
             cols = q1.getElementsByTagName("column")
+            self.RowMap = {}
             for param in cols:
                 param.normalize()
                 colName = param.getAttribute("name")
@@ -57,7 +57,7 @@ class configReader:
             self.RowQueries[qStr] = self.RowMap    
         
 if __name__=='__main__':                
-    cr = configReader("row.xml")
+    cr = configReader("MCR.xml")
     cr.parseParams()
     print cr.RowQueries
     print cr.paramDict
