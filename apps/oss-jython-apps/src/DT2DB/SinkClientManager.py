@@ -62,10 +62,11 @@ class DT2DB:
             fetchingDT = True
             operateDB = True
 
+            self.fetchData(self, cfg, sapi)
+            
             try:
                 # fetch the data from the channel
                 print "Fetching data"
-                self.fetchData(self, cfg, sapi)
             except:
                 print "Fetching failed"
                 fetchingDT = False
