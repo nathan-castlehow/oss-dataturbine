@@ -62,7 +62,7 @@ class DT2DB:
             fetchingDT = True
             operateDB = True
 
-            self.fetchData(self, cfg, sapi)
+            self.fetchData(cfg, sapi)
             
             try:
                 # fetch the data from the channel
