@@ -289,7 +289,6 @@ class DT2DB:
 
         while (self.chNodes.hasNext()):
             tempChNode = self.chNodes.next()
-            print tempChNode.getType()
             if tempChNode.getType() == self.chTree.CHANNEL:
                 self.chTimeNames.append(tempChNode.getFullName())
                 self.chStartTimes.append(tempChNode.getStart())
