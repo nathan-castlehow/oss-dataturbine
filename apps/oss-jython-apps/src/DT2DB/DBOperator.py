@@ -61,7 +61,7 @@ class DBOperator:
         queries = cfg.RowQueries
 
         # just in case for multi-line queries
-        queries = queries.split(";")
+        #queries = queries.split(";")
         
         for q1 in queries:
             # start with the time stamp
