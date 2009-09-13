@@ -44,8 +44,8 @@
 	<query>
 	  INSERT INTO test2 (#####) Values ($$$$$)  
 	  <column name="time_tag" channelMapping="TimeStampForDB"/>
-	  <column name="ch0" channelMapping="FakeDAQ/0" />
-	  <column name="ch1" channelMapping="FakeDAQ/1"/>
+	  <column name="ch0" channelMapping="FakeDAQ/ch0" />
+	  <column name="ch1" channelMapping="FakeDAQ/ch1"/>
 	</query>
 
 
