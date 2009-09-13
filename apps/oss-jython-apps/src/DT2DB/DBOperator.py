@@ -56,6 +56,7 @@ class DBOperator:
         
     def execRowQuery (self, cfg, oneDataRowQ, chNames, tStamp, vals):
 
+        print 'execRowQuery'
         # just in case for multi-line queries
         queries = oneDataRowQ.split(";")
         
