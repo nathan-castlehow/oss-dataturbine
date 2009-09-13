@@ -100,7 +100,7 @@ class DT2DB:
 
     def fetchData (self, cfg, sapi):
         blockTimeOut = 100000L
-        self.chMap = self.DT2DBSink.Fetch(self.chMap, blockTimeOut)
+        self.chMap = self.DT2DBSink.Fetch(blockTimeOut, self.chMap)
     
     def createChannelMap (self, cfg, sapi):
         #create channel map
