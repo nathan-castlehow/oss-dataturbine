@@ -74,7 +74,7 @@ class DT2DB:
         
             if fetchingDT:
                 # translate the fetched values to the DB queries
-                self.translateDT2DB (self, cfg, sapi)
+                self.translateDT2DB (cfg, sapi)
                 # keep trying to insert the DB queries
                 while operateDB:
                     try:
