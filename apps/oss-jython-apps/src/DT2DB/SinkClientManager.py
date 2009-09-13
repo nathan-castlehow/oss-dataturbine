@@ -74,14 +74,13 @@ class DT2DB:
         
             if fetchingDT:
                 # translate the fetched values to the DB queries
-                self.translateDT2DB (cfg, sapi)
                 # keep trying to insert the DB queries
                 while operateDB:
-                    self.executeDBQueries(cfg, sapi)
 
                     try:
                         # execute the DB queries
                         # move the start subscription time for the next point
+                        self.translateDT2DB (cfg, sapi)
                         self.recordStartTime(cfg, sapi)
                         operateDB = False
                     except:
