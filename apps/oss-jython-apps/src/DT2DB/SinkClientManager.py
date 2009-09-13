@@ -196,6 +196,7 @@ class DT2DB:
             colsTableTS = {}
             colsTableData = {}
             indOffset = {}
+            maxInd={}
             for chName in chNamesForQ:
                 if chName != "TimeStampForDB":
                     # get the index using the chName
