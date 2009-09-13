@@ -182,12 +182,9 @@ class DT2DB:
         return
 
     def execRowDBQueries (self, cfg, sapi):
-        # align the channel names for each DB table and synchronize them
-        listOfCh = self.chMap.GetChannelList()
-        numCh = self.chMap.NumberOfChannels()
-        
+       
         rowQs = cfg.RowQueries.keys()
-        # deal one row table at a time
+        # deal one table at a time
         for rowQ in rowQs:
             chDict = cfg.RowQueries[rowQ]
             chNamesForQ = chDict.keys()

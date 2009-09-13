@@ -54,11 +54,10 @@ class DBOperator:
         #print formattedDate
         return formattedDate
         
-    def execRowQuery (self, cfg, chNames, tStamp, vals):
-        queries = cfg.RowQueries
+    def execRowQuery (self, cfg, oneDataRowQ, chNames, tStamp, vals):
 
         # just in case for multi-line queries
-        #queries = queries.split(";")
+        queries = oneDataRowQ.split(";")
         
         for q1 in queries:
             # start with the time stamp
