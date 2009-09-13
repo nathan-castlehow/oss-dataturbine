@@ -55,7 +55,7 @@ class DT2DB:
         fetchingDT = True
         operateDB = True
         
-        interval = float (cfg.paramDict.durationSeconds)
+        interval = float (cfg.paramDict[durationSeconds])
 
         # keep fetching and inserting the data into DB
         while fetchingDT:
