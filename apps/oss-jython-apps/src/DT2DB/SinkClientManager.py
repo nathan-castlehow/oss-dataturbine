@@ -28,9 +28,8 @@ class DT2DB:
         
         self.DT2DBSink = sapi.Sink()
         self.dtName = cfg.paramDict["DTSinkName"]        
-
         self.dataModel = cfg.DataModel
-        self.dbop = DBOperator(cfg)
+        self.dbop = DBOperator.DBOperator(cfg)
         
         
     def run (self, cfg, sapi):
@@ -85,7 +84,6 @@ class DT2DB:
                         operateDB = True
                         time.sleep(interval)
                         self.connectToDB(cfg, sapi)
-
                 # wait and loop back
                 time.sleep(interval)
         return
@@ -111,7 +109,7 @@ class DT2DB:
         for chIndex in range(len(chNames)):
             self.chMap.Add(chNames[chIndex])
         # Register the channelMap
-        self.src.Register (self.chMap)
+        self.DT2DBSink.RequestRegistration (self.chMap)
         
 
     def findStartTime (self, cfg, sapi):
@@ -135,7 +133,7 @@ class DT2DB:
     def connectToDT (self, cfg, sapi):
         # connect to DT server persistently
         try:
-            DT2DBSink.OpenRBNBConnection ( self.dtServer+":"+self.dtPort, self.dtName, 'hi', "hi")
+            self.DT2DBSink.OpenRBNBConnection ( self.dtServer+":"+self.dtPort, self.dtName, 'hi', "hi")
         except:
             print 'The DT client could not connect to the DT server'
             print 'waiting to try again in 60 sec'

@@ -16,7 +16,7 @@ class DBOperator:
             self.db = sql.zxJDBC.connect(self.dbURL, self.user, self.pw, self.drv)
         
         except:
-            print 'trying to connect'
+            print 'trying to connect to the DB'
             time.sleep(10)
             self.connect()
 
