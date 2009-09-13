@@ -134,6 +134,7 @@ class DT2DB:
                 elif thisST < minST:
                     minST = thisST
             self.startTime = minST
+            print "Start time found:", self.startTime
 
     def connectToDT (self, cfg, sapi):
         # connect to DT server persistently
@@ -161,7 +162,7 @@ class DT2DB:
     # pre: create channel map with the start times
     # post: the fetch is ready
     def subscribeToDT (self, cfg, sapi):
-        duration = 0.0
+        duration = 1000.0
         self.DT2DBSink.Subscribe (self.chMap, self.startTime, duration, "absolute" )
         return
 
@@ -261,7 +262,7 @@ class DT2DB:
             self.chNames = cfg.EAVqueries.keys()
             print 'eav channel names: ', self.chNames
         else:
-            print 'please specify the correct data modle name'
+            print 'please specify the correct data model name'
         
         for chName in self.chNames:
             if chName != "TimeStampForDB":
@@ -290,9 +291,7 @@ class DT2DB:
             tempChNode = self.chNodes.next()
             print tempChNode.getType()
             if tempChNode.getType() == self.chTree.CHANNEL:
-                print 'node name', tempChNode.getFullName()
                 self.chTimeNames.append(tempChNode.getFullName())
-                print 'start time', tempChNode.getStart()
                 self.chStartTimes.append(tempChNode.getStart())
                 self.chDurationTimes.append(tempChNode.getDuration())
                 self.chEndTimes.append(tempChNode.getStart() + tempChNode.getDuration())
