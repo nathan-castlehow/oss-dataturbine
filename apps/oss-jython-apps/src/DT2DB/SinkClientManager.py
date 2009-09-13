@@ -12,8 +12,8 @@ class DT2DBManager:
         self.dtJarPath = cfg.paramDict [ "DTJarPath"]
         makeLoadSet('DTunit', [self.dtJarPath])
         import DTunit.com.rbnb.sapi as sapi
-        self.dtSink = DT2DB (cfg, sapi)
-       
+        self.dt2dbSink = DT2DB (cfg, sapi)
+        self.dt2dbSink.run(cfg, sapi)
 
 class DT2DB:
     
@@ -200,6 +200,7 @@ class DT2DB:
                     colsTableTS[chName] = self.chMap.GetTimes(chInd)
                     colsTableData[chName] = self.chMap.GetDataAsFloat64(chInd)
                     indOffset[chName] = len(self.chMap.GetTimes(chInd))
+                    maxInd [chName] = len(self.chMap.GetTimes(chInd))
             # given the data and their timestamps
             # synchronize them accordingly
             #   1. save current indices across channels
@@ -208,11 +209,39 @@ class DT2DB:
             #   4. create a query using the channels
             #   5. move the current index for the inserted channels
             if len(colsTableTS) >0:
-                moreQuries=True
+                moreQueries=True
                 while moreQueries:
-                    # find min time
-                    colsTableTS
-            
+                    # 2. find min time
+                    tempCounter = 0 # for initialization
+                    for TSchName in colsTableTS:
+                        chTSs = colTableTS[TSchName]
+                        currInd = maxInd[TSchName] - indOffset[TSchName]
+                        if tempCounter == 0:
+                            if currInd <= maxInd[TSchName]:
+                                # initialize the min value
+                                minTS = chTSs[currInd]
+                                tempCounter = tempCounter +1
+                        else:
+                            if currInd <= maxInd[TSchName]:
+                                currTS = chTSs[currInd]
+                                if currTS < minTS:
+                                    minTS = currTS
+                    # 3.  find the channels with minTime
+                    minTimeChans = []
+                    minTimeChanVals = []
+                    for TSchName in colsTableTS:
+                        chTSs = TSchName[TSchName]
+                        currInd = maxInd[TSchName] - indOffset[TSchName]
+                        if currInd <= maxInd[TSchName]:
+                            # check if the TS is the min TS
+                            currTS = chTSs[currInd]
+                            if currTS == minTS:
+                                minTimeChans.append(TSchName)
+                                minTimeChanVals.append(colsTableData[TSchName])
+                                # 5. move the cursor one up
+                                indOffset[TSchName] = currInd +1
+                    # 4. create a query using all the channel info
+                    self.dbop.execRowQuery (cfg, minTimeChans, minTS, minTimeChanVals)
         return
     
     
