@@ -265,7 +265,7 @@ class DT2DB:
             
         # Request registration
         self.DT2DBSink.RequestRegistration(self.chMapTree)
-        self.DT2DBSink.Fetch (1500, self.chMapTree)
+        self.DT2DBSink.Fetch (150000, self.chMapTree)
         self.chTree = sapi.ChannelTree.createFromChannelMap (self.chMapTree)
         print self.chTree
         self.findChStartTimes(cfg, sapi)
