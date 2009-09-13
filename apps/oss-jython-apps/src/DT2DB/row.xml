@@ -5,8 +5,8 @@
 <config>
 	<!-- Key-Value params -->
 	<!-- rbnb params -->
-	<param name="rbnbServerAddress" value="niagara-dev.sdsc.edu"/>
-	<param name="rbnbServerPort" value="3333"/>
+	<param name="DTServerAddress" value="niagara-dev.sdsc.edu"/>
+	<param name="DTServerPort" value="3333"/>
 	<param name="DTSinkName" value = "DT2DBClient" />
 	<param name="DTJarPath" value = "/Applications/RBNB/bin/rbnb.jar" />
 	

@@ -250,7 +250,7 @@ class DT2DB:
         
         # get channel names from the cfg
         if cfg.DataModel == "RowModel":
-            self.chNames = cfg.RowMap.keys()
+            self.chNames = cfg.chNames.keys()
             print 'row model channel names: ', self.chNames
         elif cfg.DataModel == "EAVModel":
             self.chNames = cfg.EAVqueries.keys()

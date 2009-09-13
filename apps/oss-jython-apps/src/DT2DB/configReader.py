@@ -46,15 +46,15 @@ class configReader:
             qStr = qStr.strip()
             print qStr
             cols = q1.getElementsByTagName("column")
-            RowMap = {}
+            self.RowMap = {}
             for param in cols:
                 param.normalize()
                 colName = param.getAttribute("name")
                 chName = param.getAttribute("channelMapping")
                 print colName,":  ", chName
-                RowMap[chName] = colName
+                self.RowMap[chName] = colName
                 self.chNames.append(chName)
-            self.RowQueries[qStr] = RowMap    
+            self.RowQueries[qStr] = self.RowMap    
         
 if __name__=='__main__':                
     cr = configReader("row.xml")
