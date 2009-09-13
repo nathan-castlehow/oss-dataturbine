@@ -68,8 +68,10 @@ class DBOperator:
             #   and a list of values 
             for chN in chNames:
                 colNames = colNames + ", " + cfg.RowMap[chN]
+                print colNames
             for v1 in vals:
                 values = values + " ," + str(v1)
+                print values
                     
             q1 = q1.replace ("#####", colNames)
             q1 = q1.replace ("$$$$$", values)
