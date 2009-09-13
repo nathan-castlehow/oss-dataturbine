@@ -57,7 +57,7 @@ class configReader:
             self.RowQueries[qStr] = self.RowMap    
         
 if __name__=='__main__':                
-    cr = configReader("MCR.xml")
+    cr = configReader("row.xml")
     cr.parseParams()
     print cr.RowQueries
     print cr.paramDict
