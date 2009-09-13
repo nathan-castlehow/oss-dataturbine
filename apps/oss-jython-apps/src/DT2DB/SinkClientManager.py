@@ -114,7 +114,6 @@ class DT2DB:
         # Register the channelMap
         print self.chMap
         print 'registering the channel map above'
-        self.DT2DBSink.RequestRegistration (self.chMap)
         
 
     def findStartTime (self, cfg, sapi):
@@ -162,7 +161,7 @@ class DT2DB:
     # pre: create channel map with the start times
     # post: the fetch is ready
     def subscribeToDT (self, cfg, sapi):
-        duration = 1000.0
+        duration = 1000000.0
         self.DT2DBSink.Subscribe (self.chMap, self.startTime, duration, "absolute" )
         return
 
