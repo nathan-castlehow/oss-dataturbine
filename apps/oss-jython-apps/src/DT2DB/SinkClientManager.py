@@ -234,7 +234,7 @@ class DT2DB:
                     # 3.  find the channels with minTime
                     minTimeChans = []
                     minTimeChanVals = []
-                    for TSchName in colsTableTS:
+                    for TSchName in colsTableTS.keys():
                         chTSs = TSchName[TSchName]
                         currInd = maxInd[TSchName] - indOffset[TSchName]
                         if currInd <= maxInd[TSchName]:
