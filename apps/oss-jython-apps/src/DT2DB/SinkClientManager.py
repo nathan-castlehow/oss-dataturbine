@@ -266,7 +266,8 @@ class DT2DB:
         for chName in self.chNames:
             if chName != "TimeStampForDB":
                 self.chMapTree.Add(chName)
-            
+        
+        print self.chMapTree
         # Request registration
         self.DT2DBSink.RequestRegistration(self.chMapTree)
         self.DT2DBSink.Fetch (150000, self.chMapTree)
