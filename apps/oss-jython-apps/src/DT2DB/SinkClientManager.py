@@ -245,9 +245,9 @@ class DT2DB:
                                 # 5. move the cursor one up
                                 indOffset[TSchName] = indOffset[TSchName] -1
                     # 4. create a query using all the channel info
-                    print 'query string', rowQ
-                    print 'min Time chans', minTimeChans
-                    print 'min TS', minTS
+#                    print 'query string', rowQ
+#                    print 'min Time chans', minTimeChans
+#                    print 'min TS', minTS
                     self.dbop.execRowQuery (cfg, rowQ, minTimeChans, minTS, minTimeChanVals)
                     
                     # check if all indices are maxed out
@@ -255,6 +255,7 @@ class DT2DB:
                     for TSchName in colsTableTS.keys():
                         if allMaxed:
                             if indOffset[TSchName] >= 0:
+                                print TSchName, 'not maxed,  offset = ', indOffset[TSchName]
                                 allMaxed=False
                     moreQueries=not allMaxed
             
