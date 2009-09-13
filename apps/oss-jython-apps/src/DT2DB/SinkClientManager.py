@@ -55,7 +55,7 @@ class DT2DB:
         fetchingDT = True
         operateDB = True
         
-        interval = 10
+        interval = 2
 
         # keep fetching and inserting the data into DB
         while fetchingDT:
