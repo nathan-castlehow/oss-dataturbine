@@ -109,7 +109,8 @@ class DT2DB:
         # Define channels by name, via ChannelMap.Add(java.lang.String)
         chNames = cfg.chNames
         for chIndex in range(len(chNames)):
-            self.chMap.Add(chNames[chIndex])
+            if chNames[chIndex] != "TimeStampForDB":
+                self.chMap.Add(chNames[chIndex])
         # Register the channelMap
         print self.chMap
         print 'registering the channel map above'
