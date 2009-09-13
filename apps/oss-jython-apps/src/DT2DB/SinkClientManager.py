@@ -235,7 +235,7 @@ class DT2DB:
                     minTimeChans = []
                     minTimeChanVals = []
                     for TSchName in colsTableTS.keys():
-                        chTSs = TSchName[TSchName]
+                        chTSs = colsTableTS[TSchName]
                         currInd = maxInd[TSchName] - indOffset[TSchName]
                         if currInd <= maxInd[TSchName]:
                             # check if the TS is the min TS
