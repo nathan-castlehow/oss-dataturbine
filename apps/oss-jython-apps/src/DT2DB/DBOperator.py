@@ -29,6 +29,7 @@ class DBOperator:
         except:
             print 'SQL error'
             time.sleep(5)
+            self.db.close()
             self.connect()
             
             
