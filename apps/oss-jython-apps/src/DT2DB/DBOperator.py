@@ -12,13 +12,20 @@ class DBOperator:
         self.drv = cfg.paramDict['jdbcDriverName']
 
     def connect (self):
+        
+        connectToDB = False
+        
+        while connectToDB:
+            connectToDB = self.establishDBConn()
+        
+    def establishDBConn(self):
         try:
             self.db = sql.zxJDBC.connect(self.dbURL, self.user, self.pw, self.drv)
-        
+            return True
         except:
             print 'trying to connect to the DB'
             time.sleep(10)
-            self.connect()
+            return False
 
     def execQuery (self, qStr):
         try:
@@ -26,12 +33,10 @@ class DBOperator:
             cursor.datahandler = sql.handler.MySQLDataHandler(cursor.datahandler)
             cursor.execute(qStr)
             self.db.commit()
+            cursor.close()
         except:
             print 'SQL error'
-            time.sleep(5)
-            self.db.close()
-            self.connect()
-            
+            cursor.close()
             
     def execEAVQuery(self, cfg, chName, tStamp, val):
         queries = cfg.EAVqueries[chName]
@@ -41,7 +46,7 @@ class DBOperator:
             q1 = q1.replace ("$$$$$", val)
             q1 = q1.replace ("%%%%%", "'" + (self.convertTime(cfg.paramDict['DBTimeFormat'], tStamp))+"'")
             print q1
-            return q1
+            self.execQuery(q1)
     
     def convertTime(self, timeFormatStr, ts):
         # from milliseconds to seconds
@@ -87,7 +92,7 @@ class DBOperator:
         self.db.close()
 
 if __name__=='__main__':
-    cfg = cr.configReader("row.xml")
+    cfg = cr.configReader("eav.xml")
     cfg.parseParams()
     dbop = DBOperator (cfg)
     dbop.connect()
