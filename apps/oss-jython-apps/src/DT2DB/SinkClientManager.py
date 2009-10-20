@@ -314,6 +314,10 @@ class DT2DB:
    
 
 if __name__ == '__main__':
-    cf = configReader.configReader("eav.xml")
-    cf.parseParams()
-    sc = DT2DBManager(cf)
+    from sys import argv
+    
+    for arg in argv:
+        cf = configReader.configReader(arg)
+        cf.parseParams()
+        sc = DT2DBManager(cf)
+        
