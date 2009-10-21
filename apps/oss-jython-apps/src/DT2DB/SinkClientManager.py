@@ -316,8 +316,7 @@ class DT2DB:
 if __name__ == '__main__':
     from sys import argv
     
-    for arg in argv:
-        cf = configReader.configReader(arg)
-        cf.parseParams()
-        sc = DT2DBManager(cf)
-        
+    cf = configReader.configReader(argv[0])
+    cf.parseParams()
+    sc = DT2DBManager(cf)
+    
