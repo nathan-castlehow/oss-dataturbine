@@ -160,7 +160,7 @@ class DT2DB:
     # pre: create channel map with the start times
     # post: the fetch is ready
     def subscribeToDT (self, cfg, sapi):
-        duration = 5000.0
+        duration = 50000.0
         self.DT2DBSink.Subscribe (self.chMap, self.startTime, duration, "absolute" )
         return
 
@@ -199,7 +199,7 @@ class DT2DB:
                     chInd = self.chMap.GetIndex(chName)
                     # get the times and values
                     #print 'ch name = ', chName, 'ch ind = ', chInd
-                    if chInd >=0:
+                    if chInd >0:
                         colsTableTS[chName] = self.chMap.GetTimes(chInd)
                         colsTableData[chName] = self.chMap.GetDataAsFloat64(chInd)
                         indOffset[chName] = len(self.chMap.GetTimes(chInd))
@@ -212,7 +212,7 @@ class DT2DB:
             #   4. create a query using the channels
             #   5. move the current index for the inserted channels
             #print 'columns for TSs ', colsTableTS
-            if len(colsTableTS) >0:
+            if len(colsTableTS) >=0:
                 moreQueries=True
                 #print 'more query loop beings'
                 while moreQueries:
