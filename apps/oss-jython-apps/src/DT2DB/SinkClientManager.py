@@ -160,7 +160,7 @@ class DT2DB:
     # pre: create channel map with the start times
     # post: the fetch is ready
     def subscribeToDT (self, cfg, sapi):
-        duration = 50000.0
+        duration = 10000.0
         self.DT2DBSink.Subscribe (self.chMap, self.startTime, duration, "absolute" )
         return
 
