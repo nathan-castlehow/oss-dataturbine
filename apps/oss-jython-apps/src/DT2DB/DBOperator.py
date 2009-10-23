@@ -3,6 +3,8 @@ import configReader as cr
 import time
 import java.text.SimpleDateFormat as sdf
 import java.sql.Date as date1
+import java.sql.SQLException as SQLExcept
+import java.sql.SQLWarning as SQLWarn
 
 class DBOperator:
     def __init__ (self, cfg):
@@ -14,9 +16,12 @@ class DBOperator:
     def connect (self):
         
         connectToDB = False
+        print 'Trying to connect to the DB connection'
         
         while connectToDB:
             connectToDB = self.establishDBConn()
+        
+        print "DB connection established"
         
     def establishDBConn(self):
         try:
@@ -34,9 +39,13 @@ class DBOperator:
             cursor.execute(qStr)
             self.db.commit()
             cursor.close()
+            
+        except SQLExcept, e:
+            print 'SQL error' + e.message
+        except SQLWarn, e2:
+            print 'SQL error' + e2.message
         except:
             print 'SQL error'
-            cursor.close()
             
     def execEAVQuery(self, cfg, chName, tStamp, val):
         queries = cfg.EAVqueries[chName]
@@ -66,6 +75,7 @@ class DBOperator:
         # just in case for multi-line queries
         queries = oneDataRowQ.split(";")
         
+        #print 'queries', queries
         for q1 in queries:
             # start with the time stamp
             chMapping = cfg.RowQueries[oneDataRowQ]
@@ -87,8 +97,10 @@ class DBOperator:
             print q1
             self.execQuery (q1)
         
+       # print 'execRow is finished'
 
     def close(self):
+        print 'DB connection closing'
         self.db.close()
 
 if __name__=='__main__':
