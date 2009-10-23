@@ -21,31 +21,80 @@ class DBOperator:
         while connectToDB:
             connectToDB = self.establishDBConn()
         
-        print "DB connection established"
         
     def establishDBConn(self):
+        self.dbConn= None
         try:
-            self.db = sql.zxJDBC.connect(self.dbURL, self.user, self.pw, self.drv)
+            self.dbConn = sql.zxJDBC.connect(self.dbURL, self.user, self.pw, self.drv)
+            print "DB connection established"
             return True
-        except:
-            print 'trying to connect to the DB'
+        except sql.zxJDBC.DatabaseError, dbe:
+            print 'DB error'
+            print dbe.message
             time.sleep(10)
+            pass
+            return False
+        except sql.zxJDBC.ProgrammingError, pge:
+            print 'Programming error'
+            print pge.message
+            time.sleep(10)
+            pass
+            return False
+        except sql.zxJDBC.noSupportedError, nse:
+            print 'Not supported error'
+            print nse.message
+            time.sleep(10)
+            pass
+            return False
+        except sql.zxJDBC.Error, e:
+            print 'zxJDBC error'
+            print e.message
+            time.sleep(10)
+            pass
+            return False
+        except:
+            print 'zxJDBC error'
+            print e.message
+            time.sleep(10)
+            pass
             return False
 
     def execQuery (self, qStr):
         try:
-            cursor = self.db.cursor()
-            cursor.datahandler = sql.handler.MySQLDataHandler(cursor.datahandler)
-            cursor.execute(qStr)
-            self.db.commit()
-            cursor.close()
+            print 'Before creating the cursor'
+            cursor = self.dbConn.cursor()
+            print 'After creating the cursor', self.dbConn
+            print cursor
             
-        except SQLExcept, e:
-            print 'SQL error' + e.message
-        except SQLWarn, e2:
-            print 'SQL error' + e2.message
+            cursor.datahandler = sql.handler.MySQLDataHandler(cursor.datahandler)
+            print 'Before executing the query', qStr
+            cursor.execute(qStr)
+            print 'executed the query', qStr
+            self.dbConn.commit()
+        except sql.zxJDBC.DatabaseError, dbe:
+            print 'DB error'
+            print dbe.message
+            pass
+        except sql.zxJDBC.ProgrammingError, pge:
+            print 'Programming error'
+            print pge.message
+            pass
+        except sql.zxJDBC.noSupportedError, nse:
+            print 'Not supported error'
+            print nse.message
+            pass
+        except sql.zxJDBC.Error, e:
+            print 'zxJDBC error'
+            print e.message
+            pass
         except:
-            print 'SQL error'
+            print 'zxJDBC error'
+            pass
+        else:
+            cursor.close()
+        
+
+            
             
     def execEAVQuery(self, cfg, chName, tStamp, val):
         queries = cfg.EAVqueries[chName]
@@ -97,11 +146,11 @@ class DBOperator:
             print q1
             self.execQuery (q1)
         
-       # print 'execRow is finished'
+        print 'execRow is finished'
 
     def close(self):
         print 'DB connection closing'
-        self.db.close()
+        self.dbConn.close()
 
 if __name__=='__main__':
     cfg = cr.configReader("eav.xml")
