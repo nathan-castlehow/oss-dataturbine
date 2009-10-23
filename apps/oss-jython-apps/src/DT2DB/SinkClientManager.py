@@ -187,7 +187,7 @@ class DT2DB:
         rowQs = cfg.RowQueries.keys()
         # deal one table at a time
         
-        print rowQs
+        #print rowQs
         for rowQ in rowQs:
             #print 'curr row query = ', rowQ
             chDict = cfg.RowQueries[rowQ]
@@ -263,23 +263,25 @@ class DT2DB:
                                 minTimeChanVals.append(currData)
                                 # 5. move the cursor one up
                                 indOffset[TSchName] = indOffset[TSchName] - 1
-                                #print 'Moving the indOffset ', indOffset[TSchName], maxInd[TSchName] 
+                                print 'Moving the indOffset ', indOffset[TSchName], maxInd[TSchName] 
 
                                 #print TSchName, ' index has ', indOffset [TSchName]
                     # 4. create a query using all the channel info
                     self.dbop.execRowQuery (cfg, rowQ, minTimeChans, minTS, minTimeChanVals)
-                    #print 'DB insert is finished'
-                    # check if all indices are maxed out
-                    allMaxed=True
-                    for TSchName in colsTableTS.keys():
-                        if allMaxed:
-                            if indOffset[TSchName] ==0:
-                                allMaxed=True
-                            else:
-                                allMaxed=False
-                    moreQueries=not allMaxed
+                    print 'DB insert is finished'
+
+                    # 5. Finish the insertion operation if all channels' index offset
+                    # are 0
+                    if self.checkOffset (colsTableTS, indOffset):
+                        moreQueries = False
                 #print '----------------------> getting out <_--------------'
         return
+    
+    def checkOffset (self, colsTableTS, indOffset):
+        for TSchName in colsTableTS.keys():
+            if indOffset[TSchName] != 0:
+                return False
+        return True
     
     
 
