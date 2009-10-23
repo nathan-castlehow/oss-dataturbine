@@ -47,48 +47,51 @@ class DT2DB:
         self.connectToDB(cfg, sapi)
         # subscribe to the channel map using runStartTime
         self.subscribeToDT(cfg, sapi)
-        self.runInLoop (cfg, sapi)
+        self.keepFetchInsert (cfg, sapi)
     
     
-    def runInLoop (self, cfg, sapi):
+    def keepFetchInsert (self, cfg, sapi):
         
-        fetchingDT = True
-        interval = 3
-
+        retryInterval = 3
+        sucessfulFetch = True
+        
         # keep fetching and inserting the data into DB
-        while fetchingDT:
-            fetchingDT = True
+        while sucessfulFetch:
+            sucessfulFetch = True
             dbConnOn = True
-
             
             try:
                 # fetch the data from the channel
                 print "Fetching data"
                 self.fetchData(cfg, sapi)
+                print "Fetch successful"
             except:
                 print "Fetching failed"
-                fetchingDT = False
-                self.run(cfg, sapi)
+                sucessfulFetch = False
+                print 'Restart the DT connection process'
+                self.restartDTConn()
         
-            if fetchingDT:
+            if sucessfulFetch:
                 # translate the fetched values to the DB queries
                 # keep trying to insert the DB queries
-                while dbConnOn:
-
-                    try:
-                        # execute the DB queries
-                        # move the start subscription time for the next point
-                        self.translateDT2DB (cfg, sapi)
-                        self.recordStartTime(cfg, sapi)
-                        dbConnOn = False
-                    except:
-                        dbConnOn = True
-                        time.sleep(interval)
-                        self.connectToDB(cfg, sapi)
+                try:
+                    # execute the DB queries
+                    # move the start subscription time for the next point
+                    self.translateDT2DB (cfg, sapi)
+                    self.recordStartTime(cfg, sapi)
+                except:
+                    time.sleep(retryInterval)
                 # wait and loop back
-                time.sleep(interval)
+                #time.sleep(retryInterval)
         return
 
+    
+    def restartDTConn(self, cfg, sapi):
+        self.DT2DBSink.CloseRBNBConnection()
+        self.connectToDT(cfg, sapi)
+        self.subscribeToDT(cfg, sapi)
+        
+    
     def translateDT2DB (self, cfg, sapi):
         if cfg.paramDict['dataModel'] == 'EAVModel':
             self.execEAVDBQueries(cfg, sapi)
@@ -97,7 +100,7 @@ class DT2DB:
         return
 
     def fetchData (self, cfg, sapi):
-        blockTimeOut = 100000L
+        blockTimeOut = 10000L
         self.chMap = self.DT2DBSink.Fetch(blockTimeOut, self.chMap)
     
     def createChannelMap (self, cfg, sapi):
@@ -160,7 +163,7 @@ class DT2DB:
     # pre: create channel map with the start times
     # post: the fetch is ready
     def subscribeToDT (self, cfg, sapi):
-        duration = 10000.0
+        duration = 50000.0
         self.DT2DBSink.Subscribe (self.chMap, self.startTime, duration, "absolute" )
         return
 
@@ -183,6 +186,8 @@ class DT2DB:
        
         rowQs = cfg.RowQueries.keys()
         # deal one table at a time
+        
+        print rowQs
         for rowQ in rowQs:
             #print 'curr row query = ', rowQ
             chDict = cfg.RowQueries[rowQ]
@@ -199,12 +204,15 @@ class DT2DB:
                     chInd = self.chMap.GetIndex(chName)
                     # get the times and values
                     #print 'ch name = ', chName, 'ch ind = ', chInd
-                    if chInd >0:
+                    if chInd >=0:
                         colsTableTS[chName] = self.chMap.GetTimes(chInd)
                         colsTableData[chName] = self.chMap.GetDataAsFloat64(chInd)
                         indOffset[chName] = len(self.chMap.GetTimes(chInd))
                         maxInd [chName] = len(self.chMap.GetTimes(chInd))
-            # given the data and their timestamps
+                    
+                    #print "chData", colsTableData
+                    #print 'chTime', colsTableTS
+            # Given the data and their timestamps
             # synchronize them accordingly
             #   1. save current indices across channels
             #   2. find the min time
@@ -212,56 +220,65 @@ class DT2DB:
             #   4. create a query using the channels
             #   5. move the current index for the inserted channels
             #print 'columns for TSs ', colsTableTS
-            if len(colsTableTS) >=0:
+            if len(colsTableTS) >0:
                 moreQueries=True
                 #print 'more query loop beings'
                 while moreQueries:
-                    # 2. find min time
+
+                    # 2. find min timestamp across channels
                     tempCounter = 0 # for initialization
                     for TSchName in colsTableTS:
                         chTSs = colsTableTS[TSchName]
                         currInd = maxInd[TSchName] - indOffset[TSchName]
-                        if tempCounter == 0:
-                            if currInd <= maxInd[TSchName]:
+                        #print 'chName ', TSchName, ' has ', chTSs, ' and index = ', currInd
+
+                        if currInd <= maxInd[TSchName]:
+                            # initialize the min TS
+                            if tempCounter == 0:
                                 # initialize the min value
                                 minTS = chTSs[currInd]
                                 tempCounter = tempCounter +1
-                        else:
-                            if currInd <= maxInd[TSchName]:
+                            else:
                                 currTS = chTSs[currInd]
                                 if currTS < minTS:
                                     minTS = currTS
+                    
                     # 3.  find the channels with minTime
                     minTimeChans = []
                     minTimeChanVals = []
+                    
                     for TSchName in colsTableTS.keys():
                         chTSs = colsTableTS[TSchName]
                         currInd = maxInd[TSchName] - indOffset[TSchName]
+                        #print 'index offset ', indOffset[TSchName], maxInd[TSchName] 
                         if currInd <= maxInd[TSchName]:
                             # check if the TS is the min TS
                             currTS = chTSs[currInd]
+                            #print 'timestamps = ', currTS, minTS
+                            #print minTS-currTS 
                             if currTS == minTS:
                                 minTimeChans.append(TSchName)
                                 currDataArr = colsTableData[TSchName]
                                 currData = currDataArr[currInd]
                                 minTimeChanVals.append(currData)
                                 # 5. move the cursor one up
-                                indOffset[TSchName] = indOffset[TSchName] -1
+                                indOffset[TSchName] = indOffset[TSchName] - 1
+                                #print 'Moving the indOffset ', indOffset[TSchName], maxInd[TSchName] 
+
+                                #print TSchName, ' index has ', indOffset [TSchName]
                     # 4. create a query using all the channel info
-                    #print 'query string', rowQ
-                    #print 'min Time chans', minTimeChans
-                    #print 'min TS', minTS
                     self.dbop.execRowQuery (cfg, rowQ, minTimeChans, minTS, minTimeChanVals)
-                    
+                    #print 'DB insert is finished'
                     # check if all indices are maxed out
                     allMaxed=True
                     for TSchName in colsTableTS.keys():
                         if allMaxed:
-                            if indOffset[TSchName] > 0:
-                                #print TSchName, 'not maxed,  offset = ', indOffset[TSchName]
+                            if indOffset[TSchName] ==0:
+                                allMaxed=True
+                            else:
                                 allMaxed=False
                     moreQueries=not allMaxed
-            
+                #print '----------------------> getting out <_--------------'
         return
     
     
