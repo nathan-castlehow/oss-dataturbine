@@ -90,7 +90,7 @@ class DT2DB:
             except:
                 print "Request failed"
                 requestSuccess = False
-                self.restartDTConn()
+                self.restartDTConn(cfg, sapi)
             
             if requestSuccess:
                 # fetch
@@ -104,7 +104,7 @@ class DT2DB:
                     print "Fetching failed"
                     successfulFetch = False
                     print 'Restart the DT connection process'
-                    self.restartDTConn()
+                    self.restartDTConn(cfg, sapi)
             else:
                 successfulFetch = False
         
