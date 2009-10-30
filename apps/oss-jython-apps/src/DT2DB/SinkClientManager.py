@@ -43,10 +43,12 @@ class DT2DB:
         self.createChannelTree(cfg, sapi)
         # either start from the file or the start of the channel
         self.findStartTime (cfg, sapi)
-        # connect to the DB
-        self.connectToDB(cfg, sapi)
+        
+        # subtract one second from the start time
+        # to avoid being discarded as a duplicate
+        self.startTime = self.startTime - 1.0
+        
         # subscribe to the channel map using runStartTime
-        self.subscribeToDT(cfg, sapi)
         self.keepFetchInsert (cfg, sapi)
     
     
@@ -55,11 +57,40 @@ class DT2DB:
         retryInterval = 3
         sucessfulFetch = True
         
+        self.currTS = self.startTime + 0.1
+        
         # keep fetching and inserting the data into DB
         while sucessfulFetch:
             sucessfulFetch = True
             dbConnOn = True
+
+            self.duration = 5000
             
+            # request
+            try:
+                if (self.currTS + self.duration) <= self.endTime:
+                    print "Requesting data starting from %d to %d seconds" %(self.currTS, self.duration)
+                    self.requestDataFromDT(cfg, sapi, self.currTS, self.duration)
+                    self.currTS = self.currTS + self.duration
+                else:  # the end time is sooner
+                    lastDuration = self.endTime - self.currTS
+                    if lastDuration > 0.0:
+                        print "Requesting data starting from %d to %d seconds" %(self.currTS, lastDuration)
+                        self.requestDataFromDT(cfg, sapi, self.currTS, lastDuration)
+                        self.currTS = self.currTS + lastDuration
+                    
+                    # find out the new end time
+                    self.findChStartTimes(cfg, sapi)
+                    self.findEndTime(cfg, sapi)
+                    
+                
+                
+            except:
+                print "Request failed"
+                sucessfulFetch = False
+                self.restartDTConn()
+            
+            # fetch
             try:
                 # fetch the data from the channel
                 print "Fetching data"
@@ -78,6 +109,8 @@ class DT2DB:
                     # execute the DB queries
                     # move the start subscription time for the next point
                     self.translateDT2DB (cfg, sapi)
+
+                    
                     self.recordStartTime(cfg, sapi)
                 except:
                     time.sleep(retryInterval)
@@ -137,6 +170,19 @@ class DT2DB:
             self.startTime = minST
             print "Start time found:", self.startTime
 
+
+    def findEndTime(self, cfg, sapi):
+        minTS = "noInit"
+        for chTS in self.chEndTimes:
+            thisTS = chTS
+            if minTS == "noInit":
+                 minTS = thisTS
+            elif thisTS < minTS:
+                minTS = thisTS
+        self.endTime = minTS
+        print "The earliest ending time found:", self.endTime
+
+    
     def connectToDT (self, cfg, sapi):
         # connect to DT server persistently
         try:
@@ -159,14 +205,12 @@ class DT2DB:
     def recordStartTime (self, cfg, sapi):
         return
 
-    # sink client continuously receives the data
-    # pre: create channel map with the start times
-    # post: the fetch is ready
-    def subscribeToDT (self, cfg, sapi):
-        duration = 50000.0
-        self.DT2DBSink.Subscribe (self.chMap, self.startTime, duration, "absolute" )
+
+    def requestDataFromDT (self, cfg, sapi, duration):
+        self.DT2DBSink.Request (self.chMap, self.currTS, duration, "absolute")
         return
 
+    
     # each channel maps onto one query
     # pre:  the channels are fetched 
     # post: creates the query strings
@@ -312,8 +356,10 @@ class DT2DB:
         self.findChStartTimes(cfg, sapi)
         
         print "start times: ", self.chStartTimes
-        
-
+    
+    
+    
+    
     def findChStartTimes (self, cfg, sapi):
         self.chNodes = self.chTree.iterator()
         
