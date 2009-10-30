@@ -263,12 +263,14 @@ class DT2DB:
             colsTableData = {}
             indOffset = {}
             maxInd={}
+            
+            print 'chNames for query', chNamesForQ
             for chName in chNamesForQ:
                 if chName != "TimeStampForDB":
                     # get the index using the chName
                     chInd = self.chMap.GetIndex(chName)
                     # get the times and values
-                    print self.chMap
+                    #print self.chMap
                     print 'ch name = ', chName, 'ch ind = ', chInd
                     if chInd >=0:
                         colsTableTS[chName] = self.chMap.GetTimes(chInd)
