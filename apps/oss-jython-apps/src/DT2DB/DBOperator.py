@@ -25,6 +25,7 @@ class DBOperator:
     def establishDBConn(self):
         self.dbConn= None
         try:
+            print 'Before zxJDBC connect'
             self.dbConn = sql.zxJDBC.connect(self.dbURL, self.user, self.pw, self.drv)
             print "DB connection established"
             return True
