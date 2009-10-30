@@ -96,7 +96,7 @@ class DBOperator:
 
             
             
-    def execEAVQuery(self, cfg, chName, tStamp, val):
+    def execEAVQuery(self, cfg, chName, tStamp, val, currTS):
         queries = cfg.EAVqueries[chName]
         # some queries are multilines
         queries = queries.split(";")
@@ -104,7 +104,10 @@ class DBOperator:
             q1 = q1.replace ("$$$$$", val)
             q1 = q1.replace ("%%%%%", "'" + (self.convertTime(cfg.paramDict['DBTimeFormat'], tStamp))+"'")
             print q1
-            self.execQuery(q1)
+            if tStamp == currTS:
+                print 'Duplicate timestamp'
+            else:
+                self.execQuery(q1)
     
     def convertTime(self, timeFormatStr, ts):
         # from milliseconds to seconds
@@ -118,7 +121,7 @@ class DBOperator:
         #print formattedDate
         return formattedDate
         
-    def execRowQuery (self, cfg, oneDataRowQ, chNames, tStamp, vals):
+    def execRowQuery (self, cfg, oneDataRowQ, chNames, tStamp, vals, currTS):
 
         #print 'execRowQuery'
         # just in case for multi-line queries
@@ -144,7 +147,10 @@ class DBOperator:
             q1 = q1.replace ("$$$$$", values)
         
             print q1
-            self.execQuery (q1)
+            if tStamp == currTS:
+                print 'duplicate time stamp'
+            else:
+                self.execQuery (q1)
         
         print 'execRow is finished'
 
