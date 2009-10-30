@@ -70,6 +70,7 @@ class DT2DB:
             # request
             try:
                 if (self.currTS + self.duration) <= self.endTime:
+                    self.duration = 5000
                     print "Requesting data starting from %d to %d seconds" %(self.currTS, self.duration)
                     self.requestDataFromDT(cfg, sapi, self.duration)
                     self.currTS = self.currTS + self.duration
