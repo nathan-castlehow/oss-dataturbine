@@ -134,6 +134,7 @@ class DT2DB:
         chNames = cfg.chNames
         for chName in chNames:
                 chInd = self.chMap.GetIndex(chName)
+                print 'ch name = ', chName, 'ch ind = ', chInd
                 # get the times and values
                 if chInd >=0:
                     return True
