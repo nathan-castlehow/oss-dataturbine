@@ -126,7 +126,6 @@ class DT2DB:
     def restartDTConn(self, cfg, sapi):
         self.DT2DBSink.CloseRBNBConnection()
         self.connectToDT(cfg, sapi)
-        self.subscribeToDT(cfg, sapi)
         
     
     def translateDT2DB (self, cfg, sapi):
