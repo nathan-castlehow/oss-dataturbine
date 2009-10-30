@@ -70,7 +70,7 @@ class DT2DB:
             try:
                 if (self.currTS + self.duration) <= self.endTime:
                     print "Requesting data starting from %d to %d seconds" %(self.currTS, self.duration)
-                    self.requestDataFromDT(cfg, sapi, self.currTS, self.duration)
+                    self.requestDataFromDT(cfg, sapi, self.duration)
                     self.currTS = self.currTS + self.duration
                     requestSuccess = True
                     
@@ -78,7 +78,7 @@ class DT2DB:
                     lastDuration = self.endTime - self.currTS
                     if lastDuration > 0.0:
                         print "Requesting data starting from %d to %d seconds" %(self.currTS, lastDuration)
-                        self.requestDataFromDT(cfg, sapi, self.currTS, lastDuration)
+                        self.requestDataFromDT(cfg, sapi, lastDuration)
                         self.currTS = self.currTS + lastDuration
                         requestSuccess = True
                     else:
