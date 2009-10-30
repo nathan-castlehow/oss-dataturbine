@@ -109,7 +109,7 @@ class DT2DB:
             else:
                 successfulFetch = False
         
-            if sucessfulFetch:
+            if successfulFetch:
                 # translate the fetched values to the DB queries
                 # keep trying to insert the DB queries
                 try:
