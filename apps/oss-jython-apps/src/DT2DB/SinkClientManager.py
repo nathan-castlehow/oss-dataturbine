@@ -88,6 +88,7 @@ class DT2DB:
         
                     # find out the new end time
                     time.sleep(retryInterval)
+                    self.createChannelTree(cfg, sapi)
                     self.findChStartTimes(cfg, sapi)
                     self.findEndTime(cfg, sapi)
                                                 
