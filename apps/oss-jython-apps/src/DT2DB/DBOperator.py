@@ -73,7 +73,7 @@ class DBOperator:
             print 'executed the query', qStr
             self.dbConn.commit()
             cursor.close()
-            self.dbConn.close()
+            self.close()
         except:
             print 'SQL error'
         
