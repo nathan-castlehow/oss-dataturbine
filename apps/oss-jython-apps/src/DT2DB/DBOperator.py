@@ -62,9 +62,7 @@ class DBOperator:
         try:
             
             self.connect()
-            print 'Before creating the cursor'
             cursor = self.dbConn.cursor()
-            print 'After creating the cursor', self.dbConn
             print cursor
             
             cursor.datahandler = sql.handler.MySQLDataHandler(cursor.datahandler)
