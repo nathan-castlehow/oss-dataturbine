@@ -299,12 +299,12 @@ class DT2DB:
                     for TSchName in colsTableTS.keys():
                         chTSs = colsTableTS[TSchName]
                         currInd = maxInd[TSchName] - indOffset[TSchName]
-                        #print 'index offset ', indOffset[TSchName], maxInd[TSchName] 
+                        print 'index offset ', indOffset[TSchName], maxInd[TSchName] 
                         if currInd <= maxInd[TSchName]:
                             # check if the TS is the min TS
                             currTS = chTSs[currInd]
-                            #print 'timestamps = ', currTS, minTS
-                            #print minTS-currTS 
+                            print 'timestamps = ', currTS, minTS
+                            print minTS-currTS 
                             if currTS == minTS:
                                 minTimeChans.append(TSchName)
                                 currDataArr = colsTableData[TSchName]
