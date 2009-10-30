@@ -252,7 +252,7 @@ class DT2DB:
                     # get the index using the chName
                     chInd = self.chMap.GetIndex(chName)
                     # get the times and values
-                    #print 'ch name = ', chName, 'ch ind = ', chInd
+                    print 'ch name = ', chName, 'ch ind = ', chInd
                     if chInd >=0:
                         colsTableTS[chName] = self.chMap.GetTimes(chInd)
                         colsTableData[chName] = self.chMap.GetDataAsFloat64(chInd)
