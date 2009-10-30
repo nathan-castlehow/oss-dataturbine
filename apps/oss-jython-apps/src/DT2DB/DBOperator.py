@@ -60,6 +60,8 @@ class DBOperator:
 
     def execQuery (self, qStr):
         try:
+            
+            self.connect()
             print 'Before creating the cursor'
             cursor = self.dbConn.cursor()
             print 'After creating the cursor', self.dbConn
@@ -71,6 +73,7 @@ class DBOperator:
             print 'executed the query', qStr
             self.dbConn.commit()
             cursor.close()
+            self.dbConn.close()
         except:
             print 'SQL error'
         
