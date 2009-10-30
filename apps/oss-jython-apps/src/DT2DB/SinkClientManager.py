@@ -170,8 +170,8 @@ class DT2DB:
             if chNames[chIndex] != "TimeStampForDB":
                 self.chMap.Add(chNames[chIndex])
         # Register the channelMap
-        #print self.chMap
-        #print 'registering the channel map above'
+        print self.chMap
+        print 'registering the channel map above'
         
 
     def findStartTime (self, cfg, sapi):
