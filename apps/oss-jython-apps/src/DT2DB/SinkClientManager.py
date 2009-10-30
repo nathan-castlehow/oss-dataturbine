@@ -131,9 +131,7 @@ class DT2DB:
 
     
     def chMapHasData(self, cfg, sapi):
-        chNames = cfg.chNames
-        print chNames
-        for chName in chNames:
+        for chName in self.chMap.GetChannelList():
                 chInd = self.chMap.GetIndex(chName)
                 print 'ch name = ', chName, 'ch ind = ', chInd
                 # get the times and values
