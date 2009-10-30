@@ -73,9 +73,9 @@ class DBOperator:
             print 'executed the query', qStr
             self.dbConn.commit()
             cursor.close()
+            
+        finally:
             self.close()
-        except:
-            print 'SQL error'
         
 
             
