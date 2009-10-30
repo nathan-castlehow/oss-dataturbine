@@ -120,7 +120,7 @@ class DT2DB:
                 try:
                     # execute the DB queries
                     # move the start subscription time for the next point
-                    if self.chMapHasData():
+                    if self.chMapHasData(cfg, sapi):
                         self.translateDT2DB (cfg, sapi)
                         self.recordStartTime(cfg, sapi)
                 except:
@@ -130,7 +130,7 @@ class DT2DB:
         return
 
     
-    def chMapHasData(self):
+    def chMapHasData(self, cfg, sapi):
         chNames = cfg.chNames
         for chName in chNames:
                 chInd = self.chMap.GetIndex(chName)
