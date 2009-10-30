@@ -229,6 +229,7 @@ class DT2DB:
 
 
     def requestDataFromDT (self, cfg, sapi, duration):
+        self.createChannelMap(cfg, sapi)
         print 'about to request using chMap', self.chMap
         self.DT2DBSink.Request (self.chMap, self.currTS, duration, "absolute")
         return
@@ -344,7 +345,7 @@ class DT2DB:
                     # are 0
                     if self.checkOffset (colsTableTS, indOffset):
                         moreQueries = False
-                #print '----------------------> getting out <_--------------'
+            print '----------------------> execRow Finished <_--------------'
         return
     
     def checkOffset (self, colsTableTS, indOffset):
