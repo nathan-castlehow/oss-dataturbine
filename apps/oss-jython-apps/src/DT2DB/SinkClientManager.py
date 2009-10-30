@@ -43,7 +43,7 @@ class DT2DB:
         self.createChannelTree(cfg, sapi)
         # either start from the file or the start of the channel
         self.findStartTime (cfg, sapi)
-        
+        self.findEndTime(cfg, sapi)
         # subtract one second from the start time
         # to avoid being discarded as a duplicate
         self.startTime = self.startTime - 1.0
