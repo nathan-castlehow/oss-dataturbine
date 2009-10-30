@@ -228,6 +228,7 @@ class DT2DB:
 
 
     def requestDataFromDT (self, cfg, sapi, duration):
+        print 'about to request using chMap', self.chMap
         self.DT2DBSink.Request (self.chMap, self.currTS, duration, "absolute")
         return
 
@@ -307,9 +308,9 @@ class DT2DB:
                                 minTS = chTSs[currInd]
                                 tempCounter = tempCounter +1
                             else:
-                                currTS = chTSs[currInd]
-                                if currTS < minTS:
-                                    minTS = currTS
+                                currTS1 = chTSs[currInd]
+                                if currTS1 < minTS:
+                                    minTS = currTS1
                     
                     # 3.  find the channels with minTime
                     minTimeChans = []
@@ -321,10 +322,10 @@ class DT2DB:
                         print 'index offset ', indOffset[TSchName], maxInd[TSchName] 
                         if currInd <= maxInd[TSchName]:
                             # check if the TS is the min TS
-                            currTS = chTSs[currInd]
-                            print 'timestamps = ', currTS, minTS
-                            print minTS-currTS 
-                            if currTS == minTS:
+                            currTS1 = chTSs[currInd]
+                            print 'timestamps = ', currTS1, minTS
+                            print minTS-currTS1 
+                            if currTS1 == minTS:
                                 minTimeChans.append(TSchName)
                                 currDataArr = colsTableData[TSchName]
                                 currData = currDataArr[currInd]
@@ -349,6 +350,7 @@ class DT2DB:
         for TSchName in colsTableTS.keys():
             if indOffset[TSchName] != 0:
                 return False
+        print 'index offset is all 0', indOffset
         return True
     
     
