@@ -35,7 +35,7 @@ class DT2DB:
     def run (self, cfg, sapi):
 
         self.connectToDT(cfg, sapi)
-        self.connectToDB(cfg, sapi)
+        #self.connectToDB(cfg, sapi)
         # create a channel map
         self.createChannelMap(cfg, sapi)
         self.durationSeconds = cfg.paramDict["durationSeconds"]
