@@ -132,6 +132,7 @@ class DT2DB:
     
     def chMapHasData(self, cfg, sapi):
         chNames = cfg.chNames
+        print chNames
         for chName in chNames:
                 chInd = self.chMap.GetIndex(chName)
                 print 'ch name = ', chName, 'ch ind = ', chInd
