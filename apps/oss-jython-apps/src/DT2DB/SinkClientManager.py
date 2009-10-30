@@ -278,8 +278,8 @@ class DT2DB:
                         indOffset[chName] = len(self.chMap.GetTimes(chInd))
                         maxInd [chName] = len(self.chMap.GetTimes(chInd))
                     
-                    #print "chData", colsTableData
-                    #print 'chTime', colsTableTS
+                    print "chData", colsTableData
+                    print 'chTime', colsTableTS
             # Given the data and their timestamps
             # synchronize them accordingly
             #   1. save current indices across channels
