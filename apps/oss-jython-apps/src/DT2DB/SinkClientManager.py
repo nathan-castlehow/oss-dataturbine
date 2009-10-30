@@ -84,14 +84,18 @@ class DT2DB:
                         requestSuccess = True
                     else:
                         requestSuccess = False
+        
                     # find out the new end time
+                    time.sleep(retryInterval)
                     self.findChStartTimes(cfg, sapi)
                     self.findEndTime(cfg, sapi)
-                                    
+                                                
             except sapi.SAPIException, se:
                 print "Request failed"
                 print se
                 requestSuccess = False
+                time.sleep(retryInterval)
+              
                 self.restartDTConn(cfg, sapi)
             
             if requestSuccess:
@@ -116,8 +120,9 @@ class DT2DB:
                 try:
                     # execute the DB queries
                     # move the start subscription time for the next point
-                    self.translateDT2DB (cfg, sapi)
-                    self.recordStartTime(cfg, sapi)
+                    if self.chMapHasData():
+                        self.translateDT2DB (cfg, sapi)
+                        self.recordStartTime(cfg, sapi)
                 except:
                     time.sleep(retryInterval)
                 # wait and loop back
@@ -125,6 +130,17 @@ class DT2DB:
         return
 
     
+    def chMapHasData(self):
+        chNames = cfg.chNames
+        for chName in chNames:
+                chInd = self.chMap.GetIndex(chName)
+                # get the times and values
+                if chInd >=0:
+                    return True
+        return False
+                    
+        
+        
     def restartDTConn(self, cfg, sapi):
         self.DT2DBSink.CloseRBNBConnection()
         self.connectToDT(cfg, sapi)
