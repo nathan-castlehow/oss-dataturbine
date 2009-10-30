@@ -61,7 +61,7 @@ class DT2DB:
         
         # keep fetching and inserting the data into DB
         while sucessfulFetch:
-            sucessfulFetch = True
+            successfulFetch = True
             dbConnOn = True
 
             self.duration = 5000
@@ -72,35 +72,41 @@ class DT2DB:
                     print "Requesting data starting from %d to %d seconds" %(self.currTS, self.duration)
                     self.requestDataFromDT(cfg, sapi, self.currTS, self.duration)
                     self.currTS = self.currTS + self.duration
+                    requestSuccess = True
+                    
                 else:  # the end time is sooner
                     lastDuration = self.endTime - self.currTS
                     if lastDuration > 0.0:
                         print "Requesting data starting from %d to %d seconds" %(self.currTS, lastDuration)
                         self.requestDataFromDT(cfg, sapi, self.currTS, lastDuration)
                         self.currTS = self.currTS + lastDuration
-                    
+                        requestSuccess = True
+                    else:
+                        requestSuccess = False
                     # find out the new end time
                     self.findChStartTimes(cfg, sapi)
                     self.findEndTime(cfg, sapi)
-                    
-                
-                
+                                    
             except:
                 print "Request failed"
-                sucessfulFetch = False
+                requestSuccess = False
                 self.restartDTConn()
             
-            # fetch
-            try:
-                # fetch the data from the channel
-                print "Fetching data"
-                self.fetchData(cfg, sapi)
-                print "Fetch successful"
-            except:
-                print "Fetching failed"
-                sucessfulFetch = False
-                print 'Restart the DT connection process'
-                self.restartDTConn()
+            if requestSuccess:
+                # fetch
+                try:
+                    # fetch the data from the channel
+                    print "Fetching data"
+                    self.fetchData(cfg, sapi)
+                    print "Fetch successful"
+                    successfulFetch = True
+                except:
+                    print "Fetching failed"
+                    successfulFetch = False
+                    print 'Restart the DT connection process'
+                    self.restartDTConn()
+            else:
+                successfulFetch = False
         
             if sucessfulFetch:
                 # translate the fetched values to the DB queries
@@ -109,8 +115,6 @@ class DT2DB:
                     # execute the DB queries
                     # move the start subscription time for the next point
                     self.translateDT2DB (cfg, sapi)
-
-                    
                     self.recordStartTime(cfg, sapi)
                 except:
                     time.sleep(retryInterval)
@@ -223,7 +227,7 @@ class DT2DB:
             tStamps = self.chMap.GetTimes(chInd)
             
             for tsInd in range(len(tStamps)):
-                self.dbop.execEAVQuery(self, cfg, chName, tStamps[tsInd], data[tsInd])
+                self.dbop.execEAVQuery(self, cfg, chName, tStamps[tsInd], data[tsInd], self.currTS)
         return
 
     def execRowDBQueries (self, cfg, sapi):
@@ -311,7 +315,7 @@ class DT2DB:
 
                                 #print TSchName, ' index has ', indOffset [TSchName]
                     # 4. create a query using all the channel info
-                    self.dbop.execRowQuery (cfg, rowQ, minTimeChans, minTS, minTimeChanVals)
+                    self.dbop.execRowQuery (cfg, rowQ, minTimeChans, minTS, minTimeChanVals, self.currTS)
                     print 'DB insert is finished'
 
                     # 5. Finish the insertion operation if all channels' index offset
