@@ -87,8 +87,9 @@ class DT2DB:
                     self.findChStartTimes(cfg, sapi)
                     self.findEndTime(cfg, sapi)
                                     
-            except:
+            except sapi.SAPIException, se:
                 print "Request failed"
+                print se
                 requestSuccess = False
                 self.restartDTConn(cfg, sapi)
             
