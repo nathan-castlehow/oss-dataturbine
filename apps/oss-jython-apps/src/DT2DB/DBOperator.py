@@ -70,27 +70,9 @@ class DBOperator:
             cursor.execute(qStr)
             print 'executed the query', qStr
             self.dbConn.commit()
-        except sql.zxJDBC.DatabaseError, dbe:
-            print 'DB error'
-            print dbe.message
-            pass
-        except sql.zxJDBC.ProgrammingError, pge:
-            print 'Programming error'
-            print pge.message
-            pass
-        except sql.zxJDBC.noSupportedError, nse:
-            print 'Not supported error'
-            print nse.message
-            pass
-        except sql.zxJDBC.Error, e:
-            print 'zxJDBC error'
-            print e.message
-            pass
-        except:
-            print 'zxJDBC error'
-            pass
-        else:
             cursor.close()
+        except:
+            print 'SQL error'
         
 
             
