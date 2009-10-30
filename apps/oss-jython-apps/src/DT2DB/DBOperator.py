@@ -17,8 +17,8 @@ class DBOperator:
         
         connectToDB = False
         print 'Trying to connect to the DB connection'
-        
         self.dbConn = sql.zxJDBC.connect(self.dbURL, self.user, self.pw, self.drv)
+        print "DB connection established", self.dbConn
         
         
     def establishDBConn(self):
