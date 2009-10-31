@@ -48,7 +48,6 @@ class DT2DB:
         # subtract one second from the start time
         # to avoid being discarded as a duplicate
         self.startTime = self.startTime - 1.0
-        self.startTime = 1250097000
         
         # subscribe to the channel map using runStartTime
         self.keepFetchInsert (cfg, sapi)
@@ -56,7 +55,7 @@ class DT2DB:
     
     def keepFetchInsert (self, cfg, sapi):
         
-        retryInterval = 3
+        retryInterval = 30
         sucessfulFetch = True
         
         self.currTS = self.startTime + 0.1
