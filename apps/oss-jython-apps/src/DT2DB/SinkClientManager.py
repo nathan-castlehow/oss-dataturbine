@@ -48,6 +48,7 @@ class DT2DB:
         # subtract one second from the start time
         # to avoid being discarded as a duplicate
         self.startTime = self.startTime - 1.0
+        self.startTime = 1250097000
         
         # subscribe to the channel map using runStartTime
         self.keepFetchInsert (cfg, sapi)
@@ -77,6 +78,9 @@ class DT2DB:
                     requestSuccess = True
                     
                 else:  # the end time is sooner
+                    self.createChannelTree(cfg, sapi)
+                    self.findChStartTimes(cfg, sapi)
+                    self.findEndTime(cfg, sapi)
                     lastDuration = self.endTime - self.currTS
                     if lastDuration > 0.0:
                         print "Requesting data starting from %d to %d seconds" %(self.currTS, lastDuration)
@@ -88,9 +92,6 @@ class DT2DB:
         
                     # find out the new end time
                     time.sleep(retryInterval)
-                    self.createChannelTree(cfg, sapi)
-                    self.findChStartTimes(cfg, sapi)
-                    self.findEndTime(cfg, sapi)
                                                 
             except sapi.SAPIException, se:
                 print "Request failed"
