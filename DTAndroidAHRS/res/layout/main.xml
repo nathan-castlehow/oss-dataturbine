@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ScrollView
+    android:id="@+id/widget54"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    >
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    >
+<TextView  
+    android:layout_width="fill_parent" 
+    android:layout_height="wrap_content" 
+    android:text="@string/rbnbServerLabel"
+    />
+<EditText android:id="@+id/rbnbServer"
+    android:layout_width="fill_parent" 
+    android:layout_height="wrap_content" 
+    />
+
+<TextView  
+    android:layout_width="fill_parent" 
+    android:layout_height="wrap_content" 
+    android:text="@string/simulatedSensorLabel"
+    />
+       
+<CheckBox android:id="@+id/useSimulatedSensor"
+        android:layout_width="wrap_content"
+       android:layout_height="wrap_content"
+       />
+ 
+ <TextView  
+    android:layout_width="fill_parent" 
+    android:layout_height="wrap_content" 
+    android:text="@string/pollSensorLabel"
+    />
+       
+<CheckBox android:id="@+id/pollSensor"
+        android:layout_width="wrap_content"
+       android:layout_height="wrap_content"
+       />
+  
+  
+ <Button android:id="@+id/run_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/run_button_text"/>
+               
+ <Button android:id="@+id/quit_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/quit_button_text"/>
+        
+<TextView  
+    android:layout_width="fill_parent" 
+    android:layout_height="wrap_content" 
+    android:text="@string/statusLabel"/>
+    
+<TextView  android:id="@+id/statusMsgs"
+    android:layout_width="fill_parent" 
+    android:layout_height="wrap_content" 
+    android:text=""/>
+    
+            
+</LinearLayout>
+</ScrollView>
+

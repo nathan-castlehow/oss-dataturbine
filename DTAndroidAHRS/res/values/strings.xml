@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="hello">RBNB AHRS</string>
+    <string name="app_name">RBNB AHRS</string>
+<string name="run_button_text">Run</string>
+<string name="rbnbServerLabel">RBNB server host:</string>
+<string name="rbnbServer">RBNB server</string>
+<string name="simulatedSensorLabel">Use simulated sensor</string>
+<string name="useSimulatedSensor">useSimulatedSensor</string>
+
+<string name="quit_button_text">Quit</string>
+<string name="statusLabel">Status:</string>
+<string name="statusMsgs">msg goes here</string>
+<string name="pollSensorLabel">Poll sensor: </string>
+<string name="pollSensor">pollSensor</string>
+<string name="camera_button_text">Take picture</string>
+</resources>
