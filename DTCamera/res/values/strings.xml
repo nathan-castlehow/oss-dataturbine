@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="hello">Hello World, CameraTest!</string>
+    <string name="app_name">CameraTest</string>
+<string name="run_button_text">Take picture</string>
+<string name="quit_button_text">Quit</string>
+<string name="rbnbServerLabel">RBNB server</string>
+</resources>
