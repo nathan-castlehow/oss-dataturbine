@@ -1,0 +1,500 @@
+/*  Blob Detection image analysis client program with a DataTurbine interface. 
+    Copyright (C) 2009, Robert J. Chen
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.FileDialog;
+import java.awt.Font;
+import java.awt.Graphics2D;
+import java.awt.GridLayout;
+import java.awt.Rectangle;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.InputStream;
+
+import javax.imageio.ImageIO;
+import javax.swing.BorderFactory;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JSlider;
+import javax.swing.JTextField;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+
+import blobDetection.Blob;
+import blobDetection.BlobDetection;
+import blobDetection.EdgeVertex;
+
+import com.rbnb.sapi.ChannelMap;
+import com.rbnb.sapi.Sink;
+import com.rbnb.sapi.Source;
+import com.sun.image.codec.jpeg.JPEGCodec;
+import com.sun.image.codec.jpeg.JPEGImageDecoder;
+
+
+
+public class CopyOfBlobDetect  {
+
+	static BlobDetection theBlobDetection;
+	static int pixels[];
+	static BufferedImage img = null;
+	static BufferedImage orimg;
+	static JLabel textLabel = null;
+	static JFrame frame = null;
+	static JButton button = null;
+	static JButton threshButton = null;
+	static String pfile= null;
+	
+	static int minHeight = 8;
+	static int minWidth = 8;
+	
+	static int maxHeight = 18;
+	static int maxWidth = 18;
+	
+	static JPanel dimensions;
+	static JLabel runningAverage;
+	
+	static JTextField TminHeight;
+	static JTextField TminWidth;
+	
+	static JTextField TmaxWidth;
+	static JTextField TmaxHeight;
+	
+	static JCheckBox Tcolor;
+	
+	
+	static int thresholdSliderValue = 0;
+	static float defaultThreshold = 0.5f;
+	static JButton apply = null;
+	static JButton help = null;
+	
+	// RBNB pull thread
+	static Thread thread = null;
+	static int average =0;
+	static int totalBlobs = 0;
+	static int totalFrames =1;
+	
+	
+	static AllEventHandler universalHandler = null;
+	
+	// dataTurbine component
+   public static Sink sink;
+   public static Source source;
+   public static ChannelMap rMap; 
+   public static ChannelMap cMap; 
+
+	// automatic updater for analysis
+   static class RBNBPullThread extends Thread {
+        
+		ChannelMap aMap; 
+		ChannelMap cMap;
+		
+		int index;
+		
+        public void run() {
+		try {
+			sink=new Sink();
+			sink.OpenRBNBConnection("gad221.nchc.org.tw:3333", "mySink");
+			
+		//	source = new Source(100, "append", 604800);
+		//	source.OpenRBNBConnection("gad.nchc.org.tw:3333", "CoralLarvae");
+			
+			
+		//System.out.print("Okay, connecting...\r");		
+	
+		// Pull data from the server:
+			rMap = new ChannelMap();
+		//	cMap = new ChannelMap();
+		    
+		//	index = cMap.Add("blobCount"); 
+		
+			rMap.Add("HD_Closeup/HD.jpg");
+
+		
+			sink.Monitor(rMap,0);
+			
+			} catch (Exception f){}
+			
+			while(true){
+				
+					
+					 
+					// Sleep for 1 second
+		try {Thread.currentThread().sleep(1000);} catch (Exception e){}
+		
+		try {
+			if ((aMap = sink.Fetch(1000)) == null) 
+			{
+				    System.err.println("Data not received!");
+				    return;
+			}	
+			
+			byte bytes[] = aMap.GetDataAsByteArray(0)[0];
+	    
+			InputStream src = new ByteArrayInputStream(bytes);
+			JPEGImageDecoder decode = JPEGCodec.createJPEGDecoder(src);
+			
+			img = decode.decodeAsBufferedImage();
+			img = crop(img, new Rectangle(0, 50, img.getWidth(), img.getHeight()));
+			
+			orimg = new BufferedImage(img.getWidth(), img.getHeight(), img.getType());
+			orimg.setData(img.getData());
+			
+			blobSetup();
+		
+			drawBlobsAndEdges(img);
+			textLabel.setIcon(new ImageIcon(img));
+			
+			// set time
+		//	cMap.PutTimeAuto("timeofday");
+			
+			// calculate running total
+			totalBlobs += theBlobDetection.getBlobNb();
+		//	int[] data = { theBlobDetection.getBlobNb() }; 
+	//		cMap.PutDataAsInt32(index, data);
+			
+	//		source.Flush(cMap, true); 
+			
+			
+			totalFrames += 1;
+			
+			average = (int)(totalBlobs/totalFrames);	
+
+			runningAverage.setText(new String("Avg Blobs/Frame: "+(new Integer(average)).toString() ));
+	
+			} catch (Exception t)	{System.out.println(t);}
+			}
+		
+        }
+    }
+	
+	// Event Handler class
+	public static class AllEventHandler implements ChangeListener, ActionListener{
+
+		public AllEventHandler(){}
+		
+		public static void printInfo()
+		{
+			System.out.println("----------\n Threshold: "+(float)thresholdSliderValue/100 +" Detected: "  + theBlobDetection.getBlobNb() + " blobs \n Min Width: "+minWidth+" Min Height: "+minHeight +" \n Max Width: "+maxWidth+" Max Height: "+maxHeight);			
+		}
+		public static boolean newBlobDetectedEvent(Blob b){
+		
+		
+			// reject blobs greater than 25x25 pixels and smaller than 5x5 pixels
+			if(b.h*img.getHeight() > maxHeight || b.w*img.getWidth() > maxWidth){return false;}
+			if(b.h*img.getHeight() < minHeight || b.w*img.getWidth() < minWidth){return false;}
+			
+			return true;
+		}
+		
+		public void actionPerformed(ActionEvent e)
+		{
+		if(e.getActionCommand().equals("Help")){
+			
+			JOptionPane.showMessageDialog(frame, "-- Automatic Threshold Acquisition Usage Instructions --\n" + 
+												 ".: Purpose of Feature :. \nThis feature attempts to automatically find the optimal \n" +
+												 "brightness threshold across a set of images \n" +
+												 "such that the blob detection algorithm provides a \n" +
+												 "count of blobs equal to the user specified amount\n\n" +
+												 
+												 "------------------------------------------------------------------------------\n"												 
+												 );
+												 
+												 
+			JOptionPane.showMessageDialog(frame, "-- Automatic Threshold Acquisition Usage Instructions --\n" + 
+												 ".: Step 1 :.\n" +
+												 ". Click the button marked on the left of the screen " +
+												 ". \n\n" 
+												 );
+		}else if(e.getActionCommand().equals("<html></html>")){
+				
+		
+			thread = new RBNBPullThread();
+			thread.start();
+				
+		}else if(e.getActionCommand().equals("Apply")){
+			minHeight = Integer.parseInt(TminHeight.getText());
+			minWidth = Integer.parseInt(TminWidth.getText());
+	
+			maxWidth = Integer.parseInt(TmaxWidth.getText());
+			maxHeight = Integer.parseInt(TmaxHeight.getText());
+			
+			
+			// reset, as new settings are in place
+			average =0;
+			totalBlobs = 0;
+			totalFrames =1;
+		
+			blobSetup();
+			printInfo();
+	
+			
+		}else if(e.getActionCommand().equals("Load Image ")){
+		
+			FileDialog fd = new FileDialog(frame, "Load Image ", FileDialog.LOAD);
+			fd.show();
+			pfile = fd.getDirectory()+fd.getFile();
+			try{
+				img = ImageIO.read(new File(pfile));
+				img = crop(img,new Rectangle(0, 0, img.getWidth(), img.getHeight()));
+				
+			} catch (Exception g) {}
+			
+			orimg = new BufferedImage(img.getWidth(), img.getHeight(), img.getType());
+			orimg.setData(img.getData());
+			
+		blobSetup();
+		printInfo();
+		
+		
+		}
+		 
+		 
+		}
+		/** Listen to the slider. */
+		
+		public void stateChanged(ChangeEvent e) {
+        JSlider source = (JSlider)e.getSource();
+        if (!source.getValueIsAdjusting()) {
+            thresholdSliderValue = (int)source.getValue();
+           try{
+				img = new BufferedImage(orimg.getWidth(), orimg.getHeight(), orimg.getType());
+				
+				img.setData(orimg.getData());
+				
+				
+			}catch(Exception f){}
+			
+                
+				defaultThreshold = (float)thresholdSliderValue/100;
+				
+				average =0;
+				totalBlobs = 0;
+				totalFrames = 1;
+	
+				blobSetup();
+				printInfo();
+				
+				//textLabel.repaint();
+        }
+    }
+		
+	}
+	
+   private static void createWindow() {
+
+    System.out.println("blobDetection Copyright (C) 2009  Robert J. Chen ");
+    System.out.println("This program comes with ABSOLUTELY NO WARRANTY; ");
+    System.out.println("This is free software, and you are welcome to redistribute it ");
+    System.out.println("under certain conditions; See license.txt for details ");
+
+      frame = new JFrame("Blob Detection (C) 2009 Robert Chen");
+      frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); 
+	  
+		dimensions = new JPanel();
+		dimensions.setLayout(new GridLayout(18,1));
+		
+		runningAverage = new JLabel("Blobs/Frame: 0");
+		
+		
+		TminWidth = new JTextField(5);
+		TminHeight = new JTextField(5);
+		TmaxWidth = new JTextField(5);
+		TmaxHeight = new JTextField(5);
+		
+		TminWidth.setText((new Integer(minWidth)).toString());
+		TminHeight.setText((new Integer(minHeight)).toString());
+		TmaxWidth.setText((new Integer(maxWidth)).toString());
+		TmaxHeight.setText((new Integer(maxHeight)).toString());
+		
+		Tcolor = new JCheckBox("Red/White", true);
+		
+
+		
+		dimensions.add(new JLabel(" Minimum Width"));
+		dimensions.add(TminWidth); 
+		
+		dimensions.add(new JLabel(" Minimum Height"));
+		dimensions.add(TminHeight); 
+		
+		dimensions.add(new JLabel(" Maximum Width"));
+		dimensions.add(TmaxWidth); 
+		
+		dimensions.add(new JLabel(" Maximum Height"));
+		dimensions.add(TmaxHeight);
+		
+		dimensions.add(Tcolor);
+		
+		
+		help = new JButton("Help");
+		
+		dimensions.add(runningAverage);
+		dimensions.add(help);
+		
+		 
+		dimensions.add(new JLabel(""));
+		
+		apply = new JButton("Apply");
+		dimensions.add(apply);
+		
+		dimensions.add(new JLabel(""));
+		
+		button = new JButton("Load Image");
+		try{
+		img = ImageIO.read(new File("default.jpg"));
+		img = crop(img, new Rectangle(0, 50, img.getWidth(), img.getHeight()));
+		
+		orimg = new BufferedImage(img.getWidth(), img.getHeight(), img.getType());
+		orimg.setData(img.getData());
+		
+		textLabel= new JLabel(new ImageIcon(img));
+		blobSetup();
+			}catch (Exception e){}
+		
+     
+		threshButton = new JButton("");
+
+        //Create the slider.
+        JSlider thresholdSlider = new JSlider(JSlider.HORIZONTAL,
+                                              0, 100, 50);
+        
+
+        thresholdSlider.addChangeListener(universalHandler);
+		apply.addActionListener(universalHandler);
+		button.addActionListener(universalHandler);
+		threshButton.addActionListener(universalHandler);
+		help.addActionListener(universalHandler);
+		
+		threshButton.setIcon(new RotatedTextIcon(RotatedTextIcon.CCW,
+				threshButton.getFont(), "Automatic Threshold Acquisition"));
+	  
+	  
+        //Turn on labels at major tick marks.
+
+        thresholdSlider.setMajorTickSpacing(10);
+        thresholdSlider.setMinorTickSpacing(5);
+        thresholdSlider.setPaintTicks(true);
+        thresholdSlider.setPaintLabels(true);
+        thresholdSlider.setBorder(
+                BorderFactory.createEmptyBorder(0,0,10,0));
+        Font font = new Font("Serif", Font.ITALIC, 15);
+        thresholdSlider.setFont(font);
+		
+      frame.getContentPane().add(textLabel, BorderLayout.CENTER); 
+	   
+	  frame.getContentPane().add(thresholdSlider, BorderLayout.SOUTH); 
+	  frame.getContentPane().add(button, BorderLayout.NORTH); 
+	  frame.getContentPane().add(dimensions, BorderLayout.EAST); 
+	  frame.getContentPane().add(threshButton, BorderLayout.WEST); 
+
+      frame.setLocationRelativeTo(null); 
+      frame.pack();
+      frame.setVisible(true); 
+
+	  
+	  
+   }
+   
+   
+   public static void blobSetup(){
+    
+	  try {
+			img = new BufferedImage(orimg.getWidth(), orimg.getHeight(), orimg.getType());
+			img.setData(orimg.getData());
+			
+	  	  
+		theBlobDetection = new BlobDetection(img.getWidth(), img.getHeight());
+		theBlobDetection.setPosDiscrimination(true);
+	
+		// lower values, more dark colored objecst are selected, higher values cause more lighter colored objects to be selected over darker ones
+		theBlobDetection.setThreshold(defaultThreshold);
+		theBlobDetection.activeCustomFilter(universalHandler);
+		
+		theBlobDetection.computeBlobs(img.getRGB(0,0,img.getWidth(), img.getHeight(), new int[img.getWidth() *(img.getHeight())],0, img.getWidth()));
+
+		drawBlobsAndEdges(img);
+		textLabel.setIcon(new ImageIcon(img));
+		
+		} catch (Exception e){}
+   }
+   public static void main(String[] args) {
+		
+	  universalHandler = new AllEventHandler();
+      createWindow();
+
+   }
+   
+   static void drawBlobsAndEdges(BufferedImage image)
+	{
+
+	Blob b;
+	EdgeVertex eA,eB;
+	
+	Graphics2D g = image.createGraphics();
+	if(Tcolor.isSelected()){ g.setColor(Color.red); }
+	else {g.setColor(Color.white);}
+	
+	
+	for (int n=0 ; n<theBlobDetection.getBlobNb() ; n++)
+	{
+		b=theBlobDetection.getBlob(n);
+		if (b!=null)
+		{
+			// Edges
+			
+			
+				for (int m=0;m<b.getEdgeNb();m++)
+				{
+					eA = b.getEdgeVertexA(m);
+					eB = b.getEdgeVertexB(m);
+					if (eA !=null && eB !=null){
+					 
+					g.drawRect((int)(b.xMin*image.getWidth()),(int)(b.yMin*image.getHeight()),(int)(b.w*image.getWidth()),(int)(b.h*image.getHeight()));
+					// Make the boxes with thicker lines
+					g.drawRect((int)(b.xMin*image.getWidth()+1),(int)(b.yMin*image.getHeight()+1),(int)(b.w*image.getWidth()),(int)(b.h*image.getHeight()));
+					
+					
+		
+						
+					}
+				
+				}
+
+		}
+
+      }
+
+
+}
+
+
+static BufferedImage crop(BufferedImage source, Rectangle rect) {
+   BufferedImage dest = new BufferedImage(rect.width, rect.height, BufferedImage.TYPE_INT_ARGB);
+   dest.createGraphics().drawImage(source, 0, 0, rect.width, rect.height, rect.x, rect.y, rect.x + rect.width, rect.y + rect.height, null);
+   
+   return dest;
+}
+
+}

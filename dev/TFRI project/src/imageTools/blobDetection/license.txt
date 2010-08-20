@@ -1,0 +1,3 @@
+adapted from Julien Gachadoat's public domain library:
+
+http://v3ga.net/processing/BlobDetection/
