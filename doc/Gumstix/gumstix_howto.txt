@@ -1,0 +1,12 @@
+Useful commands for getting ethernet and JAVA running
+
+Network:
+------
+Ethernet:	Edit /etc/network/interfaces
+		UnComment iface eth0 inet dhcp
+			
+JAVA
+------
+
+opkg update
+opkg install cocaovm		//This is a popular java vm

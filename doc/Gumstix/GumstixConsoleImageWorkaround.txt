@@ -1,0 +1,9 @@
+Possible problem when using console version of gumstix image as experienced by Allison Johnston
+---------------------------
+
+I tried connecting to the Gumstix through Putty on my windows 7 machine. 
+Putty didn't recognize it and gave me a blank terminal. 
+I downloaded Kermit 95 and tried again, with the same result. 
+From this I assumed that the linux os on the Gumstix was at fault, so I started researching how to reinstall the SD card image. 
+From there, I needed to learn how to partition the card, which led me to fdisk in Linux. 
+Luckily while I was working in Linux Live I decided to download C-Kermit and try to connect using that before I really messed with the SD card. After familiarizing myself with the Linux terminal I was able to connect using Kermit, start RBNB, and load GenericSoundSource. The next issue is how to get both programs to run at once, for which Michael suggested a shell script, which I am working on right now. 
