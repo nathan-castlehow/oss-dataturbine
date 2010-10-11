@@ -165,15 +165,16 @@ public class MOHeaderIE extends InformationElement {
 	 * Date		Programmer	Action
 	 * -----------------------------------
 	 * 04/09/2010	JPW		Created
+	 * 10/11/2010	JPW		Add folderNameI argument.
 	 *
 	 */
-	public void sendDataToRBNB(Source srcI, long timeI) throws SAPIException{
+	public void sendDataToRBNB(Source srcI, String folderNameI, double timestampI) throws SAPIException{
 		
 		// For now, put all data into RBNB as string, so it is
 		// easily visible from browser
 		
 		ChannelMap cm = new ChannelMap();
-		cm.PutTime(timeI, 0);
+		cm.PutTime(timestampI, 0);
 		
 		/*
 		int idx = cm.Add("cdr_reference");
@@ -203,20 +204,20 @@ public class MOHeaderIE extends InformationElement {
 		cm.PutDataAsString(idx, timeStr);
 		*/
 		
-		int idx = cm.Add("cdr_reference");
+		int idx = cm.Add(folderNameI + "/cdr_reference");
 		cm.PutDataAsString(idx, new String(Long.toString(cdrReference) + "\n"));
-		idx = cm.Add("IMEI");
+		idx = cm.Add(folderNameI + "/IMEI");
 		cm.PutDataAsString(idx, new String(imei + "\n"));
 		// Don't bother putting the session status byte
 		// into the RBNB; we can look at the session
 		// status string if desired.
-		idx = cm.Add("session_status");
+		idx = cm.Add(folderNameI + "/session_status");
 		cm.PutDataAsString(idx, new String(sessionStatusStr + "\n"));
-		idx = cm.Add("MOMSN");
+		idx = cm.Add(folderNameI + "/MOMSN");
 		cm.PutDataAsString(idx, new String(Integer.toString(momsn) + "\n"));
-		idx = cm.Add("MTMSN");
+		idx = cm.Add(folderNameI + "/MTMSN");
 		cm.PutDataAsString(idx, new String(Integer.toString(mtmsn) + "\n"));
-		idx = cm.Add("time");
+		idx = cm.Add(folderNameI + "/time_of_session");
 		cm.PutDataAsString(idx, new String(timeStr + "\n"));
 		
 		srcI.Flush(cm);
@@ -245,7 +246,7 @@ public class MOHeaderIE extends InformationElement {
 				"\t\tSession Status: " + sessionStatusStr + "\n" +
 				"\t\tMOMSN: " + momsn + "\n" +
 				"\t\tMTMSN: " + mtmsn + "\n" +
-				"\t\tTime: " + timeStr + "\n\n");
+				"\t\tTime of session: " + timeStr + "\n\n");
 	}
 	
 }

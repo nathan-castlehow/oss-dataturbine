@@ -147,9 +147,10 @@ public abstract class InformationElement {
 	 * Date		Programmer	Action
 	 * -----------------------------------
 	 * 04/15/2010	JPW		Created
+	 * 10/11/2010	JPW		Add folderNameI argument.
 	 *
 	 */
-	public abstract void sendDataToRBNB(Source srcI, long timeI) throws SAPIException;
+	public abstract void sendDataToRBNB(Source srcI, String folderNameI, double timestampI) throws SAPIException;
 	
 	/*************************************************************************
 	 * 

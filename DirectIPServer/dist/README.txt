@@ -20,7 +20,9 @@ INTRODUCTION
 
 This Java application implements a DirectIP server for receiving SBD packets
 from the Iridium gateway.  This server receives and parses each packet and
-puts the data into individual channels in a DataTurbine server.
+puts the data into individual channels in a DataTurbine server, organized by
+IMEI number - that is, each modem will have its own folder in the output
+source containing parsed data from SBD packets from that modem.
 
 When service is established for an Iridium SBD modem, the subscriber can
 select up to 5 parallel destinations for each SBD packet.  These destinations

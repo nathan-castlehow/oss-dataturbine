@@ -65,13 +65,14 @@ public class MOPayloadIE extends InformationElement {
 	 * Date		Programmer	Action
 	 * -----------------------------------
 	 * 04/09/2010	JPW		Created
+	 * 10/11/2010	JPW		Add folderNameI argument.
 	 *
 	 */
-	public void sendDataToRBNB(Source srcI, long timeI) throws SAPIException {
+	public void sendDataToRBNB(Source srcI, String folderNameI, double timestampI) throws SAPIException {
 		
 		ChannelMap cm = new ChannelMap();
-		cm.PutTime(timeI, 0);
-		cm.Add("payload");
+		cm.PutTime(timestampI, 0);
+		cm.Add(folderNameI + "/payload");
 		cm.PutDataAsString(0, new String(payloadStr + "\n"));
 		srcI.Flush(cm);
 		

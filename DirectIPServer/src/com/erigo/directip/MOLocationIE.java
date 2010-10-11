@@ -134,15 +134,16 @@ public class MOLocationIE extends InformationElement {
 	 * Date		Programmer	Action
 	 * -----------------------------------
 	 * 04/09/2010	JPW		Created
+	 * 10/11/2010	JPW		Add folderNameI argument.
 	 *
 	 */
-	public void sendDataToRBNB(Source srcI, long timeI) throws SAPIException{
+	public void sendDataToRBNB(Source srcI, String folderNameI, double timestampI) throws SAPIException{
 		
 		// For now, put all data into RBNB as string, so it is
 		// easily visible from browser
 		
 		ChannelMap cm = new ChannelMap();
-		cm.PutTime(timeI, 0);
+		cm.PutTime(timestampI, 0);
 		
 		/*
 		int idx = cm.Add("lat");
@@ -159,11 +160,11 @@ public class MOLocationIE extends InformationElement {
 		cm.PutDataAsInt32(idx, cepData);
 		*/
 		
-		int idx = cm.Add("lat");
+		int idx = cm.Add(folderNameI + "/lat");
 		cm.PutDataAsString(idx, new String(Double.toString(latitude) + "\n"));
-		idx = cm.Add("lon");
+		idx = cm.Add(folderNameI + "/lon");
 		cm.PutDataAsString(idx, new String(Double.toString(longitude) + "\n"));
-		idx = cm.Add("cep_radius");
+		idx = cm.Add(folderNameI + "/cep_radius");
 		cm.PutDataAsString(idx, new String(Integer.toString(cepRadius) + "\n"));
 		
 		srcI.Flush(cm);

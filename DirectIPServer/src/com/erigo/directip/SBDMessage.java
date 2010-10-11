@@ -41,7 +41,7 @@ import com.rbnb.sapi.Source;
 public class SBDMessage {
 	
 	// Array containing the total raw message: protocol number, length, and content fields
-	private byte[] rawMessage = null;
+	public byte[] rawMessage = null;
 	
 	// Protocol revision number; should be 1
 	public byte protocolRevNum = 0;
@@ -53,9 +53,9 @@ public class SBDMessage {
 	public byte[] content = null;
 	
 	// The potential information elements that may be within this message
-	private MOHeaderIE headerIE = null;
-	private MOLocationIE locationIE = null;
-	private MOPayloadIE payloadIE = null;
+	public MOHeaderIE headerIE = null;
+	public MOLocationIE locationIE = null;
+	public MOPayloadIE payloadIE = null;
 	
 	/*************************************************************************
 	 * 
@@ -73,6 +73,7 @@ public class SBDMessage {
 	 *
 	 */
 	public SBDMessage(BufferedInputStream bisI) throws IOException {
+		
 		// In actuality, incoming message shouldn't be larger than a few hundred bytes
 		byte[] bArray = new byte[4096];
 		int arrayPtr = 0;
@@ -228,31 +229,31 @@ public class SBDMessage {
 	 * Date		Programmer	Action
 	 * -----------------------------------
 	 * 04/15/2010	JPW		Created
+	 * 10/11/2010	JPW		Add folderNameI argument.
 	 *
 	 */
-	public void sendDataToRBNB(Source srcI) {
+	public void sendDataToRBNB(Source srcI, String folderNameI, double timestampI) {
 		
 		if (headerIE == null) {
 			// Can't send data to RBNB, because we won't know the time
 			System.err.println("Can't send data to RBNB - no header IE");
 			return;
 		}
-		long time = headerIE.time;
 		try {
-			headerIE.sendDataToRBNB(srcI,time);
+			headerIE.sendDataToRBNB(srcI,folderNameI,timestampI);
 		} catch (SAPIException e) {
 			System.err.println("Error sending header IE data to RBNB:\n" + e);
 		}
 		if (locationIE != null) {
 			try {
-				locationIE.sendDataToRBNB(srcI,time);
+				locationIE.sendDataToRBNB(srcI,folderNameI,timestampI);
 			} catch (SAPIException e) {
 				System.err.println("Error sending location IE data to RBNB:\n" + e);
 			}
 		}
 		if (payloadIE != null) {
 			try {
-				payloadIE.sendDataToRBNB(srcI, time);
+				payloadIE.sendDataToRBNB(srcI,folderNameI,timestampI);
 			} catch (SAPIException e) {
 				System.err.println("Error sending payload IE data to RBNB:\n" + e);
 			}

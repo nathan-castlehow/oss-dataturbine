@@ -34,6 +34,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.TimeZone;
 
 import com.rbnb.sapi.ChannelMap;
 import com.rbnb.sapi.SAPIException;
@@ -59,6 +62,11 @@ public class DirectIPServer {
 	 */
 	public static void main(String[] args) {
 		
+		boolean bVerbose = false;
+		long arrivalTimestampMillis = 0;
+		double arrivalTimestamp = 0.0;
+		String arrivalTimeStr = null;
+		
 		//
 		// Parse command line args
 		//
@@ -67,7 +75,7 @@ public class DirectIPServer {
 		if (args.length == 1) {
 			printUsage();
 			System.exit(1);
-		} else if (args.length == 2) {
+		} else if (args.length >= 2) {
 			try {
 				serverPort = Integer.parseInt(args[0]);
 			} catch (NumberFormatException e) {
@@ -76,6 +84,12 @@ public class DirectIPServer {
 				System.exit(1);
 			}
 			rbnbAddr = args[1];
+			if (args.length >= 3) {
+				// User is indicating whether they want to print debug
+				if (args[2].startsWith("y")) {
+					bVerbose = true;
+				}
+			}
 		}
 		
 		//
@@ -120,6 +134,8 @@ public class DirectIPServer {
 				Socket clientSocket = serverSocket.accept();
 				InputStream in = clientSocket.getInputStream();
 				
+				arrivalTimestampMillis =  System.currentTimeMillis();
+				arrivalTimestamp = arrivalTimestampMillis/1000.0;
 				message = new SBDMessage(new BufferedInputStream(in));
 				
 				// Close connections
@@ -131,18 +147,53 @@ public class DirectIPServer {
 				continue;
 			}
 			
+			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssz");
+			sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
+			Date date = new Date(arrivalTimestampMillis);
+			arrivalTimeStr = sdf.format(date);
+			
 			// Parse the message
 			try {
 				message.parse();
-				System.err.println("\n\n" + message);
+				System.err.println(
+					"[" +
+					arrivalTimeStr +
+					"] Received message from IMEI " +
+					message.headerIE.imei);
+				if (bVerbose) {
+					System.err.println(message);
+				}
 			} catch (Exception e) {
 				System.err.println(
 					new String("Caught exception parsing SBD message:\n" + e));
 				continue;
 			}
 			
-			// Send data to RBNB
-			message.sendDataToRBNB(src);
+			// Add data to the RBNB:
+			// 1. Raw SBD packet
+			// 2. Arrival timestamp
+			// 3. Latency channel
+			ChannelMap cm = new ChannelMap();
+			cm.PutTime(arrivalTimestamp, 0);
+			int idx;
+			try {
+			    // Raw SBD packet
+			    idx = cm.Add(new String(message.headerIE.imei + "/SBD"));
+			    cm.PutDataAsByteArray(idx, message.rawMessage );
+			    // Arrival timestamp
+			    idx = cm.Add(new String(message.headerIE.imei + "/time_of_arrival"));
+			    cm.PutDataAsString(idx, new String(arrivalTimeStr + "\n"));
+			    // Latency channel
+			    idx = cm.Add(new String(message.headerIE.imei + "/_Latency"));
+			    double latency = arrivalTimestamp - (double)message.headerIE.time;
+			    cm.PutDataAsString(idx, new String(latency + "\n"));
+			    src.Flush(cm);
+			} catch (SAPIException e) {
+			    System.err.println("Error sending data to RBNB:\n" + e);
+			}
+			
+			// Send all other data to RBNB
+			message.sendDataToRBNB(src,message.headerIE.imei,arrivalTimestamp);
 		}
 		
 		// Not currently reachable
@@ -164,10 +215,11 @@ public class DirectIPServer {
 	 */
 	public static void printUsage() {
 		System.err.println("Usage:");
-		System.err.println("    java -jar directipserver.jar <server port> <RBNB host:port>");
+		System.err.println("    java -jar directipserver.jar <server port> <RBNB host:port> <y|n verbose mode>");
 		System.err.println("    If no arguments are given, the following defaults are used:");
 		System.err.println("        server port = " + defaultServerPort);
 		System.err.println("        connect to RBNB at " + defaultRBNBAddr);
+		System.err.println("        no verbose output");
 	}
 	
 }
