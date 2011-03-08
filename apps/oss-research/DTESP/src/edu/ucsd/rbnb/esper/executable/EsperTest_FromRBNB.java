@@ -3,8 +3,6 @@ package edu.ucsd.rbnb.esper.executable;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.GregorianCalendar;
 
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.UpdateListener;
@@ -120,12 +118,7 @@ public class EsperTest_FromRBNB {
 	}
 
 	private static String time(long timestamp){
-		Date d = new Date(timestamp);
-		GregorianCalendar cal = new GregorianCalendar();
-		cal.setTimeInMillis(timestamp);
-
-		SimpleDateFormat f = new SimpleDateFormat("MM/dd/yyyy HH:mm");
-		return f.format(timestamp);
+		return (new SimpleDateFormat("MM/dd/yyyy HH:mm")).format(timestamp);
 	}
 	
 	private static void printBleeching(EventBean event){
