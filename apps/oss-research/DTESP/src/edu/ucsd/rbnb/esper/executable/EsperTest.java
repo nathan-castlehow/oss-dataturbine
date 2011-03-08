@@ -1,4 +1,4 @@
-package edu.ucsd.rbnb.esper;
+package edu.ucsd.rbnb.esper.executable;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -8,6 +8,7 @@ import java.util.Random;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.UpdateListener;
 
+import edu.ucsd.rbnb.esper.Monitor;
 import edu.ucsd.rbnb.esper.event.Measurement;
 import edu.ucsd.rbnb.esper.event.Metadata;
 

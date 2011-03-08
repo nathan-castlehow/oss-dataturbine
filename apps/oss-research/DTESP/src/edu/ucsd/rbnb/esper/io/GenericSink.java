@@ -13,8 +13,9 @@ public class GenericSink {
 	public static final String	DEFAULT_RBNB_SERVER	= "localhost";
 	public static final int		DEFAULT_RBNB_PORT	= 3333;
 
-	private ChannelMap subscribedChannels;
-	private Sink sink = new Sink();
+	protected Sink sink = new Sink();
+	
+	protected ChannelMap subscribedChannels;
 	
 	public GenericSink(String sinkName) throws SAPIException{
 		this(sinkName, DEFAULT_RBNB_SERVER,DEFAULT_RBNB_PORT);
@@ -50,6 +51,37 @@ public class GenericSink {
 	
 	public ChannelTree getChannelTree() throws SAPIException{
 		return ChannelTree.createFromChannelMap(getChannelsMap());
+	}
+	
+	public void subscribeTo() throws SAPIException{
+		subscribeTo(getChannelsMap());
+	}
+	
+	public void subscribeTo(double startTime, double duration, String timeReference) throws SAPIException{
+		subscribeTo(getChannelsMap());
+	}
+	
+	public void subscribeTo(ChannelMap cmap) throws SAPIException{
+		subscribedChannels = cmap;
+		sink.Subscribe(cmap);
+	}
+	
+	public void subscribeTo(ChannelMap cmap, double startTime,
+            double duration, String timeReference) throws SAPIException{
+		subscribedChannels = cmap;
+		sink.Subscribe(cmap, startTime, duration, timeReference);
+	}
+	
+	public ChannelMap fetch() throws SAPIException{
+		return fetch(1000);
+	}
+	
+	public ChannelMap fetch(int timeout) throws SAPIException{
+		return sink.Fetch(timeout);
+	}
+	
+	public int getId(String name){
+		return subscribedChannels.GetIndex(name);
 	}
 	
 	public void close(){

@@ -30,5 +30,10 @@ public class Monitor {
 		epService.getEPRuntime().sendEvent(new CurrentTimeEvent(startInMillis));
 	}
 	
+	public long getTime(){
+		return epService.getEPRuntime().getCurrentTime();
+	}
+	
+	
 
 }

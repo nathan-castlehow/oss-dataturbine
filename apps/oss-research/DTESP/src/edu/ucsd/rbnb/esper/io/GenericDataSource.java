@@ -337,6 +337,7 @@ public class GenericDataSource {
 		return data;
 	}
 	
+	
 	/** @see put(String chName, byte[] data, double timestamp)*/
 	public synchronized  String put(String chName, String data, double timestamp) throws SAPIException{
 		putTime(1, timestamp);
