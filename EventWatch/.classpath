@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/J2SE-1.5"/>
+	<classpathentry kind="lib" path="F:/My Documents F/eclipse/gdata/libs/gdata-calendar-meta-2.0.jar"/>
+	<classpathentry kind="lib" path="F:/My Documents F/eclipse/gdata/libs/gdata-calendar-2.0.jar"/>
+	<classpathentry kind="lib" path="F:/My Documents F/eclipse/gdata/libs/gdata-client-1.0.jar"/>
+	<classpathentry kind="lib" path="F:/My Documents F/eclipse/gdata/libs/gdata-client-meta-1.0.jar"/>
+	<classpathentry kind="lib" path="F:/My Documents F/eclipse/gdata/libs/gdata-core-1.0.jar"/>
+	<classpathentry kind="lib" path="F:/My Documents F/workspace/RBNB.trunk/Build/Lib/rbnb.jar"/>
+	<classpathentry kind="lib" path="F:/My Documents F/eclipse/gdata/libs/gdata-media-1.0.jar"/>
+	<classpathentry kind="lib" path="F:/My Documents F/eclipse/gdata/libs/servlet-api.jar"/>
+	<classpathentry kind="lib" path="F:/My Documents F/eclipse/gdata/libs/activation.jar"/>
+	<classpathentry kind="lib" path="F:/My Documents F/eclipse/gdata/libs/mail.jar"/>
+	<classpathentry kind="lib" path="F:/My Documents F/eclipse/gdata/libs/guava-r09.jar"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>
