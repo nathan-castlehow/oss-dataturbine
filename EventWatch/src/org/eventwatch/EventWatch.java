@@ -37,7 +37,10 @@ private static String eventName = "Event";					// this is the calendar name on g
  private static CalendarService myService;		// calendar info globals
  private static URL postUrl;
  private static boolean activeState=false;		// activity status
-
+ private static boolean updateMode=false;		// output every new point 
+ private static int errCount=0;
+ private static final int MAXERR=5;
+ 
  //---------------------------------------------------------------------------------
  // constructor
  public EventWatch() {}
@@ -53,7 +56,8 @@ private static String eventName = "Event";					// this is the calendar name on g
      if(args.length>i) idleTimeOut 	= Double.parseDouble(args[i++]);
      if(args.length>i) gmailUser 	= args[i++];
      if(args.length>i) gmailPW 		= args[i++];
-
+     if(args.length>i) updateMode   = (args[i++].equals("true"))?true:false;
+     
      System.err.println("EventWatch, rbnbServer: "+rbnbServer);
      System.err.println("EventWatch, eventName: "+eventName);	// this is the calendar name
      System.err.println("EventWatch, monitorChan: "+monitorChan);
@@ -147,10 +151,14 @@ private static String eventName = "Event";					// this is the calendar name on g
          // Send the request (ignore the response):
          myService.insert(postUrl, myEntry);
          System.err.println("Update Calendar: " + calTitle + ", "+dTime);
+         errCount = 0;		// reset on success
      } catch (Exception e) {
          e.printStackTrace();
-     	System.err.println("Exiting.");
-         System.exit(-1);		//  don't thrash on google calendar update
+         errCount ++;
+         if(errCount > MAXERR) {		// heuristic
+        	 System.err.println("Exiting.");
+        	 System.exit(-1);		//  don't thrash on google calendar update
+         }
      }
  }
 
@@ -208,15 +216,20 @@ private static String eventName = "Event";					// this is the calendar name on g
          		", "+new Date(iclockTime)+
          		", idle: "+(float)idleTime);
 
+
          if((activeState == false) && (dTime>0.)) {
              System.err.println(eventName+": Active!");
              updateCalendar(eventName+": Active!", calMsg);
              activeState=true;
          }
-         if((activeState==true) && (idleTime > idleTimeOut)) {
+         else if((activeState==true) && (idleTime > idleTimeOut)) {
              System.err.println(eventName+": Idle.");
              updateCalendar(eventName+": Idle.", calMsg);
              activeState=false;
+         }
+         else if(updateMode && dTime > 0.) {
+             System.err.println(eventName+": Update.");
+             updateCalendar(eventName+": Update.", calMsg);        	 
          }
 
          lastTime = eTime;
